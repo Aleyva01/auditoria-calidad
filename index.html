@@ -603,7 +603,16 @@ async function loadData(){
   try{
     const res=await fetch(CSV_URL);
     if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    
     const txt=await res.text();
+    
+    // --- ESCUDO PROTECTOR (Poka-Yoke) ---
+    // Previene fallos silenciosos si el Excel se vuelve privado
+    if (txt.trim().startsWith("<!DOCTYPE")) {
+        throw new Error("Acceso denegado. Verifica que el Google Sheet sea público ('Cualquier persona con el enlace').");
+    }
+    // ------------------------------------
+
     const rows=parseCSV(txt);
     if(rows.length<2)throw new Error('Sin datos en la hoja.');
     buildColumnMap(rows[0]);
@@ -620,7 +629,7 @@ async function loadData(){
     alert_(`✓ ${allData.length} registros cargados.`,'success');
   }catch(e){
     alert_(`Error: ${e.message}`,'error');
-    document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="empty-state"><div class="empty-icon">⚠</div><p>No se pudieron cargar los datos.</p></div></div>`;
+    document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="empty-state"><div class="empty-icon">⚠</div><p>No se pudieron cargar los datos. Detalles: ${e.message}</p></div></div>`;
   }
   document.getElementById('refresh-btn').textContent='↻ Actualizar';
   document.getElementById('refresh-btn').disabled=false;
