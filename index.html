@@ -863,11 +863,14 @@ function verFormatoLocal(){
   let puntosRows='';
   for(let i=0;i<maxR;i++){puntosRows+=`<tr><td class="puntos-cel">${col1[i]?'• '+col1[i]:''}</td><td class="puntos-cel">${col2[i]?'• '+col2[i]:''}</td></tr>`;}
 
-  document.getElementById('modal-meta').textContent=`Corte ${e.corte} · ${e.fecha.toLocaleDateString('es-MX')}`;
+  // Formateamos la fecha y la hora (Ej: 08/04/2026, 03:25 p.m.)
+  const fechaHoraFmt = e.fecha.toLocaleString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+
+  document.getElementById('modal-meta').textContent=`Corte ${e.corte} · ${fechaHoraFmt}`;
   document.getElementById('formato-print').innerHTML=`
     <table>
       <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
-      <tr><td class="lbl">CORTE:</td><td class="val">${e.corte}</td><td class="lbl">PROGRAMA:</td><td class="val">${e.programa}</td><td class="lbl">MODELO:</td><td class="val">${e.modelo}</td><td class="lbl">FECHA:</td><td class="val">${e.fecha.toLocaleDateString('es-MX')}</td></tr>
+      <tr><td class="lbl">CORTE:</td><td class="val">${e.corte}</td><td class="lbl">PROGRAMA:</td><td class="val">${e.programa}</td><td class="lbl">MODELO:</td><td class="val">${e.modelo}</td><td class="lbl">FECHA Y HORA:</td><td class="val">${fechaHoraFmt}</td></tr>
       <tr><td class="lbl">PRENDAS REVISADAS</td><td class="val">${e.prev}</td><td class="lbl">PRENDAS RECIBIDAS</td><td class="val">${e.prec}</td><td class="lbl">%</td><td class="val">${pct}</td><td class="lbl">CALIFICACIÓN</td><td class="val">${e.cal} / 5</td></tr>
       <tr><td class="lbl">REVISA:</td><td class="val">${e.auditor}</td><td class="lbl">MAQUILERO</td><td class="val" colspan="5">${e.maquilero}</td></tr>
       <tr><td class="lbl">TIPO DE PRODUCTO:</td><td class="val" colspan="7">${e.tipo}</td></tr>
@@ -878,7 +881,6 @@ function verFormatoLocal(){
     </table>`;
   document.getElementById('overlay').classList.add('open');
 }
-
 // =================== FORMATO (desde tabla) ===================
 function abrirFormato(idx){
   const r=allData[idx];
