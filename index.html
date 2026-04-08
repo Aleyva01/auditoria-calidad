@@ -559,15 +559,6 @@ function doLogout() {
   document.getElementById('login-pass').value = '';
 }
 
-function cambiarPass() {
-  const v = document.getElementById('new-pass').value.trim();
-  if (!v) return;
-  config.password = v;
-  saveConfig();
-  document.getElementById('new-pass').value = '';
-  const el = document.getElementById('pass-saved');
-  el.style.display = 'inline'; setTimeout(() => el.style.display='none', 2500);
-}
 
 // =================== TABS ===================
 function switchTab(name, btn) {
