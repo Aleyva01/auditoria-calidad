@@ -513,15 +513,52 @@ function loadConfig() {
 function saveConfig() { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); }
 
 function doLogin() {
+  const user = document.getElementById('login-user').value;
   const p = document.getElementById('login-pass').value;
-  if (p === config.password) {
+  const errEl = document.getElementById('login-err');
+
+  // 1. Validar que seleccionen usuario
+  if (!user) {
+    errEl.textContent = 'Por favor selecciona tu nombre.';
+    errEl.style.display = 'block';
+    setTimeout(() => errEl.style.display='none', 2500);
+    return;
+  }
+
+  // 2. RESTRICCIÓN DE HORARIO (8:30 a 17:30)
+  const now = new Date();
+  const minutosActuales = (now.getHours() * 60) + now.getMinutes(); 
+  const inicioMinutos = (8 * 60) + 30;  // 8:30 AM
+  const finMinutos = (17 * 60) + 30;    // 5:30 PM
+
+  if (minutosActuales < inicioMinutos || minutosActuales > finMinutos) {
+    errEl.textContent = 'El sistema solo está disponible de 08:30 a 17:30.';
+    errEl.style.display = 'block';
+    setTimeout(() => errEl.style.display='none', 4500);
+    return; 
+  }
+
+  // 3. DICCIONARIO DE CREDENCIALES (Usuario : Contraseña)
+  // Aquí puedes cambiar las contraseñas o agregar más auditores en el futuro
+  const credenciales = {
+    "Eloisa": "eloisa2026", 
+    "Luis": "luis2026"
+  };
+
+  // 4. Validar que la contraseña ingresada sea la correcta para el usuario seleccionado
+  if (credenciales[user] === p) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-shell').style.display = 'block';
-    sessionStorage.setItem('auth','1');
+    
+    sessionStorage.setItem('auth', '1');
+    sessionStorage.setItem('auditorActivo', user); 
+    
+    registrarBitacora(user);
     loadData();
   } else {
-    document.getElementById('login-err').style.display = 'block';
-    setTimeout(() => document.getElementById('login-err').style.display='none', 2500);
+    errEl.textContent = 'Contraseña incorrecta para ' + user;
+    errEl.style.display = 'block';
+    setTimeout(() => errEl.style.display='none', 2500);
   }
 }
 
