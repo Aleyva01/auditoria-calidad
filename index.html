@@ -547,7 +547,7 @@ function switchTab(name, btn) {
 // =================== DATA ===================
 const SHEET_ID = '1OzVpBKMD0PDzKOTh9uZx9uaVk5UK-Lhx29Vf_twOO1k';
 const GID = '1504659397';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQ.../pub?output=csv`;
+const CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS0Ac4R1rHVKvGYJS1o4zV9Dy-Up_1su7FKtdcNRHvfC85DwxyCsxYz8lG8u_xsbPE_xy_Nc_DGhHnZ/pub?output=csv`;
 // URL del Google Form (pre-fill)
 const FORM_BASE = 'https://docs.google.com/forms/d/e/1FAIpQLSe_placeholder/viewform';
 
@@ -679,50 +679,75 @@ function tipoBadge(tipo){if(!tipo)return'—';const t=tipo.toLowerCase();let cls
 const COLS_DEF=[{label:'Fecha'},{label:'# Corte'},{label:'Programa'},{label:'Modelo'},{label:'Tipo'},{label:'Maquilero'},{label:'Prendas Rev.'},{label:'Prendas Rec.'},{label:'Calificación'},{label:''}];
 
 function renderTable() {
-    const records = JSON.parse(localStorage.getItem('auditRecords') || '[]');
-    const tableBody = document.getElementById('tableBody');
-    
-    // BLOQUEO DE SEGURIDAD: Si no encuentra la tabla, se detiene sin marcar error
-    if (!tableBody) {
-        console.warn("La tabla 'tableBody' aún no está visible en pantalla.");
-        return; 
+    const container = document.getElementById('table-area');
+
+    // Si no hay datos (por filtros o porque está vacío)
+    if (!filtered || filtered.length === 0) {
+        container.innerHTML = `<div class="table-card"><div class="empty-state"><div class="empty-icon">⊘</div><p>No se encontraron registros.</p></div></div>`;
+        document.getElementById('count-label').textContent = '0 registros';
+        return;
     }
 
-    // Invertimos el orden (el más nuevo arriba)
-    const recordsToShow = [...records].reverse();
+    document.getElementById('count-label').textContent = `${filtered.length} registros`;
 
-    // Inyectamos el HTML
-    tableBody.innerHTML = recordsToShow.map((record, index) => {
-        // Calculamos el índice original para el botón de ver detalle
-        const originalIndex = records.length - 1 - index;
-        
-        // Asignamos colores según el estado (puedes ajustar las clases CSS si lo necesitas)
-        const statusClass = record.status === 'Cumple' ? 'status-pass' : 'status-fail';
-        
-        return `
+    // 1. Invertimos visualmente el arreglo para que el MÁS NUEVO aparezca arriba
+    const registrosMostrar = [...filtered].reverse();
+
+    // 2. Construimos la estructura de la tabla y los encabezados
+    let html = `
+    <div class="table-card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortBy(C.FECHA)">Fecha ↕</th>
+                        <th onclick="sortBy(C.CORTE)"># Corte ↕</th>
+                        <th onclick="sortBy(C.PROG)">Programa ↕</th>
+                        <th onclick="sortBy(C.MOD)">Modelo ↕</th>
+                        <th onclick="sortBy(C.TIPO)">Tipo ↕</th>
+                        <th onclick="sortBy(C.MAQ)">Maquilero ↕</th>
+                        <th onclick="sortBy(C.PREV)">Rev. ↕</th>
+                        <th onclick="sortBy(C.PREC)">Rec. ↕</th>
+                        <th onclick="sortBy(C.PROM)">Calif. ↕</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // 3. Llenamos las filas con los datos del Excel
+    registrosMostrar.forEach((r) => {
+        // Necesitamos el índice original para que el botón "Ver PDF" abra el formato correcto
+        const originalIndex = allData.indexOf(r);
+        const score = scoreInfo(g(r, C.PROM));
+
+        html += `
             <tr>
-                <td>${record.date || 'S/F'}</td>
-                <td>${record.auditor || '-'}</td>
-                <td>${record.shift || '-'}</td>
-                <td>${record.line || '-'}</td>
-                <td>${record.product || '-'}</td>
-                <td><span class="status-badge ${statusClass}">${record.status || '-'}</span></td>
+                <td>${fmtFecha(g(r, C.FECHA))}</td>
+                <td class="mono"><strong>${g(r, C.CORTE)}</strong></td>
+                <td>${g(r, C.PROG)}</td>
+                <td>${g(r, C.MOD)}</td>
+                <td>${tipoBadge(g(r, C.TIPO))}</td>
+                <td>${g(r, C.MAQ)}</td>
+                <td>${g(r, C.PREV)}</td>
+                <td>${g(r, C.PREC)}</td>
+                <td><span class="score-dot"><span class="dot ${score.cls}"></span>${score.label}</span></td>
                 <td>
-                    <button onclick="viewDetail(${originalIndex})" class="btn-icon" title="Ver detalle">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <button class="btn btn-sm btn-dark" onclick="abrirFormato(${originalIndex})">Ver PDF</button>
                 </td>
             </tr>
         `;
-    }).join('');
+    });
+
+    html += `</tbody></table></div></div>`;
+    
+    // 4. Inyectamos la tabla completa en el HTML
+    container.innerHTML = html;
 }
 
-// ASEGURAR CARGA: Esto obliga a que la tabla se renderice solo cuando el HTML esté listo
+// ASEGURAR CARGA: Esto obliga a que la tabla se renderice...
 document.addEventListener('DOMContentLoaded', () => {
-    // Solo llamamos a renderTable si la pestaña activa es la de registros
-    if (document.getElementById('tableBody')) {
-        renderTable();
-    }
+    if (document.getElementById('tableBody')) { renderTable(); }
 });
 // =================== ENCUESTA ===================
 function cargarSelectsEncuesta(){
