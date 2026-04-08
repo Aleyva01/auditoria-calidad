@@ -990,9 +990,27 @@ function closeModal(){document.getElementById('overlay').classList.remove('open'
 
 function imprimirFormato(){
   const contenido=document.getElementById('formato-print').innerHTML;
-  const w=window.open('','_blank','width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}@page{margin:15mm;}</style></head><body>${contenido}<script>window.onload=()=>{window.print()}<\/script></body></html>`);
-  w.document.close();
+  
+  // Creamos un marco invisible para evitar que el navegador lo bloquee
+  let frame = document.getElementById('print-frame');
+  if (!frame) {
+    frame = document.createElement('iframe');
+    frame.id = 'print-frame';
+    frame.style.display = 'none';
+    document.body.appendChild(frame);
+  }
+  
+  const doc = frame.contentWindow.document;
+  doc.open();
+  // Inyectamos el diseño del formato PDF
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}@page{margin:15mm;}</style></head><body>${contenido}</body></html>`);
+  doc.close();
+  
+  // Le damos medio segundo para que cargue el diseño y lanzamos la impresión
+  setTimeout(() => {
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+  }, 250);
 }
 
 // =================== CONFIG ===================
