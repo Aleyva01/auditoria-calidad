@@ -558,7 +558,18 @@ function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-pass').value = '';
 }
+// NUEVA FUNCIÓN: Envío silencioso de bitácora
+function registrarBitacora(usuario) {
+  const LOG_FORM_URL = "https://docs.google.com/forms/d/e/AQUI_TU_NUEVO_FORM/formResponse";
+  const params = new URLSearchParams();
+  params.append("entry.000000000", usuario); 
 
+  fetch(LOG_FORM_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: params
+  }).catch(e => console.log("Registro local"));
+}
 
 // =================== TABS ===================
 function switchTab(name, btn) {
