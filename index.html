@@ -205,9 +205,16 @@
   <div class="login-card">
     <div class="login-logo">Auditoría</div>
     <div class="login-sub">Producto Terminado · Calidad</div>
+    
+    <select id="login-user" style="width:100%; padding:10px 14px; border:0.5px solid var(--border); border-radius:var(--radius-sm); margin-bottom:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); outline:none; background:var(--surface);">
+      <option value="">Selecciona tu nombre...</option>
+      <option value="Eloisa">Eloisa</option>
+      <option value="Luis">Luis</option>
+    </select>
+
     <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn-full" onclick="doLogin()">Ingresar</button>
-    <div class="login-err" id="login-err">Contraseña incorrecta</div>
+    <div class="login-err" id="login-err">Error de acceso</div>
   </div>
 </div>
 
