@@ -813,6 +813,10 @@ function renderTable() {
     container.innerHTML = html;
 }
 
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
+}
+
     document.getElementById('count-label').textContent = `${filtered.length} registros`;
 
     // 1. Invertimos visualmente el arreglo para que el MÁS NUEVO aparezca arriba
