@@ -669,25 +669,35 @@ function tipoBadge(tipo){if(!tipo)return'—';const t=tipo.toLowerCase();let cls
 
 const COLS_DEF=[{label:'Fecha'},{label:'# Corte'},{label:'Programa'},{label:'Modelo'},{label:'Tipo'},{label:'Maquilero'},{label:'Prendas Rev.'},{label:'Prendas Rec.'},{label:'Calificación'},{label:''}];
 
-function renderTable(){
-const records = JSON.parse(localStorage.getItem('auditRecords') || '[]');
+function renderTable() {
+    const records = JSON.parse(localStorage.getItem('auditRecords') || '[]');
     const tableBody = document.getElementById('tableBody');
     
-    // ESTA ES LA MAGIA: Creamos una copia invertida para mostrar
+    // BLOQUEO DE SEGURIDAD: Si no encuentra la tabla, se detiene sin marcar error
+    if (!tableBody) {
+        console.warn("La tabla 'tableBody' aún no está visible en pantalla.");
+        return; 
+    }
+
+    // Invertimos el orden (el más nuevo arriba)
     const recordsToShow = [...records].reverse();
 
+    // Inyectamos el HTML
     tableBody.innerHTML = recordsToShow.map((record, index) => {
-        // Calculamos el índice original para que el botón de "Ver" no se confunda
+        // Calculamos el índice original para el botón de ver detalle
         const originalIndex = records.length - 1 - index;
+        
+        // Asignamos colores según el estado (puedes ajustar las clases CSS si lo necesitas)
+        const statusClass = record.status === 'Cumple' ? 'status-pass' : 'status-fail';
         
         return `
             <tr>
-                <td>${record.date}</td>
-                <td>${record.auditor}</td>
-                <td>${record.shift}</td>
-                <td>${record.line}</td>
-                <td>${record.product}</td>
-                <td><span class="status-badge ${record.status === 'Cumple' ? 'status-pass' : 'status-fail'}">${record.status}</span></td>
+                <td>${record.date || 'S/F'}</td>
+                <td>${record.auditor || '-'}</td>
+                <td>${record.shift || '-'}</td>
+                <td>${record.line || '-'}</td>
+                <td>${record.product || '-'}</td>
+                <td><span class="status-badge ${statusClass}">${record.status || '-'}</span></td>
                 <td>
                     <button onclick="viewDetail(${originalIndex})" class="btn-icon" title="Ver detalle">
                         <i class="fas fa-eye"></i>
@@ -698,6 +708,13 @@ const records = JSON.parse(localStorage.getItem('auditRecords') || '[]');
     }).join('');
 }
 
+// ASEGURAR CARGA: Esto obliga a que la tabla se renderice solo cuando el HTML esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    // Solo llamamos a renderTable si la pestaña activa es la de registros
+    if (document.getElementById('tableBody')) {
+        renderTable();
+    }
+});
 // =================== ENCUESTA ===================
 function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
