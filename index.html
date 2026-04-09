@@ -592,35 +592,36 @@ async function registrarBitacora(usuario) {
 
 // =================== FORMATO (desde tabla) ===================
 function abrirFormato(idx) {
-    // Validamos que los datos existan antes de procesar
-    if (!allData || !allData[idx]) {
-        alert("Error: No se pudieron cargar los datos del registro.");
-        return;
-    }
+    console.log("Iniciando apertura de PDF para índice:", idx);
+    try {
+        const r = allData[idx];
+        if (!r) {
+            console.error("Error: No se encontró el registro.");
+            return;
+        }
 
-    const r = allData[idx];
-    const prom = parseFloat(g(r, C.PROM));
-    const promStr = isNaN(prom) ? '—' : prom.toFixed(1);
-    const prevVal = C.PREV >= 0 ? parseFloat(g(r, C.PREV)) : NaN;
-    const precVal = C.PREC >= 0 ? parseFloat(g(r, C.PREC)) : NaN;
-    const pct = (!isNaN(prevVal) && !isNaN(precVal) && precVal > 0) ? Math.round(prevVal / precVal * 100) + '%' : '—';
-    const cal = g(r, C.CAL1) || g(r, C.CAL2) || '—';
+        const prom = parseFloat(g(r, C.PROM));
+        const promStr = isNaN(prom) ? '—' : prom.toFixed(1);
+        const prevVal = C.PREV >= 0 ? parseFloat(g(r, C.PREV)) : NaN;
+        const precVal = C.PREC >= 0 ? parseFloat(g(r, C.PREC)) : NaN;
+        const pct = (!isNaN(prevVal) && !isNaN(precVal) && precVal > 0) ? Math.round(prevVal / precVal * 100) + '%' : '—';
+        const cal = g(r, C.CAL1) || g(r, C.CAL2) || '—';
 
-    function puntosALista(v) { return v ? v.split(',').map(p => p.trim()).filter(Boolean) : []; }
-    const todos = [...puntosALista(g(r, C.PUN1)), ...puntosALista(g(r, C.PUN2))];
-    const mitad = Math.ceil(todos.length / 2);
-    const col1 = todos.slice(0, mitad), col2 = todos.slice(mitad);
-    const maxR = Math.max(col1.length, col2.length);
-    
-    let puntosRows = '';
-    for (let i = 0; i < maxR; i++) {
-        puntosRows += `<tr><td class="puntos-cel">${col1[i] ? '• ' + col1[i] : ''}</td><td class="puntos-cel">${col2[i] ? '• ' + col2[i] : ''}</td></tr>`;
-    }
+        function puntosALista(v) { return v ? v.split(',').map(p => p.trim()).filter(Boolean) : []; }
+        const todos = [...puntosALista(g(r, C.PUN1)), ...puntosALista(g(r, C.PUN2))];
+        const mitad = Math.ceil(todos.length / 2);
+        const col1 = todos.slice(0, mitad), col2 = todos.slice(mitad);
+        const maxR = Math.max(col1.length, col2.length);
+        
+        let puntosRows = '';
+        for (let i = 0; i < maxR; i++) {
+            puntosRows += `<tr><td class="puntos-cel">${col1[i] ? '• ' + col1[i] : ''}</td><td class="puntos-cel">${col2[i] ? '• ' + col2[i] : ''}</td></tr>`;
+        }
+        
+        const obs = [g(r, C.OBS1), g(r, C.OBS2)].filter(Boolean).join('\n\n') || '—';
 
-    const obs = [g(r, C.OBS1), g(r, C.OBS2)].filter(Boolean).join('\n\n') || '—';
-
-    document.getElementById('modal-meta').textContent = `Corte ${g(r, C.CORTE) || '—'} · ${fmtFecha(g(r, C.FECHA))}`;
-    document.getElementById('formato-print').innerHTML = `
+        document.getElementById('modal-meta').textContent = `Corte ${g(r, C.CORTE) || '—'} · ${fmtFecha(g(r, C.FECHA))}`;
+        document.getElementById('formato-print').innerHTML = `
         <table>
           <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
           <tr><td class="lbl">CORTE:</td><td class="val">${g(r, C.CORTE)}</td><td class="lbl">PROGRAMA:</td><td class="val">${g(r, C.PROG)}</td><td class="lbl">MODELO:</td><td class="val">${g(r, C.MOD)}</td><td class="lbl">FECHA Y HORA:</td><td class="val">${fmtFecha(g(r, C.FECHA))}</td></tr>
@@ -632,8 +633,32 @@ function abrirFormato(idx) {
           <tr><td colspan="8" class="sec">OBSERVACIONES GENERALES</td></tr>
           <tr><td colspan="8" class="obs">${obs}</td></tr>
         </table>`;
-    
-    document.getElementById('overlay').classList.add('open');
+        
+        document.getElementById('overlay').classList.add('open');
+    } catch (err) {
+        console.error("Fallo al construir el PDF:", err);
+    }
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+function imprimirFormato() {
+    const contenido = document.getElementById('formato-print').innerHTML;
+    let frame = document.getElementById('print-frame');
+    if (!frame) {
+        frame = document.createElement('iframe');
+        frame.id = 'print-frame';
+        frame.style.display = 'none';
+        document.body.appendChild(frame);
+    }
+    const doc = frame.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}@page{margin:15mm;}</style></head><body>${contenido}</body></html>`);
+    doc.close();
+    setTimeout(() => {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
+    }, 250);
 }
 
 // =================== TABS ===================
