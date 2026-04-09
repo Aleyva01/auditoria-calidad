@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auditoría de Producto Terminado</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e0ddd4;--border2:#c8c5ba;--text:#1a1917;--text2:#6b6860;--text3:#9e9b92;--green:#2d6a4f;--green-bg:#d8f3dc;--amber:#7d4e00;--amber-bg:#fff3cd;--red:#7f1d1d;--red-bg:#fee2e2;--blue:#1e3a5f;--blue-bg:#dbeafe;--radius:10px;--radius-sm:6px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+/* LOGIN */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.login-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;}
+.login-logo{font-size:28px;font-weight:300;letter-spacing:-1px;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:2rem;font-family:'DM Mono',monospace;}
+.login-card select,.login-card input{width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--surface);outline:none;margin-bottom:10px;}
+.login-card .btn-full{width:100%;padding:11px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.login-card .btn-full:hover{opacity:0.85;}
+.login-err{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+/* APP */
+.app-shell{display:none;}
+.topbar{background:var(--text);color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-size:15px;font-weight:600;letter-spacing:-0.3px;}
+.topbar-sub{font-size:12px;opacity:0.5;font-family:'DM Mono',monospace;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.tabs-bar{background:var(--surface);border-bottom:0.5px solid var(--border);padding:0 2rem;display:flex;gap:0;overflow-x:auto;}
+.tab-btn{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--text);}
+.tab-btn.master-only{color:#a78a50;}
+.tab-btn.master-only.active{color:#7d4e00;border-bottom-color:#7d4e00;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.main{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-family:'DM Mono',monospace;}
+.stat-value{font-size:28px;font-weight:300;letter-spacing:-1px;}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+/* FILTROS AÑO/MES */
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all 0.15s;}
+.pill:hover{border-color:var(--border2);}
+.pill.active{background:var(--text);color:#fff;border-color:var(--text);}
+.pill-label{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-right:4px;align-self:center;}
+/* CONTROLS */
+.controls-bar{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap input{width:100%;padding:9px 12px 9px 36px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;}
+.search-wrap input:focus{border-color:var(--border2);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;}
+select{padding:9px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;cursor:pointer;}
+.btn{padding:9px 18px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn:hover{background:var(--surface2);border-color:var(--border2);}
+.btn-dark{background:var(--text);color:#fff;border-color:var(--text);}
+.btn-dark:hover{opacity:0.85;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.count-label{font-size:12px;color:var(--text3);margin-left:auto;font-family:'DM Mono',monospace;}
+/* TABLE */
+.table-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px;}
+thead th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:500;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);font-family:'DM Mono',monospace;white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--text2);}
+tbody td{padding:10px 14px;border-bottom:0.5px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--bg);}
+.mono{font-family:'DM Mono',monospace;font-size:12px;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:var(--green-bg);color:var(--green);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);}
+.badge-blue{background:var(--blue-bg);color:var(--blue);}
+.badge-gray{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border);}
+.score-dot{display:inline-flex;align-items:center;gap:5px;font-weight:500;font-size:13px;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-green{background:var(--green);}
+.dot-amber{background:#d97706;}
+.dot-red{background:#dc2626;}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--text3);}
+.empty-state .empty-icon{font-size:40px;margin-bottom:1rem;opacity:0.4;}
+.empty-state p{font-size:14px;}
+.alert{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:1rem;}
+.alert-error{background:var(--red-bg);color:var(--red);border:0.5px solid #fca5a5;}
+.alert-success{background:var(--green-bg);color:var(--green);border:0.5px solid #86efac;}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);width:100%;max-width:820px;max-height:92vh;display:flex;flex-direction:column;}
+.modal-head{padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-title{font-size:15px;font-weight:600;}
+.modal-meta{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
+.modal-body{overflow-y:auto;padding:1.5rem;flex:1;}
+.modal-foot{padding:1rem 1.5rem;border-top:0.5px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px;}
+.close-btn:hover{color:var(--text);}
+/* FORMATO PDF */
+#formato-print{font-family:Arial,sans-serif;font-size:12px;}
+#formato-print .f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px 8px;letter-spacing:1px;text-transform:uppercase;}
+#formato-print table{width:100%;border-collapse:collapse;}
+#formato-print td{border:1px solid #555;padding:5px 8px;}
+#formato-print .lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+#formato-print .val{background:#fff;color:#000;}
+#formato-print .sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}
+#formato-print .sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}
+#formato-print .obs{min-height:180px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}
+#formato-print .puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}
+/* ENCUESTA */
+.encuesta-wrap{max-width:680px;margin:0 auto;}
+.enc-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+.enc-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.enc-desc{font-size:13px;color:var(--text3);}
+.enc-section{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;font-family:'DM Mono',monospace;}
+.field{margin-bottom:1.25rem;}
+.field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;}
+.field label .req{color:var(--red);margin-left:2px;}
+.field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;padding:9px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border2);}
+.field textarea{min-height:90px;resize:vertical;}
+.rating-row{display:flex;gap:8px;}
+.rating-opt{flex:1;}
+.rating-opt input{display:none;}
+.rating-opt label{display:flex;align-items:center;justify-content:center;height:44px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s;background:var(--surface);color:var(--text2);}
+.rating-opt input:checked+label{background:var(--text);color:#fff;border-color:var(--text);}
+.rating-opt label:hover{background:var(--surface2);}
+.rating-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.check-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.12s;background:var(--surface);}
+.check-item:hover{border-color:var(--border2);background:var(--surface2);}
+.check-item input{margin-top:2px;flex-shrink:0;accent-color:var(--text);}
+.check-item span{font-size:12px;line-height:1.4;}
+.check-item.checked{border-color:var(--text);background:var(--bg);}
+.enc-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:0.5rem;}
+.enc-success{text-align:center;padding:3rem 2rem;}
+.enc-success .enc-success-icon{font-size:48px;margin-bottom:1rem;}
+.enc-success h3{font-size:20px;font-weight:500;margin-bottom:8px;}
+.enc-success p{font-size:14px;color:var(--text3);}
+/* CONFIG */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.config-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.config-card-head{padding:1rem 1.25rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.config-card-title{font-size:14px;font-weight:600;}
+.config-card-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.config-list{padding:0.75rem;display:flex;flex-direction:column;gap:6px;min-height:80px;}
+.config-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:0.5px solid var(--border);gap:8px;}
+.config-item-name{font-size:13px;flex:1;}
+.config-item-badge{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;background:var(--surface2);padding:2px 7px;border-radius:20px;}
+.config-item-actions{display:flex;gap:4px;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:3px 6px;border-radius:4px;transition:all 0.1s;}
+.icon-btn:hover{background:var(--surface2);color:var(--text);}
+.icon-btn.del:hover{background:var(--red-bg);color:var(--red);}
+.add-row{display:flex;gap:8px;padding:0.75rem;border-top:0.5px solid var(--border);}
+.add-row input{flex:1;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;}
+.config-info{padding:1rem 1.25rem;background:var(--blue-bg);border-radius:var(--radius-sm);margin-bottom:1rem;font-size:13px;color:var(--blue);border:0.5px solid #93c5fd;}
+.config-actions{display:flex;gap:8px;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap;}
+.detected-banner{background:var(--amber-bg);border:0.5px solid #fbbf24;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:1rem;}
+.edit-inline{border:0.5px solid var(--border2);border-radius:4px;padding:3px 6px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;width:100%;}
+/* GUIA */
+.guide-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+.guide-card h3{font-size:15px;font-weight:600;margin-bottom:1rem;}
+.step{display:flex;gap:12px;margin-bottom:1rem;align-items:flex-start;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--text);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-body p{font-size:13px;line-height:1.6;color:var(--text2);}
+.step-body strong{color:var(--text);}
+.step-body code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;border:0.5px solid var(--border);}
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+.dash-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
+.dash-card-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;margin-bottom:4px;}
+.dash-card-sub{font-size:12px;color:var(--text3);margin-bottom:1rem;}
+.dash-card canvas{width:100%!important;}
+/* SEMAFORO */
+.semaforo-wrap{display:flex;align-items:center;justify-content:center;gap:2rem;padding:1rem 0;}
+.sem-item{text-align:center;}
+.sem-dot{width:60px;height:60px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#fff;}
+.sem-dot.green{background:#16a34a;}
+.sem-dot.amber{background:#d97706;}
+.sem-dot.red{background:#dc2626;}
+.sem-dot.gray{background:#9e9b92;}
+.sem-label{font-size:12px;color:var(--text3);}
+.sem-val{font-size:18px;font-weight:500;margin-bottom:2px;}
+.sem-arrow{font-size:28px;color:var(--text3);align-self:center;}
+/* RANKING */
+.rank-list{display:flex;flex-direction:column;gap:8px;}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);}
+.rank-item.top{background:#f0fdf4;border-color:#86efac;}
+.rank-item.bot{background:#fef2f2;border-color:#fca5a5;}
+.rank-pos{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.rank-pos.top{background:#16a34a;color:#fff;}
+.rank-pos.bot{background:#dc2626;color:#fff;}
+.rank-name{flex:1;font-size:13px;font-weight:500;}
+.rank-score{font-size:14px;font-weight:600;font-family:'DM Mono',monospace;}
+.rank-divider{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-family:'DM Mono',monospace;}
+@media(max-width:700px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .config-grid{grid-template-columns:1fr;}
+  .check-grid{grid-template-columns:1fr;}
+  .dash-grid{grid-template-columns:1fr;}
+  .topbar{padding:0 1rem;}
+  .main{padding:1rem;}
+  .tabs-bar{padding:0 1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Auditoría</div>
+    <div class="login-sub">Producto Terminado · Calidad</div>
+    <select id="login-user">
+      <option value="">Selecciona tu nombre...</option>
+      <option value="Admin">Admin (Maestro)</option>
+      <option value="Eloisa">Eloisa</option>
+      <option value="Luis">Luis</option>
+      <option value="Arely">Arely</option>
+      <option value="Equipo de calidad">Equipo de calidad</option>
+    </select>
+    <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-full" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="login-err">Error de acceso</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-shell" id="app-shell">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Auditoría de Producto Terminado</div>
+      <div class="topbar-sub" id="topbar-user">Calidad</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-dark" onclick="loadData()" id="refresh-btn">↻ Actualizar</button>
+      <button class="btn" style="color:#fff;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="tabs-bar" id="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('registros',this)">Registros</button>
+    <button class="tab-btn" onclick="switchTab('encuesta',this)">Nueva auditoría</button>
+    <!-- Pestañas solo maestro -->
+    <button class="tab-btn master-only" id="tab-btn-dashboard" style="display:none;" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn master-only" id="tab-btn-config" style="display:none;" onclick="switchTab('config',this)">Configuración</button>
+    <button class="tab-btn master-only" id="tab-btn-publicar" style="display:none;" onclick="switchTab('publicar',this)">Publicar en línea</button>
+  </div>
+
+  <!-- ===== REGISTROS ===== -->
+  <div class="tab-panel active" id="tab-registros">
+    <div class="main">
+      <div id="alert-area"></div>
+      <div class="stats-grid" id="stats" style="display:none;">
+        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">0</div><div class="stat-sub">en el Sheet</div></div>
+        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">—</div><div class="stat-sub">de 5 puntos</div></div>
+        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">0</div><div class="stat-sub">únicos</div></div>
+        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">0</div><div class="stat-sub">auditorías</div></div>
+      </div>
+
+      <!-- Filtros año/mes -->
+      <div id="filtros-periodo" style="display:none;">
+        <div class="filter-pills" id="pills-anio" style="margin-bottom:6px;">
+          <span class="pill-label">Año:</span>
+        </div>
+        <div class="filter-pills" id="pills-mes">
+          <span class="pill-label">Mes:</span>
+        </div>
+      </div>
+
+      <div class="controls-bar" id="controls" style="display:none;">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="search" placeholder="Buscar por corte, maquilero, modelo..." oninput="filterData()">
+        </div>
+        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option></select>
+        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option></select>
+        <span class="count-label" id="count-label"></span>
+      </div>
+      <div id="table-area">
+        <div class="table-card"><div class="empty-state"><div class="empty-icon">⟳</div><p>Cargando datos...</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ENCUESTA ===== -->
+  <div class="tab-panel" id="tab-encuesta">
+    <div class="main">
+      <div class="encuesta-wrap" id="enc-form-wrap">
+        <div class="enc-card">
+          <div class="enc-title">Nueva Auditoría</div>
+          <div class="enc-desc">Llena todos los campos. Al finalizar podrás ver e imprimir el formato PDF.</div>
+        </div>
+        <div class="enc-card">
+          <div class="enc-section">Datos del corte</div>
+          <div class="field"><label># de Corte <span class="req">*</span></label><input type="text" id="e-corte" placeholder="Ej: 25120672"></div>
+          <div class="field"><label>Programa <span class="req">*</span></label><input type="text" id="e-programa" placeholder="Ej: 362"></div>
+          <div class="field"><label>Modelo <span class="req">*</span></label><input type="text" id="e-modelo" placeholder="Ej: M2NEU"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Prendas revisadas <span class="req">*</span></label><input type="number" id="e-prev" placeholder="Ej: 250" min="0"></div>
+            <div class="field"><label>Prendas recibidas <span class="req">*</span></label><input type="number" id="e-prec" placeholder="Ej: 300" min="0"></div>
+          </div>
+          <div class="field">
+            <label>Auditor <span class="req">*</span></label>
+            <select id="e-auditor"><option value="">Selecciona...</option><option>Eloisa</option><option>Luis</option><option>Arely</option><option>Equipo de calidad</option></select>
+          </div>
+          <div class="field"><label>Maquilero <span class="req">*</span></label><select id="e-maquilero"><option value="">Selecciona...</option></select></div>
+          <div class="field"><label>Tipo de producto <span class="req">*</span></label><select id="e-tipo" onchange="actualizarPuntos()"><option value="">Selecciona...</option></select></div>
+        </div>
+
+        <div class="enc-card" id="enc-puntos-card" style="display:none;">
+          <div class="enc-section" id="enc-puntos-titulo">Puntos de revisión</div>
+          <div class="check-grid" id="enc-puntos-lista"></div>
+        </div>
+
+        <div class="enc-card">
+          <div class="enc-section">Calificación general</div>
+          <div class="field">
+            <label>¿Cómo evalúas la calidad general? <span class="req">*</span></label>
+            <div class="rating-row">
+              <div class="rating-opt"><input type="radio" name="cal" id="cal1" value="1"><label for="cal1">1</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal2" value="2"><label for="cal2">2</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal3" value="3"><label for="cal3">3</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal4" value="4"><label for="cal4">4</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal5" value="5"><label for="cal5">5</label></div>
+            </div>
+            <div class="rating-labels"><span>Muy malo</span><span>Excelente</span></div>
+          </div>
+          <div class="field"><label>Observaciones generales</label><textarea id="e-obs" placeholder="Defectos encontrados, observaciones para próximas entregas..."></textarea></div>
+        </div>
+
+        <div class="enc-card" style="background:var(--blue-bg);border-color:#93c5fd;">
+          <p style="font-size:13px;color:var(--blue);margin-bottom:12px;">Al presionar <strong>Generar auditoría</strong> se mostrará el formato PDF y se abrirá el Google Form para guardar el registro.</p>
+          <div class="enc-actions">
+            <button class="btn" onclick="limpiarEncuesta()">Limpiar</button>
+            <button class="btn btn-dark" onclick="enviarEncuesta()">Generar auditoría →</button>
+          </div>
+        </div>
+      </div>
+      <div id="enc-success" style="display:none;" class="encuesta-wrap">
+        <div class="enc-card enc-success">
+          <div class="enc-success-icon">✓</div>
+          <h3>Auditoría generada</h3>
+          <p style="margin-bottom:1.5rem;">Formato listo. Se abrió el Google Form para guardar el registro en el Sheet.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn btn-dark" onclick="verFormatoLocal()">Ver e imprimir formato PDF</button>
+            <button class="btn" onclick="nuevaEncuesta()">Nueva auditoría</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD (SOLO MAESTRO) ===== -->
+  <div class="tab-panel" id="tab-dashboard">
+    <div class="main">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:18px;font-weight:600;">Dashboard de Calidad</div>
+          <div style="font-size:13px;color:var(--text3);">Análisis histórico de auditorías</div>
+        </div>
+        <button class="btn btn-dark" onclick="renderDashboard()">↻ Actualizar gráficas</button>
+      </div>
+
+      <!-- Semáforo tendencia -->
+      <div class="dash-card" style="margin-bottom:1.5rem;">
+        <div class="dash-card-title">Semáforo de tendencia mensual</div>
+        <div class="dash-card-sub">Comparación del promedio de este mes vs el mes pasado</div>
+        <div class="semaforo-wrap" id="semaforo-wrap">
+          <div class="sem-item"><div class="sem-dot gray" id="sem-prev-dot">—</div><div class="sem-val" id="sem-prev-val">—</div><div class="sem-label" id="sem-prev-label">Mes anterior</div></div>
+          <div class="sem-arrow" id="sem-arrow">→</div>
+          <div class="sem-item"><div class="sem-dot gray" id="sem-curr-dot">—</div><div class="sem-val" id="sem-curr-val">—</div><div class="sem-label" id="sem-curr-label">Este mes</div></div>
+        </div>
+        <div id="sem-mensaje" style="text-align:center;font-size:13px;color:var(--text3);padding-bottom:0.5rem;"></div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Ranking maquileros -->
+        <div class="dash-card">
+          <div class="dash-card-title">Ranking de maquileros</div>
+          <div class="dash-card-sub">Top 3 mejores y 3 con más oportunidad de mejora</div>
+          <div class="rank-list" id="rank-list"><div style="font-size:13px;color:var(--text3);">Cargando...</div></div>
+        </div>
+
+        <!-- Balance auditores -->
+        <div class="dash-card">
+          <div class="dash-card-title">Balance de carga de trabajo</div>
+          <div class="dash-card-sub">Auditorías realizadas por cada auditor</div>
+          <canvas id="chart-auditores" height="220"></canvas>
+        </div>
+
+        <!-- Pareto defectos -->
+        <div class="dash-card" style="grid-column:1/-1;">
+          <div class="dash-card-title">Puntos críticos de falla (Pareto de defectos)</div>
+          <div class="dash-card-sub">Los puntos de revisión que más frecuentemente presentan fallas</div>
+          <canvas id="chart-pareto" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONFIGURACIÓN (SOLO MAESTRO) ===== -->
+  <div class="tab-panel" id="tab-config">
+    <div class="main">
+      <div class="config-info">Los nombres definidos aquí normalizan los datos y aparecen en filtros y encuesta.</div>
+      <div class="config-actions">
+        <button class="btn btn-dark" onclick="importarDelSheet()">↓ Importar del Sheet</button>
+        <button class="btn" onclick="guardarConfig()">Guardar cambios</button>
+        <span id="config-saved" style="font-size:12px;color:var(--green);display:none;">✓ Guardado</span>
+      </div>
+      <div id="detected-banner" class="detected-banner" style="display:none;"></div>
+      <div class="config-grid">
+        <div class="config-card">
+          <div class="config-card-head"><div><div class="config-card-title">Maquileros</div><div class="config-card-sub">Nombres normalizados</div></div><span id="maq-count" class="config-item-badge">0</span></div>
+          <div class="config-list" id="maq-list"></div>
+          <div class="add-row"><input type="text" id="new-maq" placeholder="Agregar maquilero..." onkeydown="if(event.key==='Enter')agregarMaquilero()"><button class="btn btn-sm btn-dark" onclick="agregarMaquilero()">+ Agregar</button></div>
+        </div>
+        <div class="config-card">
+          <div class="config-card-head"><div><div class="config-card-title">Tipos de producto</div><div class="config-card-sub">Categorías normalizadas</div></div><span id="tipo-count" class="config-item-badge">0</span></div>
+          <div class="config-list" id="tipo-list"></div>
+          <div class="add-row"><input type="text" id="new-tipo" placeholder="Agregar tipo..." onkeydown="if(event.key==='Enter')agregarTipo()"><button class="btn btn-sm btn-dark" onclick="agregarTipo()">+ Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-top:1.5rem;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Credenciales de acceso</div>
+        <p style="font-size:13px;color:var(--text3);">Para cambiar contraseñas, edita el objeto <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;">CREDENCIALES</code> en el código HTML y vuelve a publicar.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PUBLICAR (SOLO MAESTRO) ===== -->
+  <div class="tab-panel" id="tab-publicar">
+    <div class="main" style="max-width:720px;">
+      <div class="guide-card">
+        <h3>Publica tu app gratis en GitHub Pages</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1.5rem;">URL pública permanente accesible desde cualquier dispositivo.</p>
+        <div class="step"><div class="step-num">1</div><div class="step-body"><p><strong>Crea cuenta en GitHub</strong> — <a href="https://github.com" target="_blank" style="color:var(--blue);">github.com</a></p></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><p><strong>Nuevo repositorio:</strong> <code>+</code> → <code>New repository</code> → nombre: <code>auditoria-calidad</code> → <strong>Public</strong> → Crear.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><p><strong>Sube el archivo:</strong> <code>Add file</code> → <code>Upload files</code> → arrastra el archivo descargado → renómbralo a <code>index.html</code> → <strong>Commit changes</strong>.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><p><strong>Activa GitHub Pages:</strong> <code>Settings</code> → <code>Pages</code> → Source: <code>main / root</code> → <strong>Save</strong>.</p></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><p><strong>URL lista:</strong> <code>https://TU-USUARIO.github.io/auditoria-calidad/</code></p></div></div>
+      </div>
+      <div class="guide-card">
+        <h3>Descargar archivo actualizado</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1rem;">Descarga con tu configuración actual para subir a GitHub.</p>
+        <button class="btn btn-dark" onclick="descargarHTML()">↓ Descargar index.html</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PDF -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-title">Formato de Auditoría</div><div class="modal-meta" id="modal-meta"></div></div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body"><div id="formato-print"></div></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-dark" onclick="imprimirFormato()">🖨 Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== PUNTOS POR TIPO =====
+const PUNTOS_POR_TIPO = {
+  'filipina manga larga':['Ubicación de etiquetas talla de 5/8" a 3/4"','Ubicación y orientación del parche emblema','Ubicación y división de la bolsa','Pespunte en el escote espalda','Pespunte en el cuello y cruce','Ubicación y orientación del ojal y botón','Terminado del ojal (100 puntadas)','Ubicación y funcionalidad del cierre','Terminado de las aberturas','Medida de las abertura (5" Caballero y 4 3/4" Dama)','Medida en bolsa (parche, vivo, etc.)','Calidad de la over (Medida del gancho)','Colocación de entretelas (cuellos, vistas, puños)','Costuras de seguridad ocultas','Colocación de broches','Colocación de traba','Colocación de elevadores','Terminado de los puños','NA','Otros'],
+  'filipina manga corta':['Ubicación de etiquetas talla de 5/8" a 3/4"','Ubicación y orientación del parche emblema','Ubicación y división de la bolsa','Pespunte en el escote espalda','Pespunte en el cuello y cruce','Ubicación y orientación del ojal y botón','Terminado del ojal (100 puntadas)','Ubicación y funcionalidad del cierre','Terminado de las aberturas','Medida de las abertura (5" Caballero y 4 3/4" Dama)','Medida en bolsa (parche, vivo, etc.)','Calidad de la over (Medida del gancho)','Colocación de entretelas (cuellos, vistas, puños)','Costuras de seguridad ocultas','Colocación de broches','Colocación de traba','Dobladillo Manga','NA','Otros'],
+  'mandil':['Consumo en dobladillos (doble doblez de 3/8")','Colocación y ubicación de etiqueta de composición','Colocación y ubicación de etiqueta emblema (bandera chef)','Medida de pespuntes','Color de hilo en armado','Color de hilo en pespuntes','Colocación de bolsas','Dobladillos de bolsas','Medida de bolsas','Colocación de ojillo','Ancho de cintas','Ubicación y funcionalidad del cierre','Colocación de remaches','Colocación de pretinas','Funcionalidad de correderas','Remates a presillas','Sobrehilado','Ubicación y funcionalidad de broches','NA','Otros'],
+  'pantalón':['Consumo en dobladillos (doble doblez de 3/8")','Colocación y ubicación de etiqueta de composición','Colocación y ubicación de etiqueta emblema','Medida de pespuntes','Color de hilo en armado','Color de hilo en pespuntes','Colocación de bolsas','Dobladillos de bolsas','Medida de bolsas','Medidas de resorte, colocación y ubicación','Ancho de cintas','Ubicación y funcionalidad del cierre','Colocación de remaches','Funcionalidad de correderas','Remates a presillas','Sobrehilado','Ubicación y funcionalidad de broches','NA','Otros']
+};
+function getPuntosPorTipo(tipo){if(!tipo)return[];const t=tipo.toLowerCase();for(const k of Object.keys(PUNTOS_POR_TIPO)){if(t.includes(k)||k.includes(t))return PUNTOS_POR_TIPO[k];}return[];}
+
+// ===== CREDENCIALES =====
+// Admin = usuario maestro con acceso a Dashboard, Configuración y Publicar
+const CREDENCIALES = {
+  'Admin':             'admin2026',
+  'Eloisa':            '3loi$a2026',
+  'Luis':              'lui$2026',
+  'Arely':             'arely2026',
+  'Equipo de calidad': 'calidad2024'
+};
+const MASTER_USER = 'Admin';
+
+// ===== CONFIG =====
+const STORAGE_KEY = 'auditoria_config_v2';
+let config = { maquileros:[], tipos:[] };
+let currentUser = '';
+function loadConfig(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){const p=JSON.parse(s);config={...config,...p};}}catch(e){}}
+function saveConfig(){localStorage.setItem(STORAGE_KEY,JSON.stringify(config));}
+
+// ===== AUTH =====
+function doLogin(){
+  const user=document.getElementById('login-user').value;
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-err');
+  if(!user){errEl.textContent='Selecciona tu nombre.';errEl.style.display='block';setTimeout(()=>errEl.style.display='none',2500);return;}
+  const now=new Date();const mins=now.getHours()*60+now.getMinutes();
+  if(mins<8*60+30||mins>17*60+30){errEl.textContent='Sistema disponible de 08:30 a 17:30.';errEl.style.display='block';setTimeout(()=>errEl.style.display='none',4000);return;}
+  if(CREDENCIALES[user]===pass){
+    currentUser=user;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='block';
+    document.getElementById('topbar-user').textContent=`Sesión: ${user}`;
+    sessionStorage.setItem('auth','1');sessionStorage.setItem('auditorActivo',user);
+    aplicarPermisos(user);
+    registrarBitacora(user);
+    loadData();
+  } else {
+    errEl.textContent=`Contraseña incorrecta para ${user}.`;errEl.style.display='block';setTimeout(()=>errEl.style.display='none',2500);
+  }
+}
+
+function aplicarPermisos(user){
+  const esMaestro=user===MASTER_USER;
+  ['tab-btn-dashboard','tab-btn-config','tab-btn-publicar'].forEach(id=>{
+    document.getElementById(id).style.display=esMaestro?'block':'none';
+  });
+}
+
+function doLogout(){
+  sessionStorage.removeItem('auth');sessionStorage.removeItem('auditorActivo');currentUser='';
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pass').value='';document.getElementById('login-user').value='';
+  // Volver a pestaña registros
+  switchTabById('registros');
+}
+
+async function registrarBitacora(usuario){
+  const LOG='https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse';
+  let ip='No disponible';
+  try{const c=new AbortController();setTimeout(()=>c.abort(),2000);const r=await fetch('https://api.ipify.org?format=json',{signal:c.signal});if(r.ok){const d=await r.json();ip=d.ip;}}catch(e){}
+  const p=new URLSearchParams();p.append('entry.2056068168',usuario);p.append('entry.368415568',ip);p.append('entry.1047010619',navigator.userAgent);
+  fetch(LOG,{method:'POST',mode:'no-cors',body:p}).catch(()=>{});
+}
+
+// ===== TABS =====
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='encuesta')cargarSelectsEncuesta();
+  if(name==='dashboard')renderDashboard();
+}
+function switchTabById(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const btn=document.querySelector(`.tab-btn[onclick*="'${name}'"]`);
+  if(btn)btn.classList.add('active');
+}
+
+// ===== DATA =====
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vS0Ac4R1rHVKvGYJS1o4zV9Dy-Up_1su7FKtdcNRHvfC85DwxyCsxYz8lG8u_xsbPE_xy_Nc_DGhHnZ/pub?gid=1504659397&single=true&output=csv';
+let allData=[],filtered=[],sortCol=0,sortAsc=false,C={};
+let lastEncuesta=null;
+let anioActivo='todos',mesActivo='todos';
+
+function buildColumnMap(headers){
+  const h=headers.map(x=>String(x).toLowerCase().trim());
+  function find(...terms){for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i;}return -1;}
+  C={FECHA:find('marca temporal','timestamp'),PUNT:find('puntuaci'),CORTE:find('# de corte','corte'),PROG:find('programa'),MOD:find('modelo'),PREV:find('cantidad de prendas revisadas','prendas revisadas'),PREC:find('cantidad de piezas recibidas','piezas recibidas'),AUD:find('auditor'),MAQ:find('maquilero'),TIPO:find('tipo de producto'),PROM:find('promedio calificaci','promedio')};
+  const punIdx=h.reduce((a,x,i)=>x.includes('puntos importantes')?[...a,i]:a,[]);
+  const calIdx=h.reduce((a,x,i)=>x.includes('calidad general')?[...a,i]:a,[]);
+  const obsIdx=h.reduce((a,x,i)=>x.includes('observaciones generales')?[...a,i]:a,[]);
+  C.PUN1=punIdx[0]??-1;C.PUN2=punIdx[1]??-1;C.CAL1=calIdx[0]??-1;C.CAL2=calIdx[1]??-1;C.OBS1=obsIdx[0]??-1;C.OBS2=obsIdx[1]??-1;
+}
+
+function g(r,idx){return(idx>=0&&idx<r.length)?(r[idx]||''):'';}
+function normalize(val,list){if(!val)return val;const v=val.trim().toLowerCase();const m=list.find(x=>x.trim().toLowerCase()===v);return m||val.trim();}
+
+function parseCSV(text){
+  const rows=[];let cur='',inQ=false,row=[];
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){row.push(cur.trim());rows.push(row);row=[];cur='';if(ch==='\r'&&text[i+1]==='\n')i++;}
+    else cur+=ch;
+  }
+  if(cur||row.length){row.push(cur.trim());rows.push(row);}
+  return rows;
+}
+
+function alert_(msg,type='info'){
+  const el=document.getElementById('alert-area');
+  el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  if(type!=='error')setTimeout(()=>el.innerHTML='',4000);
+}
+
+function fmtFecha(v){
+  if(!v)return'—';
+  try{const d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return v;}
+}
+
+function scoreInfo(v){const n=parseFloat(v);if(isNaN(n))return{label:'—',cls:''};return{label:n.toFixed(1),cls:n>=4?'dot-green':n>=3?'dot-amber':'dot-red'};}
+function tipoBadge(tipo){if(!tipo)return'—';const t=tipo.toLowerCase();let cls='badge-gray';if(t.includes('filipina'))cls='badge-blue';else if(t.includes('mandil'))cls='badge-amber';else if(t.includes('pantalón')||t.includes('pantalon'))cls='badge-green';return`<span class="badge ${cls}">${tipo}</span>`;}
+
+async function loadData(){
+  document.getElementById('refresh-btn').textContent='↻ Cargando...';
+  document.getElementById('refresh-btn').disabled=true;
+  try{
+    const res=await fetch(CSV_URL);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const txt=await res.text();
+    if(txt.trim().startsWith('<!DOCTYPE'))throw new Error('Sheet no publicado como CSV.');
+    const rows=parseCSV(txt);
+    if(rows.length<2)throw new Error('Sin datos.');
+    buildColumnMap(rows[0]);
+    allData=rows.slice(1).filter(r=>r.some(c=>c)).map(r=>{
+      const copy=[...r];
+      if(C.MAQ>=0)copy[C.MAQ]=normalize(copy[C.MAQ],config.maquileros);
+      if(C.TIPO>=0)copy[C.TIPO]=normalize(copy[C.TIPO],config.tipos);
+      return copy;
+    });
+    anioActivo='todos';mesActivo='todos';
+    filtered=[...allData];
+    buildStats();buildPeriodoPills();buildFilters();renderTable();
+    document.getElementById('stats').style.display='grid';
+    document.getElementById('controls').style.display='flex';
+    document.getElementById('filtros-periodo').style.display='block';
+    alert_(`✓ ${allData.length} registros cargados.`,'success');
+  }catch(e){alert_(`Error: ${e.message}`,'error');}
+  document.getElementById('refresh-btn').textContent='↻ Actualizar';
+  document.getElementById('refresh-btn').disabled=false;
+}
+
+function buildStats(){
+  const src=filtered.length?filtered:allData;
+  document.getElementById('s-total').textContent=src.length;
+  const proms=src.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
+  document.getElementById('s-avg').textContent=proms.length?(proms.reduce((a,b)=>a+b,0)/proms.length).toFixed(1):'—';
+  document.getElementById('s-maq').textContent=new Set(src.map(r=>g(r,C.MAQ)).filter(Boolean)).size;
+  const now=new Date();
+  document.getElementById('s-mes').textContent=src.filter(r=>{const d=new Date(g(r,C.FECHA));return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+}
+
+// ===== FILTROS PERÍODO =====
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function buildPeriodoPills(){
+  const anios=[...new Set(allData.map(r=>{const d=new Date(g(r,C.FECHA));return isNaN(d)?null:d.getFullYear();}).filter(Boolean))].sort();
+  const pAnio=document.getElementById('pills-anio');
+  pAnio.innerHTML='<span class="pill-label">Año:</span>';
+  const pillTodos=document.createElement('span');
+  pillTodos.className='pill active';pillTodos.textContent='Todos';
+  pillTodos.onclick=()=>setAnio('todos',pillTodos);
+  pAnio.appendChild(pillTodos);
+  anios.forEach(a=>{
+    const p=document.createElement('span');p.className='pill';p.textContent=a;
+    p.onclick=()=>setAnio(a,p);pAnio.appendChild(p);
+  });
+  buildMesPills();
+}
+
+function buildMesPills(){
+  const pMes=document.getElementById('pills-mes');
+  pMes.innerHTML='<span class="pill-label">Mes:</span>';
+  const pillTodos=document.createElement('span');
+  pillTodos.className='pill active';pillTodos.textContent='Todos';
+  pillTodos.onclick=()=>setMes('todos',pillTodos);
+  pMes.appendChild(pillTodos);
+  // Solo meses con datos según año activo
+  const src=anioActivo==='todos'?allData:allData.filter(r=>{const d=new Date(g(r,C.FECHA));return !isNaN(d)&&d.getFullYear()===anioActivo;});
+  const mesesConDatos=[...new Set(src.map(r=>{const d=new Date(g(r,C.FECHA));return isNaN(d)?null:d.getMonth();}).filter(v=>v!==null))].sort((a,b)=>a-b);
+  mesesConDatos.forEach(m=>{
+    const p=document.createElement('span');p.className='pill';p.textContent=MESES[m];
+    p.onclick=()=>setMes(m,p);pMes.appendChild(p);
+  });
+}
+
+function setAnio(val,btn){
+  anioActivo=val;mesActivo='todos';
+  document.querySelectorAll('#pills-anio .pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  buildMesPills();
+  applyPeriodoFilter();
+}
+
+function setMes(val,btn){
+  mesActivo=val;
+  document.querySelectorAll('#pills-mes .pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  applyPeriodoFilter();
+}
+
+function applyPeriodoFilter(){
+  filtered=allData.filter(r=>{
+    const d=new Date(g(r,C.FECHA));if(isNaN(d))return false;
+    const okAnio=anioActivo==='todos'||d.getFullYear()===anioActivo;
+    const okMes=mesActivo==='todos'||d.getMonth()===mesActivo;
+    return okAnio&&okMes;
+  });
+  // Aplicar también filtros de búsqueda/select
+  const q=document.getElementById('search').value.toLowerCase();
+  const maq=document.getElementById('filter-maq').value;
+  const tipo=document.getElementById('filter-tipo').value;
+  if(q||maq||tipo){
+    filtered=filtered.filter(r=>{
+      const qOk=!q||[g(r,C.CORTE),g(r,C.MAQ),g(r,C.MOD),g(r,C.PROG),g(r,C.TIPO)].some(v=>String(v).toLowerCase().includes(q));
+      return qOk&&(!maq||g(r,C.MAQ)===maq)&&(!tipo||g(r,C.TIPO)===tipo);
+    });
+  }
+  buildStats();renderTable();
+}
+
+function buildFilters(){
+  const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const tipos=config.tipos.length?config.tipos:[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  const mS=document.getElementById('filter-maq');mS.innerHTML='<option value="">Todos los maquileros</option>';maqs.forEach(m=>mS.innerHTML+=`<option>${m}</option>`);
+  const tS=document.getElementById('filter-tipo');tS.innerHTML='<option value="">Todos los productos</option>';tipos.forEach(t=>tS.innerHTML+=`<option>${t}</option>`);
+}
+
+function filterData(){
+  applyPeriodoFilter();
+}
+
+function sortBy(col){
+  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
+  filtered.sort((a,b)=>{const av=a[col]||'',bv=b[col]||'';const an=parseFloat(av),bn=parseFloat(bv);if(!isNaN(an)&&!isNaN(bn))return sortAsc?an-bn:bn-an;return sortAsc?av.localeCompare(bv):bv.localeCompare(av);});
+  renderTable();
+}
+
+function renderTable(){
+  document.getElementById('count-label').textContent=`${filtered.length} / ${allData.length} registros`;
+  if(!filtered.length){document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="empty-state"><div class="empty-icon">∅</div><p>No hay registros para este período.</p></div></div>`;return;}
+  const regs=[...filtered].reverse();
+  const colKeys=[C.FECHA,C.CORTE,C.PROG,C.MOD,C.TIPO,C.MAQ,C.PREV,C.PREC,C.PROM,-1];
+  const labels=['Fecha','# Corte','Programa','Modelo','Tipo','Maquilero','Rev.','Rec.','Calif.',''];
+  const ths=labels.map((l,i)=>colKeys[i]>=0?`<th onclick="sortBy(${colKeys[i]})">${l} ${sortCol===colKeys[i]?(sortAsc?'↑':'↓'):''}</th>`:`<th></th>`).join('');
+  const trs=regs.map(r=>{
+    const si=scoreInfo(g(r,C.PROM));const idx=allData.indexOf(r);
+    return`<tr><td class="mono" style="font-size:11px;">${fmtFecha(g(r,C.FECHA))}</td><td><strong class="mono">${g(r,C.CORTE)||'—'}</strong></td><td>${g(r,C.PROG)||'—'}</td><td>${g(r,C.MOD)||'—'}</td><td>${tipoBadge(g(r,C.TIPO))}</td><td>${g(r,C.MAQ)||'—'}</td><td class="mono">${g(r,C.PREV)||'—'}</td><td class="mono">${g(r,C.PREC)||'—'}</td><td><span class="score-dot"><span class="dot ${si.cls}"></span>${si.label}</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(${idx})">Ver PDF</button></td></tr>`;
+  }).join('');
+  document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="table-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div></div>`;
+}
+
+// ===== DASHBOARD =====
+let chartAuditores=null,chartPareto=null;
+
+function renderDashboard(){
+  if(!allData.length){return;}
+  renderSemaforo();
+  renderRanking();
+  renderChartAuditores();
+  renderChartPareto();
+}
+
+function getPromedioMes(anio,mes){
+  const registros=allData.filter(r=>{const d=new Date(g(r,C.FECHA));return !isNaN(d)&&d.getFullYear()===anio&&d.getMonth()===mes;});
+  const vals=registros.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
+  return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+}
+
+function renderSemaforo(){
+  const now=new Date();
+  const currAnio=now.getFullYear(),currMes=now.getMonth();
+  const prevAnio=currMes===0?currAnio-1:currAnio;
+  const prevMes=currMes===0?11:currMes-1;
+  const curr=getPromedioMes(currAnio,currMes);
+  const prev=getPromedioMes(prevAnio,prevMes);
+  const setDot=(id,val)=>{
+    const el=document.getElementById(id);
+    if(val===null){el.textContent='—';el.className='sem-dot gray';return;}
+    el.textContent=val.toFixed(1);
+    el.className='sem-dot '+(val>=4?'green':val>=3?'amber':'red');
+  };
+  setDot('sem-curr-dot',curr);setDot('sem-prev-dot',prev);
+  document.getElementById('sem-curr-val').textContent=curr?curr.toFixed(1):'Sin datos';
+  document.getElementById('sem-prev-val').textContent=prev?prev.toFixed(1):'Sin datos';
+  document.getElementById('sem-curr-label').textContent=MESES[currMes]+' '+currAnio;
+  document.getElementById('sem-prev-label').textContent=MESES[prevMes]+' '+prevAnio;
+  const arrow=document.getElementById('sem-arrow');
+  let msg='';
+  if(curr&&prev){
+    const diff=curr-prev;
+    if(diff>0.2){arrow.textContent='↑';arrow.style.color='#16a34a';msg=`La calidad subió ${diff.toFixed(1)} puntos. ¡Buen trabajo!`;}
+    else if(diff<-0.2){arrow.textContent='↓';arrow.style.color='#dc2626';msg=`La calidad bajó ${Math.abs(diff).toFixed(1)} puntos. Se requiere atención.`;}
+    else{arrow.textContent='→';arrow.style.color='#9e9b92';msg='La calidad se mantiene estable.';}
+  }else{arrow.textContent='→';arrow.style.color='#9e9b92';}
+  document.getElementById('sem-mensaje').textContent=msg;
+}
+
+function renderRanking(){
+  const maqMap={};
+  allData.forEach(r=>{
+    const maq=g(r,C.MAQ);const prom=parseFloat(g(r,C.PROM));
+    if(!maq||isNaN(prom))return;
+    if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
+    maqMap[maq].sum+=prom;maqMap[maq].cnt++;
+  });
+  const ranking=Object.entries(maqMap).map(([name,{sum,cnt}])=>({name,avg:sum/cnt,cnt})).sort((a,b)=>b.avg-a.avg);
+  const top=ranking.slice(0,3);
+  const bot=ranking.slice(-3).reverse();
+  const container=document.getElementById('rank-list');
+  if(!ranking.length){container.innerHTML='<div style="font-size:13px;color:var(--text3);">Sin datos suficientes.</div>';return;}
+  let html='';
+  top.forEach((m,i)=>{
+    html+=`<div class="rank-item top"><div class="rank-pos top">${i+1}</div><div class="rank-name">${m.name}</div><div class="rank-score" style="color:#16a34a;">${m.avg.toFixed(2)}</div><div style="font-size:11px;color:var(--text3);margin-left:4px;">${m.cnt} aud.</div></div>`;
+  });
+  if(ranking.length>6){html+=`<div class="rank-divider">· · ·</div>`;}
+  bot.forEach((m,i)=>{
+    html+=`<div class="rank-item bot"><div class="rank-pos bot">${ranking.length-2+i}</div><div class="rank-name">${m.name}</div><div class="rank-score" style="color:#dc2626;">${m.avg.toFixed(2)}</div><div style="font-size:11px;color:var(--text3);margin-left:4px;">${m.cnt} aud.</div></div>`;
+  });
+  container.innerHTML=html;
+}
+
+function renderChartAuditores(){
+  const audMap={};
+  allData.forEach(r=>{const a=g(r,C.AUD);if(!a)return;audMap[a]=(audMap[a]||0)+1;});
+  const labels=Object.keys(audMap).sort((a,b)=>audMap[b]-audMap[a]);
+  const vals=labels.map(l=>audMap[l]);
+  const colors=['#1a1917','#6b6860','#9e9b92','#c8c5ba','#e0ddd4'];
+  const ctx=document.getElementById('chart-auditores').getContext('2d');
+  if(chartAuditores)chartAuditores.destroy();
+  chartAuditores=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors.slice(0,labels.length),borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}});
+}
+
+function renderChartPareto(){
+  const defMap={};
+  allData.forEach(r=>{
+    const pun=[g(r,C.PUN1),g(r,C.PUN2)].join(',');
+    if(!pun.trim())return;
+    pun.split(',').map(p=>p.trim()).filter(Boolean).forEach(p=>{
+      if(p==='NA'||p==='Otros'||p==='')return;
+      defMap[p]=(defMap[p]||0)+1;
+    });
+  });
+  const sorted=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  if(!sorted.length)return;
+  const labels=sorted.map(([k])=>k.length>30?k.slice(0,30)+'…':k);
+  const vals=sorted.map(([,v])=>v);
+  const total=vals.reduce((a,b)=>a+b,0);
+  let acum=0;const acumPct=vals.map(v=>{acum+=v;return Math.round(acum/total*100);});
+  const ctx=document.getElementById('chart-pareto').getContext('2d');
+  if(chartPareto)chartPareto.destroy();
+  chartPareto=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {type:'bar',label:'Frecuencia',data:vals,backgroundColor:'#1a1917',borderRadius:4,yAxisID:'y'},
+      {type:'line',label:'% acumulado',data:acumPct,borderColor:'#dc2626',backgroundColor:'transparent',borderWidth:2,pointRadius:3,yAxisID:'y2'}
+    ]},
+    options:{responsive:true,interaction:{mode:'index'},plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}},scales:{
+      x:{ticks:{font:{size:10},maxRotation:40}},
+      y:{position:'left',title:{display:true,text:'Frecuencia',font:{size:11}}},
+      y2:{position:'right',min:0,max:100,title:{display:true,text:'% acumulado',font:{size:11}},grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}
+    }}
+  });
+}
+
+// ===== FORMATO PDF =====
+function generarHTMLFormato(datos){
+  const{corte,programa,modelo,fecha,prev,prec,auditor,maquilero,tipo,cal,promedio,puntos,obs}=datos;
+  const prevVal=parseFloat(prev),precVal=parseFloat(prec);
+  const pct=(!isNaN(prevVal)&&!isNaN(precVal)&&precVal>0)?Math.round(prevVal/precVal*100)+'%':'—';
+  const mitad=Math.ceil(puntos.length/2);
+  const col1=puntos.slice(0,mitad),col2=puntos.slice(mitad);
+  const maxR=Math.max(col1.length,col2.length,1);
+  let puntosRows='';
+  for(let i=0;i<maxR;i++){puntosRows+=`<tr><td class="puntos-cel">${col1[i]?'• '+col1[i]:''}</td><td class="puntos-cel">${col2[i]?'• '+col2[i]:''}</td></tr>`;}
+  const calStr=cal?`${cal} / 5`:'—';
+  const promStr=promedio?` · Prom: ${promedio}`:'';
+  return`<table>
+    <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
+    <tr><td class="lbl">CORTE:</td><td class="val">${corte||''}</td><td class="lbl">PROGRAMA:</td><td class="val">${programa||''}</td><td class="lbl">MODELO:</td><td class="val">${modelo||''}</td><td class="lbl">FECHA:</td><td class="val">${fecha||''}</td></tr>
+    <tr><td class="lbl">PRENDAS REVISADAS</td><td class="val">${prev||''}</td><td class="lbl">PRENDAS RECIBIDAS</td><td class="val">${prec||''}</td><td class="lbl">%</td><td class="val">${pct}</td><td class="lbl">CALIFICACIÓN</td><td class="val">${calStr}${promStr}</td></tr>
+    <tr><td class="lbl">REVISA:</td><td class="val">${auditor||''}</td><td class="lbl">MAQUILERO</td><td class="val" colspan="5">${maquilero||''}</td></tr>
+    <tr><td class="lbl">TIPO DE PRODUCTO:</td><td class="val" colspan="7">${tipo||''}</td></tr>
+    <tr><td colspan="8" class="sec">PUNTOS IMPORTANTES DE REVISIÓN</td></tr>
+    ${puntos.length?`<tr><td colspan="4" class="sec-sub">—</td><td colspan="4" class="sec-sub">—</td></tr>${puntosRows}`:'<tr><td colspan="8" style="padding:8px;font-size:11px;color:#666;">Sin puntos registrados</td></tr>'}
+    <tr><td colspan="8" class="sec">OBSERVACIONES GENERALES</td></tr>
+    <tr><td colspan="8" class="obs">${obs||'—'}</td></tr>
+  </table>`;
+}
+
+function abrirFormato(idx){
+  try{
+    const r=allData[idx];
+    const prom=parseFloat(g(r,C.PROM));
+    function puntosALista(v){return v?v.split(',').map(p=>p.trim()).filter(Boolean):[];}
+    const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal:g(r,C.CAL1)||g(r,C.CAL2),promedio:isNaN(prom)?'':prom.toFixed(1),puntos:[...puntosALista(g(r,C.PUN1)),...puntosALista(g(r,C.PUN2))],obs:[g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')};
+    document.getElementById('modal-meta').textContent=`Corte ${datos.corte||'—'} · ${datos.fecha}`;
+    document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
+    document.getElementById('overlay').classList.add('open');
+  }catch(e){console.error(e);}
+}
+
+function verFormatoLocal(){
+  if(!lastEncuesta)return;
+  const e=lastEncuesta;
+  const datos={corte:e.corte,programa:e.programa,modelo:e.modelo,fecha:e.fecha.toLocaleString('es-MX'),prev:e.prev,prec:e.prec,auditor:e.auditor,maquilero:e.maquilero,tipo:e.tipo,cal:e.cal||'',promedio:'',puntos:e.puntos||[],obs:e.obs||''};
+  document.getElementById('modal-meta').textContent=`Corte ${datos.corte} · ${datos.fecha}`;
+  document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+
+function imprimirFormato(){
+  const contenido=document.getElementById('formato-print').innerHTML;
+  let frame=document.getElementById('print-frame');
+  if(!frame){frame=document.createElement('iframe');frame.id='print-frame';frame.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';document.body.appendChild(frame);}
+  const doc=frame.contentWindow.document;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}@page{margin:15mm;}</style></head><body>${contenido}</body></html>`);
+  doc.close();
+  setTimeout(()=>{frame.contentWindow.focus();frame.contentWindow.print();},300);
+}
+
+// ===== ENCUESTA =====
+function cargarSelectsEncuesta(){
+  const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
+  const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';Object.keys(PUNTOS_POR_TIPO).forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
+  const audActivo=sessionStorage.getItem('auditorActivo');
+  if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
+}
+
+function actualizarPuntos(){
+  const tipo=document.getElementById('e-tipo').value;
+  const puntos=getPuntosPorTipo(tipo);
+  const card=document.getElementById('enc-puntos-card');
+  const lista=document.getElementById('enc-puntos-lista');
+  if(!puntos.length){card.style.display='none';return;}
+  document.getElementById('enc-puntos-titulo').textContent=`Puntos de revisión — ${tipo}`;
+  lista.innerHTML=puntos.map((p,i)=>`<label class="check-item" id="ci-${i}" onclick="toggleCheck(${i})"><input type="checkbox" id="chk-${i}"><span>${p}</span></label>`).join('');
+  card.style.display='block';
+}
+
+function toggleCheck(i){const item=document.getElementById(`ci-${i}`);const chk=document.getElementById(`chk-${i}`);item.classList.toggle('checked');chk.checked=item.classList.contains('checked');}
+
+function limpiarEncuesta(){
+  ['e-corte','e-programa','e-modelo','e-prev','e-prec','e-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('e-maquilero').value='';document.getElementById('e-tipo').value='';
+  document.querySelectorAll('input[name="cal"]').forEach(r=>r.checked=false);
+  document.getElementById('enc-puntos-card').style.display='none';
+}
+
+function enviarEncuesta(){
+  const corte=document.getElementById('e-corte').value.trim();
+  const programa=document.getElementById('e-programa').value.trim();
+  const modelo=document.getElementById('e-modelo').value.trim();
+  const prev=document.getElementById('e-prev').value.trim();
+  const prec=document.getElementById('e-prec').value.trim();
+  const auditor=document.getElementById('e-auditor').value;
+  const maquilero=document.getElementById('e-maquilero').value;
+  const tipo=document.getElementById('e-tipo').value;
+  const cal=document.querySelector('input[name="cal"]:checked')?.value||'';
+  const obs=document.getElementById('e-obs').value.trim();
+  if(!corte||!programa||!modelo||!prev||!prec||!auditor||!maquilero||!tipo||!cal){alert('Por favor completa todos los campos obligatorios (*).');return;}
+  const puntos=[];document.querySelectorAll('.check-item.checked span').forEach(s=>puntos.push(s.textContent));
+  lastEncuesta={corte,programa,modelo,prev,prec,auditor,maquilero,tipo,cal,obs,puntos,fecha:new Date()};
+  window.open('https://docs.google.com/forms/d/185WTdHxLaeQ2Zw57S-EQno-SLSRVC-ILvcA2xMs7iTk/viewform','_blank');
+  document.getElementById('enc-form-wrap').style.display='none';
+  document.getElementById('enc-success').style.display='block';
+}
+
+function nuevaEncuesta(){limpiarEncuesta();document.getElementById('enc-form-wrap').style.display='block';document.getElementById('enc-success').style.display='none';}
+
+// ===== CONFIG =====
+function renderConfigLists(){
+  const maqList=document.getElementById('maq-list');
+  const tipoList=document.getElementById('tipo-list');
+  maqList.innerHTML=config.maquileros.length?config.maquileros.map((m,i)=>itemHTML(m,i,'maq')).join(''):'<div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin maquileros — importa del Sheet</div>';
+  tipoList.innerHTML=config.tipos.length?config.tipos.map((t,i)=>itemHTML(t,i,'tipo')).join(''):'<div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin tipos — importa del Sheet</div>';
+  document.getElementById('maq-count').textContent=config.maquileros.length;
+  document.getElementById('tipo-count').textContent=config.tipos.length;
+}
+function itemHTML(name,idx,type){return`<div class="config-item" id="${type}-item-${idx}"><span class="config-item-name" id="${type}-name-${idx}">${name}</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('${type}',${idx})">✎</button><button class="icon-btn del" onclick="eliminarItem('${type}',${idx})">✕</button></div></div>`;}
+function editarItem(type,idx){const span=document.getElementById(`${type}-name-${idx}`);const cur=span.textContent;span.innerHTML=`<input class="edit-inline" value="${cur}" onblur="guardarEdicion('${type}',${idx},this)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value='${cur}';this.blur()}">`;span.querySelector('input').focus();}
+function guardarEdicion(type,idx,input){const v=input.value.trim();if(!v){renderConfigLists();return;}if(type==='maq')config.maquileros[idx]=v;else config.tipos[idx]=v;renderConfigLists();}
+function eliminarItem(type,idx){if(type==='maq')config.maquileros.splice(idx,1);else config.tipos.splice(idx,1);renderConfigLists();}
+function agregarMaquilero(){const inp=document.getElementById('new-maq');const v=inp.value.trim();if(!v)return;if(!config.maquileros.find(m=>m.toLowerCase()===v.toLowerCase())){config.maquileros.push(v);renderConfigLists();}inp.value='';}
+function agregarTipo(){const inp=document.getElementById('new-tipo');const v=inp.value.trim();if(!v)return;if(!config.tipos.find(t=>t.toLowerCase()===v.toLowerCase())){config.tipos.push(v);renderConfigLists();}inp.value='';}
+function guardarConfig(){saveConfig();const el=document.getElementById('config-saved');el.style.display='inline';setTimeout(()=>el.style.display='none',2500);if(allData.length){buildFilters();filterData();}}
+function importarDelSheet(){
+  if(!allData.length){alert('Primero carga los datos del Sheet desde Registros.');return;}
+  const rawMaqs=[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const rawTipos=[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  let added=0;
+  rawMaqs.forEach(m=>{if(!config.maquileros.find(x=>x.toLowerCase()===m.toLowerCase())){config.maquileros.push(m);added++;}});
+  rawTipos.forEach(t=>{if(!config.tipos.find(x=>x.toLowerCase()===t.toLowerCase())){config.tipos.push(t);added++;}});
+  renderConfigLists();
+  const b=document.getElementById('detected-banner');b.textContent=`Se importaron ${added} valores. Edita para unificar variantes.`;b.style.display='block';
+}
+
+function descargarHTML(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();}
+
+// ===== INIT =====
+loadConfig();
+renderConfigLists();
+if(sessionStorage.getItem('auth')==='1'){
+  const u=sessionStorage.getItem('auditorActivo')||'';
+  currentUser=u;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-shell').style.display='block';
+  if(u)document.getElementById('topbar-user').textContent=`Sesión: ${u}`;
+  aplicarPermisos(u);
+  loadData();
+}
+</script>
+</body>
+</html>
