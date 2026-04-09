@@ -24,8 +24,8 @@
   .login-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;}
   .login-logo{font-size:28px;font-weight:300;letter-spacing:-1px;margin-bottom:6px;}
   .login-sub{font-size:13px;color:var(--text3);margin-bottom:2rem;font-family:'DM Mono',monospace;}
-  .login-card input{width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--surface);outline:none;margin-bottom:10px;}
-  .login-card input:focus{border-color:var(--border2);}
+  .login-card select,.login-card input{width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--surface);outline:none;margin-bottom:10px;}
+  .login-card input:focus,.login-card select:focus{border-color:var(--border2);}
   .login-card .btn-full{width:100%;padding:11px;background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
   .login-card .btn-full:hover{opacity:0.85;}
   .login-err{font-size:12px;color:var(--red);margin-top:8px;display:none;}
@@ -68,7 +68,7 @@
   /* TABLE */
   .table-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
   .table-wrap{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px;}
   thead th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:500;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);font-family:'DM Mono',monospace;white-space:nowrap;cursor:pointer;user-select:none;}
   thead th:hover{color:var(--text2);}
   tbody td{padding:11px 14px;border-bottom:0.5px solid var(--border);vertical-align:middle;}
@@ -91,10 +91,876 @@
   .alert{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:1rem;}
   .alert-error{background:var(--red-bg);color:var(--red);border:0.5px solid #fca5a5;}
   .alert-success{background:var(--green-bg);color:var(--green);border:0.5px solid #86efac;}
-  .alert-info{background:var(--blue-bg);color:var(--blue);border:0.5px solid #93c5fd;}
 
   /* MODAL */
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1rem;}
   .overlay.open{display:flex;}
   .modal{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);width:100%;max-width:820px;max-height:92vh;display:flex;flex-direction:column;}
-  .modal-head{padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-
+  .modal-head{padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .modal-title{font-size:15px;font-weight:600;}
+  .modal-meta{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
+  .modal-body{overflow-y:auto;padding:1.5rem;flex:1;}
+  .modal-foot{padding:1rem 1.5rem;border-top:0.5px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+  .close-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px;}
+  .close-btn:hover{color:var(--text);}
+
+  /* FORMATO PDF */
+  #formato-print{font-family:Arial,sans-serif;font-size:12px;}
+  #formato-print .f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px 8px;letter-spacing:1px;text-transform:uppercase;}
+  #formato-print table{width:100%;border-collapse:collapse;}
+  #formato-print td{border:1px solid #555;padding:5px 8px;}
+  #formato-print .lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+  #formato-print .val{background:#fff;color:#000;}
+  #formato-print .sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}
+  #formato-print .sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}
+  #formato-print .obs{min-height:180px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}
+  #formato-print .puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}
+
+  /* ENCUESTA */
+  .encuesta-wrap{max-width:680px;margin:0 auto;}
+  .enc-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+  .enc-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+  .enc-desc{font-size:13px;color:var(--text3);}
+  .enc-section{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;font-family:'DM Mono',monospace;}
+  .field{margin-bottom:1.25rem;}
+  .field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text);}
+  .field label .req{color:var(--red);margin-left:2px;}
+  .field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;padding:9px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border2);}
+  .field textarea{min-height:90px;resize:vertical;}
+  .rating-row{display:flex;gap:8px;}
+  .rating-opt{flex:1;}
+  .rating-opt input{display:none;}
+  .rating-opt label{display:flex;align-items:center;justify-content:center;height:44px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s;background:var(--surface);color:var(--text2);}
+  .rating-opt input:checked+label{background:var(--text);color:#fff;border-color:var(--text);}
+  .rating-opt label:hover{border-color:var(--border2);background:var(--surface2);}
+  .rating-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;}
+  .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .check-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.12s;background:var(--surface);}
+  .check-item:hover{border-color:var(--border2);background:var(--surface2);}
+  .check-item input{margin-top:2px;flex-shrink:0;accent-color:var(--text);}
+  .check-item span{font-size:12px;line-height:1.4;color:var(--text);}
+  .check-item.checked{border-color:var(--text);background:var(--bg);}
+  .enc-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:0.5rem;}
+  .enc-success{text-align:center;padding:3rem 2rem;}
+  .enc-success .enc-success-icon{font-size:48px;margin-bottom:1rem;}
+  .enc-success h3{font-size:20px;font-weight:500;margin-bottom:8px;}
+  .enc-success p{font-size:14px;color:var(--text3);}
+
+  /* CONFIG */
+  .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+  .config-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .config-card-head{padding:1rem 1.25rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .config-card-title{font-size:14px;font-weight:600;}
+  .config-card-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+  .config-list{padding:0.75rem;display:flex;flex-direction:column;gap:6px;min-height:80px;}
+  .config-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:0.5px solid var(--border);gap:8px;}
+  .config-item-name{font-size:13px;flex:1;}
+  .config-item-badge{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;background:var(--surface2);padding:2px 7px;border-radius:20px;}
+  .config-item-actions{display:flex;gap:4px;}
+  .icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:3px 6px;border-radius:4px;transition:all 0.1s;}
+  .icon-btn:hover{background:var(--surface2);color:var(--text);}
+  .icon-btn.del:hover{background:var(--red-bg);color:var(--red);}
+  .add-row{display:flex;gap:8px;padding:0.75rem;border-top:0.5px solid var(--border);}
+  .add-row input{flex:1;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;}
+  .config-info{padding:1rem 1.25rem;background:var(--blue-bg);border-radius:var(--radius-sm);margin-bottom:1rem;font-size:13px;color:var(--blue);border:0.5px solid #93c5fd;}
+  .config-actions{display:flex;gap:8px;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap;}
+  .detected-banner{background:var(--amber-bg);border:0.5px solid #fbbf24;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:1rem;}
+  .edit-inline{border:0.5px solid var(--border2);border-radius:4px;padding:3px 6px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;width:100%;}
+  .pass-config{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-top:1.5rem;}
+  .pass-config h4{font-size:14px;font-weight:600;margin-bottom:1rem;}
+  .pass-row{display:flex;gap:8px;align-items:center;}
+  .pass-row input{flex:1;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-family:'DM Mono',monospace;font-size:13px;color:var(--text);outline:none;}
+
+  /* GUIA */
+  .guide-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+  .guide-card h3{font-size:15px;font-weight:600;margin-bottom:1rem;}
+  .step{display:flex;gap:12px;margin-bottom:1rem;align-items:flex-start;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--text);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .step-body p{font-size:13px;line-height:1.6;color:var(--text2);}
+  .step-body strong{color:var(--text);}
+  .step-body code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;border:0.5px solid var(--border);}
+
+  @media(max-width:700px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .config-grid{grid-template-columns:1fr;}
+    .check-grid{grid-template-columns:1fr;}
+    .topbar{padding:0 1rem;}
+    .main{padding:1rem;}
+    .tabs-bar{padding:0 1rem;overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Auditoría</div>
+    <div class="login-sub">Producto Terminado · Calidad</div>
+    <select id="login-user">
+      <option value="">Selecciona tu nombre...</option>
+      <option value="Eloisa">Eloisa</option>
+      <option value="Luis">Luis</option>
+      <option value="Arely">Arely</option>
+      <option value="Equipo de calidad">Equipo de calidad</option>
+    </select>
+    <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-full" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="login-err">Error de acceso</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-shell" id="app-shell">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Auditoría de Producto Terminado</div>
+      <div class="topbar-sub" id="topbar-user">Google Sheets → Formato PDF</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-dark" onclick="loadData()" id="refresh-btn">↻ Actualizar</button>
+      <button class="btn" style="color:#fff;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('registros',this)">Registros</button>
+    <button class="tab-btn" onclick="switchTab('encuesta',this)">Nueva auditoría</button>
+    <button class="tab-btn" onclick="switchTab('config',this)">Configuración</button>
+    <button class="tab-btn" onclick="switchTab('publicar',this)">Publicar en línea</button>
+  </div>
+
+  <!-- REGISTROS -->
+  <div class="tab-panel active" id="tab-registros">
+    <div class="main">
+      <div id="alert-area"></div>
+      <div class="stats-grid" id="stats" style="display:none;">
+        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">0</div><div class="stat-sub">en el Sheet</div></div>
+        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">—</div><div class="stat-sub">de 5 puntos</div></div>
+        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">0</div><div class="stat-sub">únicos</div></div>
+        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">0</div><div class="stat-sub">auditorías</div></div>
+      </div>
+      <div class="controls-bar" id="controls" style="display:none;">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="search" placeholder="Buscar por corte, maquilero, modelo..." oninput="filterData()">
+        </div>
+        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option></select>
+        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option></select>
+        <span class="count-label" id="count-label"></span>
+      </div>
+      <div id="table-area">
+        <div class="table-card"><div class="empty-state"><div class="empty-icon">⟳</div><p>Cargando datos del Google Sheet...</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENCUESTA -->
+  <div class="tab-panel" id="tab-encuesta">
+    <div class="main">
+      <div class="encuesta-wrap" id="enc-form-wrap">
+        <div class="enc-card">
+          <div class="enc-title">Nueva Auditoría</div>
+          <div class="enc-desc">Llena todos los campos. Al finalizar podrás ver e imprimir el formato PDF y se abrirá el Google Form para guardar el registro.</div>
+        </div>
+        <div class="enc-card">
+          <div class="enc-section">Datos del corte</div>
+          <div class="field"><label># de Corte <span class="req">*</span></label><input type="text" id="e-corte" placeholder="Ej: 25120672"></div>
+          <div class="field"><label>Programa <span class="req">*</span></label><input type="text" id="e-programa" placeholder="Ej: 362"></div>
+          <div class="field"><label>Modelo <span class="req">*</span></label><input type="text" id="e-modelo" placeholder="Ej: M2NEU"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field"><label>Prendas revisadas <span class="req">*</span></label><input type="number" id="e-prev" placeholder="Ej: 250" min="0"></div>
+            <div class="field"><label>Prendas recibidas <span class="req">*</span></label><input type="number" id="e-prec" placeholder="Ej: 300" min="0"></div>
+          </div>
+          <div class="field">
+            <label>Auditor <span class="req">*</span></label>
+            <select id="e-auditor">
+              <option value="">Selecciona...</option>
+              <option>Eloisa</option><option>Luis</option><option>Arely</option><option>Equipo de calidad</option>
+            </select>
+          </div>
+          <div class="field"><label>Maquilero <span class="req">*</span></label><select id="e-maquilero"><option value="">Selecciona...</option></select></div>
+          <div class="field"><label>Tipo de producto <span class="req">*</span></label><select id="e-tipo" onchange="actualizarPuntos()"><option value="">Selecciona...</option></select></div>
+        </div>
+
+        <div class="enc-card" id="enc-puntos-card" style="display:none;">
+          <div class="enc-section" id="enc-puntos-titulo">Puntos de revisión</div>
+          <div class="check-grid" id="enc-puntos-lista"></div>
+        </div>
+
+        <div class="enc-card">
+          <div class="enc-section">Calificación general</div>
+          <div class="field">
+            <label>¿Cómo evalúas la calidad general del producto recibido? <span class="req">*</span></label>
+            <div class="rating-row">
+              <div class="rating-opt"><input type="radio" name="cal" id="cal1" value="1"><label for="cal1">1</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal2" value="2"><label for="cal2">2</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal3" value="3"><label for="cal3">3</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal4" value="4"><label for="cal4">4</label></div>
+              <div class="rating-opt"><input type="radio" name="cal" id="cal5" value="5"><label for="cal5">5</label></div>
+            </div>
+            <div class="rating-labels"><span>Muy malo</span><span>Excelente</span></div>
+          </div>
+          <div class="field"><label>Observaciones generales</label><textarea id="e-obs" placeholder="Describe defectos encontrados, observaciones para próximas entregas..."></textarea></div>
+        </div>
+
+        <div class="enc-card" style="background:var(--blue-bg);border-color:#93c5fd;">
+          <p style="font-size:13px;color:var(--blue);margin-bottom:12px;">Al presionar <strong>Generar auditoría</strong> se mostrará el formato PDF y se abrirá el Google Form para guardar el registro.</p>
+          <div class="enc-actions">
+            <button class="btn" onclick="limpiarEncuesta()">Limpiar</button>
+            <button class="btn btn-dark" onclick="enviarEncuesta()">Generar auditoría →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="enc-success" style="display:none;" class="encuesta-wrap">
+        <div class="enc-card enc-success">
+          <div class="enc-success-icon">✓</div>
+          <h3>Auditoría generada</h3>
+          <p style="margin-bottom:1.5rem;">El formato está listo para imprimir. También se abrió el Google Form para guardar el registro en el Sheet.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn btn-dark" onclick="verFormatoLocal()">Ver e imprimir formato PDF</button>
+            <button class="btn" onclick="nuevaEncuesta()">Nueva auditoría</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN -->
+  <div class="tab-panel" id="tab-config">
+    <div class="main">
+      <div class="config-info">Los nombres definidos aquí normalizan los datos del Sheet y aparecen en los filtros y la encuesta.</div>
+      <div class="config-actions">
+        <button class="btn btn-dark" onclick="importarDelSheet()">↓ Importar del Sheet</button>
+        <button class="btn" onclick="guardarConfig()">Guardar cambios</button>
+        <span id="config-saved" style="font-size:12px;color:var(--green);display:none;">✓ Guardado</span>
+      </div>
+      <div id="detected-banner" class="detected-banner" style="display:none;"></div>
+      <div class="config-grid">
+        <div class="config-card">
+          <div class="config-card-head">
+            <div><div class="config-card-title">Maquileros</div><div class="config-card-sub">Nombres normalizados</div></div>
+            <span id="maq-count" class="config-item-badge">0</span>
+          </div>
+          <div class="config-list" id="maq-list"></div>
+          <div class="add-row">
+            <input type="text" id="new-maq" placeholder="Agregar maquilero..." onkeydown="if(event.key==='Enter')agregarMaquilero()">
+            <button class="btn btn-sm btn-dark" onclick="agregarMaquilero()">+ Agregar</button>
+          </div>
+        </div>
+        <div class="config-card">
+          <div class="config-card-head">
+            <div><div class="config-card-title">Tipos de producto</div><div class="config-card-sub">Categorías normalizadas</div></div>
+            <span id="tipo-count" class="config-item-badge">0</span>
+          </div>
+          <div class="config-list" id="tipo-list"></div>
+          <div class="add-row">
+            <input type="text" id="new-tipo" placeholder="Agregar tipo..." onkeydown="if(event.key==='Enter')agregarTipo()">
+            <button class="btn btn-sm btn-dark" onclick="agregarTipo()">+ Agregar</button>
+          </div>
+        </div>
+      </div>
+      <div class="pass-config">
+        <h4>Contraseñas de acceso</h4>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1rem;">Edita directamente en el código las contraseñas del objeto <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;">credenciales</code> dentro del script.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLICAR -->
+  <div class="tab-panel" id="tab-publicar">
+    <div class="main" style="max-width:720px;">
+      <div class="guide-card">
+        <h3>Publica tu app gratis en GitHub Pages</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1.5rem;">GitHub Pages te da una URL pública permanente que cualquier persona puede abrir desde su celular o computadora.</p>
+        <div class="step"><div class="step-num">1</div><div class="step-body"><p><strong>Crea una cuenta en GitHub</strong><br>Ve a <a href="https://github.com" target="_blank" style="color:var(--blue);">github.com</a> y regístrate gratis.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><p><strong>Crea un repositorio nuevo</strong><br>Clic en <code>+</code> → <code>New repository</code>. Nómbralo <code>auditoria-calidad</code>, márcalo como <strong>Public</strong> y crea.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><p><strong>Sube el archivo</strong><br>En tu repositorio: <code>Add file</code> → <code>Upload files</code> → arrastra el archivo descargado → renómbralo a <code>index.html</code> → <strong>Commit changes</strong>.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><p><strong>Activa GitHub Pages</strong><br><code>Settings</code> → <code>Pages</code> → Source: <code>main</code> / <code>/ (root)</code> → <strong>Save</strong>.</p></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><p><strong>¡Listo! Tu URL será:</strong><br><code>https://TU-USUARIO.github.io/auditoria-calidad/</code></p></div></div>
+      </div>
+      <div class="guide-card">
+        <h3>Descargar archivo actualizado</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1rem;">Descarga la versión con tu configuración para subir a GitHub.</p>
+        <button class="btn btn-dark" onclick="descargarHTML()">↓ Descargar index.html</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal PDF -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-title">Formato de Auditoría</div><div class="modal-meta" id="modal-meta"></div></div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body"><div id="formato-print"></div></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-dark" onclick="imprimirFormato()">🖨 Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== PUNTOS POR TIPO =====
+const PUNTOS_POR_TIPO = {
+  'filipina manga larga':['Ubicación de etiquetas talla de 5/8" a 3/4"','Ubicación y orientación del parche emblema','Ubicación y división de la bolsa','Pespunte en el escote espalda','Pespunte en el cuello y cruce','Ubicación y orientación del ojal y botón','Terminado del ojal (100 puntadas)','Ubicación y funcionalidad del cierre','Terminado de las aberturas','Medida de las abertura (5" Caballero y 4 3/4" Dama)','Medida en bolsa (parche, vivo, etc.)','Calidad de la over (Medida del gancho)','Colocación de entretelas (cuellos, vistas, puños)','Costuras de seguridad ocultas','Colocación de broches','Colocación de traba','Colocación de elevadores','Terminado de los puños','NA','Otros'],
+  'filipina manga corta':['Ubicación de etiquetas talla de 5/8" a 3/4"','Ubicación y orientación del parche emblema','Ubicación y división de la bolsa','Pespunte en el escote espalda','Pespunte en el cuello y cruce','Ubicación y orientación del ojal y botón','Terminado del ojal (100 puntadas)','Ubicación y funcionalidad del cierre','Terminado de las aberturas','Medida de las abertura (5" Caballero y 4 3/4" Dama)','Medida en bolsa (parche, vivo, etc.)','Calidad de la over (Medida del gancho)','Colocación de entretelas (cuellos, vistas, puños)','Costuras de seguridad ocultas','Colocación de broches','Colocación de traba','Dobladillo Manga','NA','Otros'],
+  'mandil':['Consumo en dobladillos (doble doblez de 3/8")','Colocación y ubicación de etiqueta de composición','Colocación y ubicación de etiqueta emblema (bandera chef)','Medida de pespuntes','Color de hilo en armado','Color de hilo en pespuntes','Colocación de bolsas','Dobladillos de bolsas','Medida de bolsas','Colocación de ojillo','Ancho de cintas','Ubicación y funcionalidad del cierre','Colocación de remaches','Colocación de pretinas','Funcionalidad de correderas','Remates a presillas','Sobrehilado','Ubicación y funcionalidad de broches','NA','Otros'],
+  'pantalón':['Consumo en dobladillos (doble doblez de 3/8")','Colocación y ubicación de etiqueta de composición','Colocación y ubicación de etiqueta emblema','Medida de pespuntes','Color de hilo en armado','Color de hilo en pespuntes','Colocación de bolsas','Dobladillos de bolsas','Medida de bolsas','Medidas de resorte, colocación y ubicación','Ancho de cintas','Ubicación y funcionalidad del cierre','Colocación de remaches','Funcionalidad de correderas','Remates a presillas','Sobrehilado','Ubicación y funcionalidad de broches','NA','Otros']
+};
+
+function getPuntosPorTipo(tipo) {
+  if (!tipo) return [];
+  const t = tipo.toLowerCase();
+  for (const key of Object.keys(PUNTOS_POR_TIPO)) {
+    if (t.includes(key) || key.includes(t)) return PUNTOS_POR_TIPO[key];
+  }
+  return [];
+}
+
+// ===== CONFIG / AUTH =====
+const STORAGE_KEY = 'auditoria_config_v1';
+let config = { maquileros:[], tipos:[] };
+
+// Credenciales — edita aquí para cambiar contraseñas o agregar usuarios
+const CREDENCIALES = {
+  'Eloisa':          '3loi$a2026',
+  'Luis':            'lui$2026',
+  'Arely':           'arely2026',
+  'Equipo de calidad': 'calidad2024'
+};
+
+function loadConfig() {
+  try { const s=localStorage.getItem(STORAGE_KEY); if(s){const p=JSON.parse(s);config={...config,...p};} } catch(e){}
+}
+function saveConfig() { localStorage.setItem(STORAGE_KEY,JSON.stringify(config)); }
+
+function doLogin() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+
+  if (!user) { errEl.textContent='Selecciona tu nombre.'; errEl.style.display='block'; setTimeout(()=>errEl.style.display='none',2500); return; }
+
+  const now = new Date();
+  const mins = now.getHours()*60 + now.getMinutes();
+  if (mins < 8*60+30 || mins > 17*60+30) {
+    errEl.textContent='Sistema disponible de 08:30 a 17:30.'; errEl.style.display='block'; setTimeout(()=>errEl.style.display='none',4000); return;
+  }
+
+  if (CREDENCIALES[user] === pass) {
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='block';
+    document.getElementById('topbar-user').textContent=`Sesión: ${user}`;
+    sessionStorage.setItem('auth','1');
+    sessionStorage.setItem('auditorActivo',user);
+    // Pre-seleccionar auditor en encuesta
+    const audSel = document.getElementById('e-auditor');
+    for(let o of audSel.options){ if(o.value===user){o.selected=true;break;} }
+    registrarBitacora(user);
+    loadData();
+  } else {
+    errEl.textContent=`Contraseña incorrecta para ${user}.`; errEl.style.display='block'; setTimeout(()=>errEl.style.display='none',2500);
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('auth'); sessionStorage.removeItem('auditorActivo');
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-user').value='';
+}
+
+async function registrarBitacora(usuario) {
+  const LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse";
+  let ip = "No disponible";
+  try {
+    const ctrl = new AbortController();
+    setTimeout(()=>ctrl.abort(),2000);
+    const r = await fetch('https://api.ipify.org?format=json',{signal:ctrl.signal});
+    if(r.ok){const d=await r.json();ip=d.ip;}
+  } catch(e){}
+  const params = new URLSearchParams();
+  params.append("entry.2056068168", usuario);
+  params.append("entry.368415568", ip);
+  params.append("entry.1047010619", navigator.userAgent);
+  fetch(LOG_FORM_URL,{method:"POST",mode:"no-cors",body:params}).catch(()=>{});
+}
+
+// ===== TABS =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name==='encuesta') cargarSelectsEncuesta();
+}
+
+// ===== DATA =====
+const CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS0Ac4R1rHVKvGYJS1o4zV9Dy-Up_1su7FKtdcNRHvfC85DwxyCsxYz8lG8u_xsbPE_xy_Nc_DGhHnZ/pub?gid=1504659397&single=true&output=csv`;
+
+let allData=[], filtered=[], sortCol=0, sortAsc=false, C={};
+let lastEncuesta = null;
+
+function buildColumnMap(headers) {
+  const h = headers.map(x=>String(x).toLowerCase().trim());
+  function find(...terms){for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i;}return -1;}
+  C = {
+    FECHA:find('marca temporal','timestamp'), PUNT:find('puntuaci'),
+    CORTE:find('# de corte','corte'), PROG:find('programa'), MOD:find('modelo'),
+    PREV:find('cantidad de prendas revisadas','prendas revisadas'),
+    PREC:find('cantidad de piezas recibidas','piezas recibidas'),
+    AUD:find('auditor'), MAQ:find('maquilero'), TIPO:find('tipo de producto'),
+    PROM:find('promedio calificaci','promedio'),
+  };
+  const punIdx=h.reduce((a,x,i)=>x.includes('puntos importantes')?[...a,i]:a,[]);
+  const calIdx=h.reduce((a,x,i)=>x.includes('calidad general')?[...a,i]:a,[]);
+  const obsIdx=h.reduce((a,x,i)=>x.includes('observaciones generales')?[...a,i]:a,[]);
+  C.PUN1=punIdx[0]??-1; C.PUN2=punIdx[1]??-1;
+  C.CAL1=calIdx[0]??-1; C.CAL2=calIdx[1]??-1;
+  C.OBS1=obsIdx[0]??-1; C.OBS2=obsIdx[1]??-1;
+}
+
+function g(r,idx){return(idx>=0&&idx<r.length)?(r[idx]||''):'';}
+function normalize(val,list){if(!val)return val;const v=val.trim().toLowerCase();const m=list.find(x=>x.trim().toLowerCase()===v);return m||val.trim();}
+
+function parseCSV(text) {
+  const rows=[];let cur='',inQ=false,row=[];
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+    else if((ch==='\n'||ch==='\r')&&!inQ){row.push(cur.trim());rows.push(row);row=[];cur='';if(ch==='\r'&&text[i+1]==='\n')i++;}
+    else cur+=ch;
+  }
+  if(cur||row.length){row.push(cur.trim());rows.push(row);}
+  return rows;
+}
+
+function alert_(msg,type='info'){
+  const el=document.getElementById('alert-area');
+  el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  if(type!=='error')setTimeout(()=>el.innerHTML='',4000);
+}
+
+function fmtFecha(v){
+  if(!v)return'—';
+  try{const d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return v;}
+}
+
+function scoreInfo(v){
+  const n=parseFloat(v);if(isNaN(n))return{label:'—',cls:''};
+  return{label:n.toFixed(1),cls:n>=4?'dot-green':n>=3?'dot-amber':'dot-red'};
+}
+
+function tipoBadge(tipo){
+  if(!tipo)return'—';const t=tipo.toLowerCase();
+  let cls='badge-gray';
+  if(t.includes('filipina'))cls='badge-blue';
+  else if(t.includes('mandil'))cls='badge-amber';
+  else if(t.includes('pantalón')||t.includes('pantalon'))cls='badge-green';
+  return`<span class="badge ${cls}">${tipo}</span>`;
+}
+
+async function loadData(){
+  document.getElementById('refresh-btn').textContent='↻ Cargando...';
+  document.getElementById('refresh-btn').disabled=true;
+  try{
+    const res=await fetch(CSV_URL);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const txt=await res.text();
+    if(txt.trim().startsWith('<!DOCTYPE'))throw new Error('El Sheet no está publicado como CSV público.');
+    const rows=parseCSV(txt);
+    if(rows.length<2)throw new Error('Sin datos.');
+    buildColumnMap(rows[0]);
+    allData=rows.slice(1).filter(r=>r.some(c=>c)).map(r=>{
+      const copy=[...r];
+      if(C.MAQ>=0)copy[C.MAQ]=normalize(copy[C.MAQ],config.maquileros);
+      if(C.TIPO>=0)copy[C.TIPO]=normalize(copy[C.TIPO],config.tipos);
+      return copy;
+    });
+    filtered=[...allData];
+    buildStats();buildFilters();renderTable();
+    document.getElementById('stats').style.display='grid';
+    document.getElementById('controls').style.display='flex';
+    alert_(`✓ ${allData.length} registros cargados.`,'success');
+  }catch(e){
+    alert_(`Error al cargar: ${e.message}`,'error');
+  }
+  document.getElementById('refresh-btn').textContent='↻ Actualizar';
+  document.getElementById('refresh-btn').disabled=false;
+}
+
+function buildStats(){
+  document.getElementById('s-total').textContent=allData.length;
+  const proms=allData.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
+  document.getElementById('s-avg').textContent=proms.length?(proms.reduce((a,b)=>a+b,0)/proms.length).toFixed(1):'—';
+  document.getElementById('s-maq').textContent=new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean)).size;
+  const now=new Date();
+  document.getElementById('s-mes').textContent=allData.filter(r=>{const d=new Date(g(r,C.FECHA));return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+}
+
+function buildFilters(){
+  const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const tipos=config.tipos.length?config.tipos:[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  const mSel=document.getElementById('filter-maq');
+  mSel.innerHTML='<option value="">Todos los maquileros</option>';
+  maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
+  const tSel=document.getElementById('filter-tipo');
+  tSel.innerHTML='<option value="">Todos los productos</option>';
+  tipos.forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
+}
+
+function filterData(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const maq=document.getElementById('filter-maq').value;
+  const tipo=document.getElementById('filter-tipo').value;
+  filtered=allData.filter(r=>{
+    const qOk=!q||[g(r,C.CORTE),g(r,C.MAQ),g(r,C.MOD),g(r,C.PROG),g(r,C.TIPO)].some(v=>String(v).toLowerCase().includes(q));
+    return qOk&&(!maq||g(r,C.MAQ)===maq)&&(!tipo||g(r,C.TIPO)===tipo);
+  });
+  renderTable();
+}
+
+function sortBy(col){
+  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
+  filtered.sort((a,b)=>{const av=a[col]||'',bv=b[col]||'';const an=parseFloat(av),bn=parseFloat(bv);if(!isNaN(an)&&!isNaN(bn))return sortAsc?an-bn:bn-an;return sortAsc?av.localeCompare(bv):bv.localeCompare(av);});
+  renderTable();
+}
+
+function renderTable(){
+  document.getElementById('count-label').textContent=`${filtered.length} / ${allData.length} registros`;
+  if(!filtered.length){document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="empty-state"><div class="empty-icon">∅</div><p>No hay registros.</p></div></div>`;return;}
+  const regs=[...filtered].reverse();
+  const colKeys=[C.FECHA,C.CORTE,C.PROG,C.MOD,C.TIPO,C.MAQ,C.PREV,C.PREC,C.PROM,-1];
+  const labels=['Fecha','# Corte','Programa','Modelo','Tipo','Maquilero','Rev.','Rec.','Calif.',''];
+  const ths=labels.map((l,i)=>colKeys[i]>=0?`<th onclick="sortBy(${colKeys[i]})">${l} ${sortCol===colKeys[i]?(sortAsc?'↑':'↓'):''}</th>`:`<th></th>`).join('');
+  const trs=regs.map(r=>{
+    const si=scoreInfo(g(r,C.PROM));
+    const idx=allData.indexOf(r);
+    return`<tr>
+      <td class="mono" style="font-size:11px;">${fmtFecha(g(r,C.FECHA))}</td>
+      <td><strong class="mono">${g(r,C.CORTE)||'—'}</strong></td>
+      <td>${g(r,C.PROG)||'—'}</td>
+      <td>${g(r,C.MOD)||'—'}</td>
+      <td>${tipoBadge(g(r,C.TIPO))}</td>
+      <td>${g(r,C.MAQ)||'—'}</td>
+      <td class="mono">${g(r,C.PREV)||'—'}</td>
+      <td class="mono">${g(r,C.PREC)||'—'}</td>
+      <td><span class="score-dot"><span class="dot ${si.cls}"></span>${si.label}</span></td>
+      <td><button class="btn btn-sm btn-dark" onclick="abrirFormato(${idx})">Ver PDF</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="table-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div></div>`;
+}
+
+// ===== FORMATO PDF (función central compartida) =====
+function generarHTMLFormato(datos) {
+  // datos puede venir de allData (Sheet) o de lastEncuesta (encuesta local)
+  const {corte,programa,modelo,fecha,prev,prec,auditor,maquilero,tipo,cal,promedio,puntos,obs} = datos;
+
+  const prevVal=parseFloat(prev), precVal=parseFloat(prec);
+  const pct=(!isNaN(prevVal)&&!isNaN(precVal)&&precVal>0)?Math.round(prevVal/precVal*100)+'%':'—';
+
+  const mitad=Math.ceil(puntos.length/2);
+  const col1=puntos.slice(0,mitad), col2=puntos.slice(mitad);
+  const maxR=Math.max(col1.length,col2.length,1);
+  let puntosRows='';
+  for(let i=0;i<maxR;i++){
+    puntosRows+=`<tr><td class="puntos-cel">${col1[i]?'• '+col1[i]:''}</td><td class="puntos-cel">${col2[i]?'• '+col2[i]:''}</td></tr>`;
+  }
+
+  const calStr = cal ? `${cal} / 5` : '—';
+  const promStr = promedio ? `Prom: ${promedio}` : '';
+
+  return `<table>
+    <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
+    <tr>
+      <td class="lbl">CORTE:</td><td class="val">${corte||''}</td>
+      <td class="lbl">PROGRAMA:</td><td class="val">${programa||''}</td>
+      <td class="lbl">MODELO:</td><td class="val">${modelo||''}</td>
+      <td class="lbl">FECHA:</td><td class="val">${fecha||''}</td>
+    </tr>
+    <tr>
+      <td class="lbl">PRENDAS REVISADAS</td><td class="val">${prev||''}</td>
+      <td class="lbl">PRENDAS RECIBIDAS</td><td class="val">${prec||''}</td>
+      <td class="lbl">%</td><td class="val">${pct}</td>
+      <td class="lbl">CALIFICACIÓN</td><td class="val">${calStr}${promStr?' · '+promStr:''}</td>
+    </tr>
+    <tr>
+      <td class="lbl">REVISA:</td><td class="val">${auditor||''}</td>
+      <td class="lbl">MAQUILERO</td><td class="val" colspan="5">${maquilero||''}</td>
+    </tr>
+    <tr>
+      <td class="lbl">TIPO DE PRODUCTO:</td><td class="val" colspan="7">${tipo||''}</td>
+    </tr>
+    <tr><td colspan="8" class="sec">PUNTOS IMPORTANTES DE REVISIÓN</td></tr>
+    ${puntos.length
+      ? `<tr><td colspan="4" class="sec-sub">—</td><td colspan="4" class="sec-sub">—</td></tr>${puntosRows}`
+      : '<tr><td colspan="8" style="padding:8px;font-size:11px;color:#666;">Sin puntos registrados</td></tr>'}
+    <tr><td colspan="8" class="sec">OBSERVACIONES GENERALES</td></tr>
+    <tr><td colspan="8" class="obs">${obs||'—'}</td></tr>
+  </table>`;
+}
+
+// Abre formato desde tabla (Sheet)
+function abrirFormato(idx) {
+  try {
+    const r = allData[idx];
+    const prom = parseFloat(g(r,C.PROM));
+    function puntosALista(v){return v?v.split(',').map(p=>p.trim()).filter(Boolean):[];}
+    const datos = {
+      corte:    g(r,C.CORTE),
+      programa: g(r,C.PROG),
+      modelo:   g(r,C.MOD),
+      fecha:    fmtFecha(g(r,C.FECHA)),
+      prev:     g(r,C.PREV),
+      prec:     g(r,C.PREC),
+      auditor:  g(r,C.AUD),
+      maquilero:g(r,C.MAQ),
+      tipo:     g(r,C.TIPO),
+      cal:      g(r,C.CAL1)||g(r,C.CAL2),
+      promedio: isNaN(prom)?'':prom.toFixed(1),
+      puntos:   [...puntosALista(g(r,C.PUN1)),...puntosALista(g(r,C.PUN2))],
+      obs:      [g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')
+    };
+    document.getElementById('modal-meta').textContent=`Corte ${datos.corte||'—'} · ${datos.fecha}`;
+    document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
+    document.getElementById('overlay').classList.add('open');
+  } catch(e){ console.error('Error al abrir formato:',e); }
+}
+
+// Abre formato desde encuesta local
+function verFormatoLocal() {
+  if (!lastEncuesta) return;
+  const e = lastEncuesta;
+  const datos = {
+    corte:    e.corte,
+    programa: e.programa,
+    modelo:   e.modelo,
+    fecha:    e.fecha.toLocaleString('es-MX'),
+    prev:     e.prev,
+    prec:     e.prec,
+    auditor:  e.auditor,
+    maquilero:e.maquilero,
+    tipo:     e.tipo,
+    cal:      e.cal||'',
+    promedio: '',
+    puntos:   e.puntos||[],
+    obs:      e.obs||''
+  };
+  document.getElementById('modal-meta').textContent=`Corte ${datos.corte} · ${datos.fecha}`;
+  document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+
+function imprimirFormato() {
+  const contenido = document.getElementById('formato-print').innerHTML;
+  let frame = document.getElementById('print-frame');
+  if (!frame) {
+    frame = document.createElement('iframe');
+    frame.id = 'print-frame';
+    frame.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';
+    document.body.appendChild(frame);
+  }
+  const doc = frame.contentWindow.document;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}
+    table{width:100%;border-collapse:collapse;}
+    td{border:1px solid #555;padding:5px 8px;}
+    .f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}
+    .lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}
+    .val{background:#fff;color:#000;}
+    .sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}
+    .sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}
+    .obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}
+    .puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}
+    @page{margin:15mm;}
+  </style>
+  </head><body>${contenido}</body></html>`);
+  doc.close();
+  setTimeout(()=>{ frame.contentWindow.focus(); frame.contentWindow.print(); }, 300);
+}
+
+// ===== ENCUESTA =====
+function cargarSelectsEncuesta(){
+  const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const mSel=document.getElementById('e-maquilero');
+  mSel.innerHTML='<option value="">Selecciona...</option>';
+  maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
+  const tSel=document.getElementById('e-tipo');
+  tSel.innerHTML='<option value="">Selecciona...</option>';
+  Object.keys(PUNTOS_POR_TIPO).forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
+  // Pre-seleccionar auditor activo
+  const auditorActivo = sessionStorage.getItem('auditorActivo');
+  if (auditorActivo) {
+    const audSel=document.getElementById('e-auditor');
+    for(let o of audSel.options){if(o.value===auditorActivo){o.selected=true;break;}}
+  }
+}
+
+function actualizarPuntos(){
+  const tipo=document.getElementById('e-tipo').value;
+  const puntos=getPuntosPorTipo(tipo);
+  const card=document.getElementById('enc-puntos-card');
+  const lista=document.getElementById('enc-puntos-lista');
+  const tit=document.getElementById('enc-puntos-titulo');
+  if(!puntos.length){card.style.display='none';return;}
+  tit.textContent=`Puntos de revisión — ${tipo}`;
+  lista.innerHTML=puntos.map((p,i)=>`
+    <label class="check-item" id="ci-${i}" onclick="toggleCheck(${i})">
+      <input type="checkbox" id="chk-${i}">
+      <span>${p}</span>
+    </label>`).join('');
+  card.style.display='block';
+}
+
+function toggleCheck(i){
+  const item=document.getElementById(`ci-${i}`);
+  const chk=document.getElementById(`chk-${i}`);
+  item.classList.toggle('checked');
+  chk.checked=item.classList.contains('checked');
+}
+
+function limpiarEncuesta(){
+  ['e-corte','e-programa','e-modelo','e-prev','e-prec','e-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('e-maquilero').value='';
+  document.getElementById('e-tipo').value='';
+  document.querySelectorAll('input[name="cal"]').forEach(r=>r.checked=false);
+  document.getElementById('enc-puntos-card').style.display='none';
+}
+
+function enviarEncuesta(){
+  const corte=document.getElementById('e-corte').value.trim();
+  const programa=document.getElementById('e-programa').value.trim();
+  const modelo=document.getElementById('e-modelo').value.trim();
+  const prev=document.getElementById('e-prev').value.trim();
+  const prec=document.getElementById('e-prec').value.trim();
+  const auditor=document.getElementById('e-auditor').value;
+  const maquilero=document.getElementById('e-maquilero').value;
+  const tipo=document.getElementById('e-tipo').value;
+  const cal=document.querySelector('input[name="cal"]:checked')?.value||'';
+  const obs=document.getElementById('e-obs').value.trim();
+
+  if(!corte||!programa||!modelo||!prev||!prec||!auditor||!maquilero||!tipo||!cal){
+    alert('Por favor completa todos los campos obligatorios (*).');return;
+  }
+
+  const puntosSeleccionados=[];
+  document.querySelectorAll('.check-item.checked span').forEach(s=>puntosSeleccionados.push(s.textContent));
+
+  lastEncuesta={corte,programa,modelo,prev,prec,auditor,maquilero,tipo,cal,obs,puntos:puntosSeleccionados,fecha:new Date()};
+
+  window.open('https://docs.google.com/forms/d/185WTdHxLaeQ2Zw57S-EQno-SLSRVC-ILvcA2xMs7iTk/viewform','_blank');
+  document.getElementById('enc-form-wrap').style.display='none';
+  document.getElementById('enc-success').style.display='block';
+}
+
+function nuevaEncuesta(){
+  limpiarEncuesta();
+  document.getElementById('enc-form-wrap').style.display='block';
+  document.getElementById('enc-success').style.display='none';
+}
+
+// ===== CONFIG =====
+function renderConfigLists(){
+  const maqList=document.getElementById('maq-list');
+  const tipoList=document.getElementById('tipo-list');
+  maqList.innerHTML=config.maquileros.length
+    ?config.maquileros.map((m,i)=>itemHTML(m,i,'maq')).join('')
+    :'<div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin maquileros — importa del Sheet</div>';
+  tipoList.innerHTML=config.tipos.length
+    ?config.tipos.map((t,i)=>itemHTML(t,i,'tipo')).join('')
+    :'<div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin tipos — importa del Sheet</div>';
+  document.getElementById('maq-count').textContent=config.maquileros.length;
+  document.getElementById('tipo-count').textContent=config.tipos.length;
+}
+
+function itemHTML(name,idx,type){
+  return`<div class="config-item" id="${type}-item-${idx}">
+    <span class="config-item-name" id="${type}-name-${idx}">${name}</span>
+    <div class="config-item-actions">
+      <button class="icon-btn" onclick="editarItem('${type}',${idx})">✎</button>
+      <button class="icon-btn del" onclick="eliminarItem('${type}',${idx})">✕</button>
+    </div>
+  </div>`;
+}
+
+function editarItem(type,idx){
+  const span=document.getElementById(`${type}-name-${idx}`);
+  const cur=span.textContent;
+  span.innerHTML=`<input class="edit-inline" value="${cur}" onblur="guardarEdicion('${type}',${idx},this)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value='${cur}';this.blur()}">`;
+  span.querySelector('input').focus();
+}
+
+function guardarEdicion(type,idx,input){
+  const v=input.value.trim();if(!v){renderConfigLists();return;}
+  if(type==='maq')config.maquileros[idx]=v;else config.tipos[idx]=v;
+  renderConfigLists();
+}
+
+function eliminarItem(type,idx){
+  if(type==='maq')config.maquileros.splice(idx,1);else config.tipos.splice(idx,1);
+  renderConfigLists();
+}
+
+function agregarMaquilero(){
+  const inp=document.getElementById('new-maq');const v=inp.value.trim();if(!v)return;
+  if(!config.maquileros.find(m=>m.toLowerCase()===v.toLowerCase())){config.maquileros.push(v);renderConfigLists();}
+  inp.value='';
+}
+
+function agregarTipo(){
+  const inp=document.getElementById('new-tipo');const v=inp.value.trim();if(!v)return;
+  if(!config.tipos.find(t=>t.toLowerCase()===v.toLowerCase())){config.tipos.push(v);renderConfigLists();}
+  inp.value='';
+}
+
+function guardarConfig(){
+  saveConfig();
+  const el=document.getElementById('config-saved');
+  el.style.display='inline';setTimeout(()=>el.style.display='none',2500);
+  if(allData.length){buildFilters();filterData();}
+}
+
+function importarDelSheet(){
+  if(!allData.length){alert('Primero carga los datos del Sheet desde la pestaña Registros.');return;}
+  const rawMaqs=[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
+  const rawTipos=[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  let added=0;
+  rawMaqs.forEach(m=>{if(!config.maquileros.find(x=>x.toLowerCase()===m.toLowerCase())){config.maquileros.push(m);added++;}});
+  rawTipos.forEach(t=>{if(!config.tipos.find(x=>x.toLowerCase()===t.toLowerCase())){config.tipos.push(t);added++;}});
+  renderConfigLists();
+  const b=document.getElementById('detected-banner');
+  b.textContent=`Se importaron ${added} valores nuevos. Edita para unificar variantes (ej: "rafael" → "Rafael").`;
+  b.style.display='block';
+}
+
+function descargarHTML(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();
+}
+
+// ===== INIT =====
+loadConfig();
+renderConfigLists();
+if(sessionStorage.getItem('auth')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-shell').style.display='block';
+  const u=sessionStorage.getItem('auditorActivo');
+  if(u)document.getElementById('topbar-user').textContent=`Sesión: ${u}`;
+  loadData();
+}
+</script>
+</body>
+</html>
