@@ -558,17 +558,37 @@ function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-pass').value = '';
 }
-// NUEVA FUNCIÓN: Envío silencioso de bitácora
-function registrarBitacora(usuario) {
-  const LOG_FORM_URL = "https://docs.google.com/forms/d/e/AQUI_TU_NUEVO_FORM/formResponse";
-  const params = new URLSearchParams();
-  params.append("entry.000000000", usuario); 
+// NUEVA FUNCIÓN: Envío silencioso de bitácora con IP y Dispositivo
+async function registrarBitacora(usuario) {
+    // 1. URL de tu formulario de Bitácora
+    const LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse";
+    
+    const params = new URLSearchParams();
+    
+    // 2. Obtenemos el dispositivo (Ej: iPhone, Android, Windows)
+    const dispositivo = navigator.userAgent;
+    
+    // 3. Obtenemos la IP pública
+    let ipUsuario = "Desconocida";
+    try {
+        const respuestaIP = await fetch('https://api.ipify.org?format=json');
+        const datosIP = await respuestaIP.json();
+        ipUsuario = datosIP.ip;
+    } catch (error) {
+        console.log("Modo offline o bloqueador de red activo");
+    }
 
-  fetch(LOG_FORM_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: params
-  }).catch(e => console.log("Registro local"));
+    // 4. Asignamos los datos a tus IDs exactos
+    params.append("entry.2056068168", usuario);      // Campo: Usuario
+    params.append("entry.368415568", ipUsuario);     // Campo: IP
+    params.append("entry.1047010619", dispositivo);  // Campo: Dispositivo
+
+    // 5. Enviamos los datos en silencio
+    fetch(LOG_FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: params
+    }).catch(e => console.log("Registro local"));
 }
 
 // =================== TABS ===================
