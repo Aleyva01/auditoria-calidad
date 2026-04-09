@@ -813,67 +813,6 @@ function renderTable() {
     container.innerHTML = html;
 }
 
-    html += `</tbody></table></div></div>`;
-    container.innerHTML = html;
-}
-
-    document.getElementById('count-label').textContent = `${filtered.length} registros`;
-
-    // 1. Invertimos visualmente el arreglo para que el MÁS NUEVO aparezca arriba
-    const registrosMostrar = [...filtered].reverse();
-
-    // 2. Construimos la estructura de la tabla y los encabezados
-    let html = `
-    <div class="table-card">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th onclick="sortBy(C.FECHA)">Fecha ↕</th>
-                        <th onclick="sortBy(C.CORTE)"># Corte ↕</th>
-                        <th onclick="sortBy(C.PROG)">Programa ↕</th>
-                        <th onclick="sortBy(C.MOD)">Modelo ↕</th>
-                        <th onclick="sortBy(C.TIPO)">Tipo ↕</th>
-                        <th onclick="sortBy(C.MAQ)">Maquilero ↕</th>
-                        <th onclick="sortBy(C.PREV)">Rev. ↕</th>
-                        <th onclick="sortBy(C.PREC)">Rec. ↕</th>
-                        <th onclick="sortBy(C.PROM)">Calif. ↕</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    // 3. Llenamos las filas con los datos del Excel
-    registrosMostrar.forEach((r) => {
-        // Necesitamos el índice original para que el botón "Ver PDF" abra el formato correcto
-        const originalIndex = allData.indexOf(r);
-        const score = scoreInfo(g(r, C.PROM));
-
-        html += `
-            <tr>
-                <td>${fmtFecha(g(r, C.FECHA))}</td>
-                <td class="mono"><strong>${g(r, C.CORTE)}</strong></td>
-                <td>${g(r, C.PROG)}</td>
-                <td>${g(r, C.MOD)}</td>
-                <td>${tipoBadge(g(r, C.TIPO))}</td>
-                <td>${g(r, C.MAQ)}</td>
-                <td>${g(r, C.PREV)}</td>
-                <td>${g(r, C.PREC)}</td>
-                <td><span class="score-dot"><span class="dot ${score.cls}"></span>${score.label}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-dark" onclick="abrirFormato(${originalIndex})">Ver PDF</button>
-                </td>
-            </tr>
-        `;
-    });
-
-    html += `</tbody></table></div></div>`;
-    
-    // 4. Inyectamos la tabla completa en el HTML
-    container.innerHTML = html;
-}
-
 // ASEGURAR CARGA: Esto obliga a que la tabla se renderice...
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tableBody')) { renderTable(); }
