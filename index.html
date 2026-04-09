@@ -558,37 +558,82 @@ function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-pass').value = '';
 }
-// NUEVA FUNCIÓN: Envío silencioso de bitácora con IP y Dispositivo
+// NUEVA FUNCIÓN: Envío silencioso de bitácora (Versión Blindada)
 async function registrarBitacora(usuario) {
-    // 1. URL de tu formulario de Bitácora
-    const LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse";
-    
-    const params = new URLSearchParams();
-    
-    // 2. Obtenemos el dispositivo (Ej: iPhone, Android, Windows)
-    const dispositivo = navigator.userAgent;
-    
-    // 3. Obtenemos la IP pública
-    let ipUsuario = "Desconocida";
     try {
-        const respuestaIP = await fetch('https://api.ipify.org?format=json');
-        const datosIP = await respuestaIP.json();
-        ipUsuario = datosIP.ip;
-    } catch (error) {
-        console.log("Modo offline o bloqueador de red activo");
+        const LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse";
+        const params = new URLSearchParams();
+        const dispositivo = navigator.userAgent;
+        
+        let ipUsuario = "Desconocida";
+        
+        // Intentamos obtener la IP, pero si falla, continuamos para no romper el login
+        try {
+            const respuestaIP = await fetch('https://api.ipify.org?format=json');
+            if (respuestaIP.ok) {
+                const datosIP = await respuestaIP.json();
+                ipUsuario = datosIP.ip;
+            }
+        } catch (e) { console.log("IP no disponible"); }
+
+        params.append("entry.2056068168", usuario);
+        params.append("entry.368415568", ipUsuario);
+        params.append("entry.1047010619", dispositivo);
+
+        fetch(LOG_FORM_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: params
+        });
+    } catch (err) {
+        console.error("Error en bitácora, pero el sistema sigue vivo:", err);
+    }
+}
+
+// =================== FORMATO (desde tabla) ===================
+function abrirFormato(idx) {
+    // Validamos que los datos existan antes de procesar
+    if (!allData || !allData[idx]) {
+        alert("Error: No se pudieron cargar los datos del registro.");
+        return;
     }
 
-    // 4. Asignamos los datos a tus IDs exactos
-    params.append("entry.2056068168", usuario);      // Campo: Usuario
-    params.append("entry.368415568", ipUsuario);     // Campo: IP
-    params.append("entry.1047010619", dispositivo);  // Campo: Dispositivo
+    const r = allData[idx];
+    const prom = parseFloat(g(r, C.PROM));
+    const promStr = isNaN(prom) ? '—' : prom.toFixed(1);
+    const prevVal = C.PREV >= 0 ? parseFloat(g(r, C.PREV)) : NaN;
+    const precVal = C.PREC >= 0 ? parseFloat(g(r, C.PREC)) : NaN;
+    const pct = (!isNaN(prevVal) && !isNaN(precVal) && precVal > 0) ? Math.round(prevVal / precVal * 100) + '%' : '—';
+    const cal = g(r, C.CAL1) || g(r, C.CAL2) || '—';
 
-    // 5. Enviamos los datos en silencio
-    fetch(LOG_FORM_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: params
-    }).catch(e => console.log("Registro local"));
+    function puntosALista(v) { return v ? v.split(',').map(p => p.trim()).filter(Boolean) : []; }
+    const todos = [...puntosALista(g(r, C.PUN1)), ...puntosALista(g(r, C.PUN2))];
+    const mitad = Math.ceil(todos.length / 2);
+    const col1 = todos.slice(0, mitad), col2 = todos.slice(mitad);
+    const maxR = Math.max(col1.length, col2.length);
+    
+    let puntosRows = '';
+    for (let i = 0; i < maxR; i++) {
+        puntosRows += `<tr><td class="puntos-cel">${col1[i] ? '• ' + col1[i] : ''}</td><td class="puntos-cel">${col2[i] ? '• ' + col2[i] : ''}</td></tr>`;
+    }
+
+    const obs = [g(r, C.OBS1), g(r, C.OBS2)].filter(Boolean).join('\n\n') || '—';
+
+    document.getElementById('modal-meta').textContent = `Corte ${g(r, C.CORTE) || '—'} · ${fmtFecha(g(r, C.FECHA))}`;
+    document.getElementById('formato-print').innerHTML = `
+        <table>
+          <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
+          <tr><td class="lbl">CORTE:</td><td class="val">${g(r, C.CORTE)}</td><td class="lbl">PROGRAMA:</td><td class="val">${g(r, C.PROG)}</td><td class="lbl">MODELO:</td><td class="val">${g(r, C.MOD)}</td><td class="lbl">FECHA Y HORA:</td><td class="val">${fmtFecha(g(r, C.FECHA))}</td></tr>
+          <tr><td class="lbl">PRENDAS REVISADAS</td><td class="val">${g(r, C.PREV)}</td><td class="lbl">PRENDAS RECIBIDAS</td><td class="val">${g(r, C.PREC)}</td><td class="lbl">%</td><td class="val">${pct}</td><td class="lbl">CALIFICACIÓN</td><td class="val">${cal} / 5 · Prom: ${promStr}</td></tr>
+          <tr><td class="lbl">REVISA:</td><td class="val">${g(r, C.AUD)}</td><td class="lbl">MAQUILERO</td><td class="val" colspan="5">${g(r, C.MAQ)}</td></tr>
+          <tr><td class="lbl">TIPO DE PRODUCTO:</td><td class="val" colspan="7">${g(r, C.TIPO)}</td></tr>
+          <tr><td colspan="8" class="sec">PUNTOS IMPORTANTES DE REVISIÓN</td></tr>
+          ${todos.length ? `<tr><td colspan="4" class="sec-sub">—</td><td colspan="4" class="sec-sub">—</td></tr>${puntosRows}` : '<tr><td colspan="8" style="padding:8px;font-size:11px;color:#666;">Sin puntos registrados</td></tr>'}
+          <tr><td colspan="8" class="sec">OBSERVACIONES GENERALES</td></tr>
+          <tr><td colspan="8" class="obs">${obs}</td></tr>
+        </table>`;
+    
+    document.getElementById('overlay').classList.add('open');
 }
 
 // =================== TABS ===================
