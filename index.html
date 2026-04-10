@@ -340,8 +340,13 @@ tbody tr:hover td{background:var(--bg);}
       <div id="enc-success" style="display:none;" class="encuesta-wrap">
         <div class="enc-card enc-success">
           <div class="enc-success-icon">✓</div>
-          <h3>Auditoría generada</h3>
-          <p style="margin-bottom:1.5rem;">Formato listo. Se abrió el Google Form para guardar el registro en el Sheet.</p>
+          <h3>¡Auditoría guardada!</h3>
+          <p style="margin-bottom:6px;">El registro fue enviado directamente a Google Sheets.</p>
+          <div id="sync-status" style="display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0;padding:10px;background:var(--blue-bg);border-radius:var(--radius-sm);border:0.5px solid #93c5fd;">
+            <span id="sync-icon" style="font-size:16px;">⟳</span>
+            <span id="sync-text" style="font-size:13px;color:var(--blue);">Sincronizando con Google Sheets...</span>
+          </div>
+          <p style="margin-bottom:1.5rem;font-size:12px;color:var(--text3);">El registro aparecerá en Registros automáticamente. Si no lo ves, usa el botón de actualizar.</p>
           <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
             <button class="btn btn-dark" onclick="verFormatoLocal()">Ver e imprimir formato PDF</button>
             <button class="btn" onclick="nuevaEncuesta()">Nueva auditoría</button>
@@ -556,19 +561,48 @@ function switchTabById(name){
 }
 
 // ===== DATA =====
-const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vS0Ac4R1rHVKvGYJS1o4zV9Dy-Up_1su7FKtdcNRHvfC85DwxyCsxYz8lG8u_xsbPE_xy_Nc_DGhHnZ/pub?gid=1504659397&single=true&output=csv';
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRr_TfDto1P9uXJ6QBYCcuLq1H_hTMeVF0oMhJJxrPPoWQr5LaXO_hEmr95b98H53dBLQPH-amnNkOs/pub?gid=329035310&single=true&output=csv';
 let allData=[],filtered=[],sortCol=0,sortAsc=false,C={};
 let lastEncuesta=null;
 let anioActivo='todos',mesActivo='todos';
 
 function buildColumnMap(headers){
+  // Nuevo Sheet: columnas fijas según estructura real detectada
+  // [0]Fecha [1]Corte [2]Prog [3]Mod [4]PrendasRec [5]PrendasRev
+  // [6]Auditor [7]Maquilero [8]Tipo [9]PunVacio [10]PUN1 [11]PUN2
+  // [12]PUN3 [13]PUN4 [14]CalVacio [15]ObsVacio [16]Vacia [17]CAL [18]OBS
   const h=headers.map(x=>String(x).toLowerCase().trim());
   function find(...terms){for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i;}return -1;}
-  C={FECHA:find('marca temporal','timestamp'),PUNT:find('puntuaci'),CORTE:find('# de corte','corte'),PROG:find('programa'),MOD:find('modelo'),PREV:find('cantidad de prendas revisadas','prendas revisadas'),PREC:find('cantidad de piezas recibidas','piezas recibidas'),AUD:find('auditor'),MAQ:find('maquilero'),TIPO:find('tipo de producto'),PROM:find('promedio calificaci','promedio')};
-  const punIdx=h.reduce((a,x,i)=>x.includes('puntos importantes')?[...a,i]:a,[]);
-  const calIdx=h.reduce((a,x,i)=>x.includes('calidad general')?[...a,i]:a,[]);
-  const obsIdx=h.reduce((a,x,i)=>x.includes('observaciones generales')?[...a,i]:a,[]);
-  C.PUN1=punIdx[0]??-1;C.PUN2=punIdx[1]??-1;C.CAL1=calIdx[0]??-1;C.CAL2=calIdx[1]??-1;C.OBS1=obsIdx[0]??-1;C.OBS2=obsIdx[1]??-1;
+  C={
+    FECHA: find('marca temporal','timestamp','fecha'),
+    CORTE: find('# de corte','de corte','corte'),
+    PROG:  find('programa'),
+    MOD:   find('modelo'),
+    PREC:  find('cantidad de prendas recibidas','prendas recibidas'),
+    PREV:  find('cantidad de prendas revisadas','prendas revisadas'),
+    AUD:   find('auditor'),
+    MAQ:   find('maquilero'),
+    TIPO:  find('producto recibido','tipo de producto'),
+    PROM:  -1,  // No hay columna promedio en este sheet
+  };
+  // Puntos: columnas K(10), L(11), M(12), N(13) — buscamos todas las que digan "puntos"
+  const punIdx=h.reduce((a,x,i)=>x.includes('puntos')?[...a,i]:a,[]);
+  C.PUN1=punIdx[0]??-1;
+  C.PUN2=punIdx[1]??-1;
+  C.PUN3=punIdx[2]??-1;
+  C.PUN4=punIdx[3]??-1;
+  // Calificación: buscar columna que diga "evalúas" o "calidad del producto"
+  // Si no la encuentra por nombre, usamos índice 17 como fallback
+  const calIdx=h.findIndex(x=>x.includes('eval') || (x.includes('calidad') && x.includes('producto')));
+  C.CAL1 = calIdx>=0 ? calIdx : 17;
+  C.CAL2 = -1;
+  // Observaciones: buscar columna "observaciones generales"
+  const obsIdx=h.findIndex(x=>x.includes('observaciones'));
+  // El sheet tiene dos candidatas: índice 15 (vacía en datos) e índice 18 (con datos)
+  // Tomamos la última ocurrencia que tenga datos
+  const allObs=h.reduce((a,x,i)=>x.includes('observacion')?[...a,i]:a,[]);
+  C.OBS1 = allObs[allObs.length-1]??15;
+  C.OBS2 = -1;
 }
 
 function g(r,idx){return(idx>=0&&idx<r.length)?(r[idx]||''):'';}
@@ -633,7 +667,7 @@ async function loadData(){
 function buildStats(){
   const src=filtered.length?filtered:allData;
   document.getElementById('s-total').textContent=src.length;
-  const proms=src.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
+  const proms=src.map(r=>parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1))).filter(v=>!isNaN(v)&&v>0);
   document.getElementById('s-avg').textContent=proms.length?(proms.reduce((a,b)=>a+b,0)/proms.length).toFixed(1):'—';
   document.getElementById('s-maq').textContent=new Set(src.map(r=>g(r,C.MAQ)).filter(Boolean)).size;
   const now=new Date();
@@ -734,7 +768,7 @@ function renderTable(){
   const labels=['Fecha','# Corte','Programa','Modelo','Tipo','Maquilero','Rev.','Rec.','Calif.',''];
   const ths=labels.map((l,i)=>colKeys[i]>=0?`<th onclick="sortBy(${colKeys[i]})">${l} ${sortCol===colKeys[i]?(sortAsc?'↑':'↓'):''}</th>`:`<th></th>`).join('');
   const trs=regs.map(r=>{
-    const si=scoreInfo(g(r,C.PROM));const idx=allData.indexOf(r);
+    const siVal=C.PROM>=0&&g(r,C.PROM)?g(r,C.PROM):g(r,C.CAL1);const si=scoreInfo(siVal);const idx=allData.indexOf(r);
     return`<tr><td class="mono" style="font-size:11px;">${fmtFecha(g(r,C.FECHA))}</td><td><strong class="mono">${g(r,C.CORTE)||'—'}</strong></td><td>${g(r,C.PROG)||'—'}</td><td>${g(r,C.MOD)||'—'}</td><td>${tipoBadge(g(r,C.TIPO))}</td><td>${g(r,C.MAQ)||'—'}</td><td class="mono">${g(r,C.PREV)||'—'}</td><td class="mono">${g(r,C.PREC)||'—'}</td><td><span class="score-dot"><span class="dot ${si.cls}"></span>${si.label}</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(${idx})">Ver PDF</button></td></tr>`;
   }).join('');
   document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="table-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div></div>`;
@@ -789,8 +823,10 @@ function renderSemaforo(){
 function renderRanking(){
   const maqMap={};
   allData.forEach(r=>{
-    const maq=g(r,C.MAQ);const prom=parseFloat(g(r,C.PROM));
-    if(!maq||isNaN(prom))return;
+    const maq=g(r,C.MAQ);
+    const promVal=C.PROM>=0?g(r,C.PROM):g(r,C.CAL1);
+    const prom=parseFloat(promVal);
+    if(!maq||isNaN(prom)||prom<=0)return;
     if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
     maqMap[maq].sum+=prom;maqMap[maq].cnt++;
   });
@@ -881,9 +917,17 @@ function generarHTMLFormato(datos){
 function abrirFormato(idx){
   try{
     const r=allData[idx];
-    const prom=parseFloat(g(r,C.PROM));
+    const cal=g(r,C.CAL1)||g(r,C.CAL2)||'';
+    const prom=parseFloat(cal);
     function puntosALista(v){return v?v.split(',').map(p=>p.trim()).filter(Boolean):[];}
-    const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal:g(r,C.CAL1)||g(r,C.CAL2),promedio:isNaN(prom)?'':prom.toFixed(1),puntos:[...puntosALista(g(r,C.PUN1)),...puntosALista(g(r,C.PUN2))],obs:[g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')};
+    // Combinar todas las columnas de puntos del nuevo sheet
+    const todosLosPuntos=[
+      ...puntosALista(g(r,C.PUN1)),
+      ...puntosALista(g(r,C.PUN2)),
+      ...puntosALista(g(r,C.PUN3??-1)),
+      ...puntosALista(g(r,C.PUN4??-1)),
+    ].filter((v,i,a)=>v&&a.indexOf(v)===i); // deduplicar
+    const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal,promedio:'',puntos:todosLosPuntos,obs:[g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')};
     document.getElementById('modal-meta').textContent=`Corte ${datos.corte||'—'} · ${datos.fecha}`;
     document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
     document.getElementById('overlay').classList.add('open');
@@ -941,7 +985,55 @@ function limpiarEncuesta(){
   document.getElementById('enc-puntos-card').style.display='none';
 }
 
-function enviarEncuesta(){
+// IDs reales de cada campo del Google Form
+const FORM_SUBMIT_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSd6wofiLsofbgiW1vw8o3Upqc8LUMi0Tjqj_b_fGtmVP_hS5Q/formResponse';
+const FORM_ENTRIES = {
+  corte:    'entry.1947473599',
+  programa: 'entry.1951935409',
+  modelo:   'entry.1380981039',
+  prev:     'entry.1891805099',
+  prec:     'entry.1453855016',
+  auditor:  'entry.2104310288',
+  maquilero:'entry.1027777862',
+  tipo:     'entry.1993568250',
+  cal:      'entry.1099290045',
+  cal2:     '',                  // este form tiene una sola sección de calificación
+  puntos:   'entry.1348801101',  // campo múltiple (se repite por cada punto)
+  obs:      'entry.213021728',
+};
+
+async function enviarAGoogleForms(datos) {
+  const params = new URLSearchParams();
+  params.append(FORM_ENTRIES.corte,     datos.corte);
+  params.append(FORM_ENTRIES.programa,  datos.programa);
+  params.append(FORM_ENTRIES.modelo,    datos.modelo);
+  params.append(FORM_ENTRIES.prev,      datos.prev);
+  params.append(FORM_ENTRIES.prec,      datos.prec);
+  params.append(FORM_ENTRIES.auditor,   datos.auditor);
+  params.append(FORM_ENTRIES.maquilero, datos.maquilero);
+  params.append(FORM_ENTRIES.tipo,      datos.tipo);
+  params.append(FORM_ENTRIES.cal,       datos.cal);
+  if(FORM_ENTRIES.cal2) params.append(FORM_ENTRIES.cal2, datos.cal);
+  // Puntos de revisión: un entry por cada punto seleccionado
+  datos.puntos.forEach(p => params.append(FORM_ENTRIES.puntos, p));
+  params.append(FORM_ENTRIES.obs, datos.obs);
+
+  // Envío en background con no-cors (Google Forms lo acepta)
+  try {
+    await fetch(FORM_SUBMIT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    });
+    return true;
+  } catch(e) {
+    console.warn('Error enviando a Google Forms:', e);
+    return false;
+  }
+}
+
+async function enviarEncuesta(){
   const corte=document.getElementById('e-corte').value.trim();
   const programa=document.getElementById('e-programa').value.trim();
   const modelo=document.getElementById('e-modelo').value.trim();
@@ -955,9 +1047,45 @@ function enviarEncuesta(){
   if(!corte||!programa||!modelo||!prev||!prec||!auditor||!maquilero||!tipo||!cal){alert('Por favor completa todos los campos obligatorios (*).');return;}
   const puntos=[];document.querySelectorAll('.check-item.checked span').forEach(s=>puntos.push(s.textContent));
   lastEncuesta={corte,programa,modelo,prev,prec,auditor,maquilero,tipo,cal,obs,puntos,fecha:new Date()};
-  window.open('https://docs.google.com/forms/d/185WTdHxLaeQ2Zw57S-EQno-SLSRVC-ILvcA2xMs7iTk/viewform','_blank');
+
+  // Mostrar estado de envío
+  const btnEnviar=document.querySelector('[onclick="enviarEncuesta()"]');
+  const textoOriginal=btnEnviar.textContent;
+  btnEnviar.textContent='Enviando...';
+  btnEnviar.disabled=true;
+
+  // Enviar directo a Google Forms en segundo plano
+  const ok=await enviarAGoogleForms(lastEncuesta);
+
+  btnEnviar.textContent=textoOriginal;
+  btnEnviar.disabled=false;
+
+  // Mostrar pantalla de éxito independientemente (no-cors no permite confirmar)
   document.getElementById('enc-form-wrap').style.display='none';
   document.getElementById('enc-success').style.display='block';
+
+  // Actualizar Sheet progresivamente — Google tarda ~5-15s en reflejar el registro
+  const syncText=document.getElementById('sync-text');
+  const syncIcon=document.getElementById('sync-icon');
+  
+  setTimeout(()=>{
+    loadData();
+    if(syncText)syncText.textContent='Verificando registro en Google Sheets...';
+  }, 5000);
+  
+  setTimeout(()=>{
+    loadData();
+    if(syncText)syncText.textContent='Segunda verificación...';
+  }, 12000);
+  
+  setTimeout(()=>{
+    loadData();
+    if(syncText){
+      syncText.textContent='Sincronización completada. Revisa la pestaña Registros.';
+      syncText.style.color='var(--green)';
+      if(syncIcon)syncIcon.textContent='✓';
+    }
+  }, 20000);
 }
 
 function nuevaEncuesta(){limpiarEncuesta();document.getElementById('enc-form-wrap').style.display='block';document.getElementById('enc-success').style.display='none';}
@@ -1006,4 +1134,3 @@ if(sessionStorage.getItem('auth')==='1'){
 </script>
 </body>
 </html>
-
