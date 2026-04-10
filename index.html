@@ -627,9 +627,31 @@ function alert_(msg,type='info'){
   if(type!=='error')setTimeout(()=>el.innerHTML='',4000);
 }
 
+function parseFechaMX(v) {
+  // El Sheet guarda la fecha en formato DD/MM/YYYY HH:MM:SS (formato México)
+  // JavaScript la interpreta mal como MM/DD, así que la parseamos manualmente
+  if (!v) return null;
+  // Formato esperado: "10/4/2026 15:53:26" o "10/04/2026 15:53:26"
+  const match = String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(.*))?$/);
+  if (match) {
+    const [, dd, mm, yyyy, hora] = match;
+    // dd/mm/yyyy — construimos con formato ISO para evitar ambigüedad
+    const iso = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}${hora ? 'T'+hora.trim() : ''}`;
+    const d = new Date(iso);
+    return isNaN(d) ? null : d;
+  }
+  // Fallback: intentar parseo directo
+  const d = new Date(v);
+  return isNaN(d) ? null : d;
+}
+
 function fmtFecha(v){
   if(!v)return'—';
-  try{const d=new Date(v);if(isNaN(d))return v;return d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return v;}
+  try{
+    const d=parseFechaMX(v);
+    if(!d)return v;
+    return d.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }catch{return v;}
 }
 
 function scoreInfo(v){const n=parseFloat(v);if(isNaN(n))return{label:'—',cls:''};return{label:n.toFixed(1),cls:n>=4?'dot-green':n>=3?'dot-amber':'dot-red'};}
@@ -671,14 +693,14 @@ function buildStats(){
   document.getElementById('s-avg').textContent=proms.length?(proms.reduce((a,b)=>a+b,0)/proms.length).toFixed(1):'—';
   document.getElementById('s-maq').textContent=new Set(src.map(r=>g(r,C.MAQ)).filter(Boolean)).size;
   const now=new Date();
-  document.getElementById('s-mes').textContent=src.filter(r=>{const d=new Date(g(r,C.FECHA));return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
+  document.getElementById('s-mes').textContent=src.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
 }
 
 // ===== FILTROS PERÍODO =====
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 function buildPeriodoPills(){
-  const anios=[...new Set(allData.map(r=>{const d=new Date(g(r,C.FECHA));return isNaN(d)?null:d.getFullYear();}).filter(Boolean))].sort();
+  const anios=[...new Set(allData.map(r=>{const d=parseFechaMX(g(r,C.FECHA));return d?d.getFullYear():null;}).filter(Boolean))].sort();
   const pAnio=document.getElementById('pills-anio');
   pAnio.innerHTML='<span class="pill-label">Año:</span>';
   const pillTodos=document.createElement('span');
@@ -700,8 +722,8 @@ function buildMesPills(){
   pillTodos.onclick=()=>setMes('todos',pillTodos);
   pMes.appendChild(pillTodos);
   // Solo meses con datos según año activo
-  const src=anioActivo==='todos'?allData:allData.filter(r=>{const d=new Date(g(r,C.FECHA));return !isNaN(d)&&d.getFullYear()===anioActivo;});
-  const mesesConDatos=[...new Set(src.map(r=>{const d=new Date(g(r,C.FECHA));return isNaN(d)?null:d.getMonth();}).filter(v=>v!==null))].sort((a,b)=>a-b);
+  const src=anioActivo==='todos'?allData:allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getFullYear()===anioActivo;});
+  const mesesConDatos=[...new Set(src.map(r=>{const d=parseFechaMX(g(r,C.FECHA));return d!==null?d.getMonth():null;}).filter(v=>v!==null))].sort((a,b)=>a-b);
   mesesConDatos.forEach(m=>{
     const p=document.createElement('span');p.className='pill';p.textContent=MESES[m];
     p.onclick=()=>setMes(m,p);pMes.appendChild(p);
@@ -725,7 +747,7 @@ function setMes(val,btn){
 
 function applyPeriodoFilter(){
   filtered=allData.filter(r=>{
-    const d=new Date(g(r,C.FECHA));if(isNaN(d))return false;
+    const d=parseFechaMX(g(r,C.FECHA));if(!d)return false;
     const okAnio=anioActivo==='todos'||d.getFullYear()===anioActivo;
     const okMes=mesActivo==='todos'||d.getMonth()===mesActivo;
     return okAnio&&okMes;
@@ -786,7 +808,7 @@ function renderDashboard(){
 }
 
 function getPromedioMes(anio,mes){
-  const registros=allData.filter(r=>{const d=new Date(g(r,C.FECHA));return !isNaN(d)&&d.getFullYear()===anio&&d.getMonth()===mes;});
+  const registros=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getFullYear()===anio&&d.getMonth()===mes;});
   const vals=registros.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
   return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
 }
