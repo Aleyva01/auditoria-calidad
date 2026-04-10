@@ -436,18 +436,98 @@ tbody tr:hover td{background:var(--bg);}
   <!-- ===== PUBLICAR (SOLO MAESTRO) ===== -->
   <div class="tab-panel" id="tab-publicar">
     <div class="main" style="max-width:720px;">
+      <!-- PASO 1: Apps Script -->
+      <div class="guide-card" style="border-color:#86efac;">
+        <h3 style="color:var(--green);">⚡ Paso 1 — Conectar Google Apps Script (obligatorio para guardar)</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1.25rem;">Esto permite que los registros se guarden en Google Sheets desde cualquier dispositivo sin restricciones.</p>
+
+        <div class="step">
+          <div class="step-num" style="background:var(--green);">1</div>
+          <div class="step-body"><p>Abre tu <strong>Google Sheet</strong> de respuestas → menú <strong>Extensiones</strong> → <strong>Apps Script</strong>.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--green);">2</div>
+          <div class="step-body">
+            <p>Borra todo el código que aparece y pega <strong>exactamente esto</strong>:</p>
+            <div id="script-code" style="background:#1a1917;color:#d8f3dc;font-family:'DM Mono',monospace;font-size:11px;padding:12px;border-radius:8px;margin-top:8px;white-space:pre;overflow-x:auto;line-height:1.6;">const SHEET_ID = '1DTV6rFCwIq1NzAU7pjMfuvgnt_ep-4veuDU0Vi2Fys4';
+const SHEET_NAME = 'Respuestas de formulario 1';
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+    const now = new Date();
+    const fecha = Utilities.formatDate(now, 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
+    sheet.appendRow([
+      fecha,
+      data.corte    || '',
+      data.programa || '',
+      data.modelo   || '',
+      data.prec     || '',
+      data.prev     || '',
+      data.auditor  || '',
+      data.maquilero|| '',
+      data.tipo     || '',
+      '',
+      data.puntos   || '',
+      '', '', '', '',
+      '',
+      '',
+      data.cal      || '',
+      data.obs      || '',
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false,error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput('OK');
+}</div>
+            <button class="btn btn-sm" style="margin-top:8px;" onclick="copiarScript()">📋 Copiar código</button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--green);">3</div>
+          <div class="step-body"><p>Clic en <strong>Guardar</strong> (ícono de disco 💾) → ponle el nombre <code>AuditoriaScript</code>.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--green);">4</div>
+          <div class="step-body"><p>Clic en <strong>Implementar</strong> → <strong>Nueva implementación</strong> → tipo: <strong>Aplicación web</strong> → "Ejecutar como": <strong>Yo</strong> → "Quién tiene acceso": <strong>Cualquier persona</strong> → clic en <strong>Implementar</strong>.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--green);">5</div>
+          <div class="step-body">
+            <p>Copia la <strong>URL de implementación</strong> que aparece (empieza con <code>https://script.google.com/macros/s/...</code>) y pégala aquí:</p>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <input type="text" id="apps-script-url-input" placeholder="https://script.google.com/macros/s/..." style="flex:1;min-width:200px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:12px;outline:none;">
+              <button class="btn btn-dark" onclick="guardarAppsScriptURL()">Guardar URL</button>
+            </div>
+            <div id="url-status" style="font-size:12px;margin-top:6px;display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: GitHub Pages -->
       <div class="guide-card">
-        <h3>Publica tu app gratis en GitHub Pages</h3>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:1.5rem;">URL pública permanente accesible desde cualquier dispositivo.</p>
+        <h3>Paso 2 — Publicar en GitHub Pages</h3>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1.25rem;">URL pública permanente accesible desde cualquier dispositivo.</p>
         <div class="step"><div class="step-num">1</div><div class="step-body"><p><strong>Crea cuenta en GitHub</strong> — <a href="https://github.com" target="_blank" style="color:var(--blue);">github.com</a></p></div></div>
         <div class="step"><div class="step-num">2</div><div class="step-body"><p><strong>Nuevo repositorio:</strong> <code>+</code> → <code>New repository</code> → nombre: <code>auditoria-calidad</code> → <strong>Public</strong> → Crear.</p></div></div>
-        <div class="step"><div class="step-num">3</div><div class="step-body"><p><strong>Sube el archivo:</strong> <code>Add file</code> → <code>Upload files</code> → arrastra el archivo descargado → renómbralo a <code>index.html</code> → <strong>Commit changes</strong>.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><p><strong>Sube el archivo descargado</strong> (después de guardar la URL del Apps Script): <code>Add file</code> → <code>Upload files</code> → renómbralo a <code>index.html</code> → <strong>Commit changes</strong>.</p></div></div>
         <div class="step"><div class="step-num">4</div><div class="step-body"><p><strong>Activa GitHub Pages:</strong> <code>Settings</code> → <code>Pages</code> → Source: <code>main / root</code> → <strong>Save</strong>.</p></div></div>
-        <div class="step"><div class="step-num">5</div><div class="step-body"><p><strong>URL lista:</strong> <code>https://TU-USUARIO.github.io/auditoria-calidad/</code></p></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><p><strong>Tu URL:</strong> <code>https://TU-USUARIO.github.io/auditoria-calidad/</code></p></div></div>
       </div>
+
       <div class="guide-card">
         <h3>Descargar archivo actualizado</h3>
-        <p style="font-size:13px;color:var(--text3);margin-bottom:1rem;">Descarga con tu configuración actual para subir a GitHub.</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:1rem;">Descarga con la URL del Apps Script ya guardada para subir a GitHub.</p>
+        <div id="url-warning" style="background:var(--amber-bg);border:0.5px solid #fbbf24;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:1rem;display:none;">
+          ⚠ Primero guarda la URL del Apps Script (Paso 1) antes de descargar.
+        </div>
         <button class="btn btn-dark" onclick="descargarHTML()">↓ Descargar index.html</button>
       </div>
     </div>
@@ -551,6 +631,7 @@ function switchTab(name,btn){
   btn.classList.add('active');
   if(name==='encuesta')cargarSelectsEncuesta();
   if(name==='dashboard')renderDashboard();
+  if(name==='publicar'){cargarAppsScriptURL();}
 }
 function switchTabById(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -1007,52 +1088,65 @@ function limpiarEncuesta(){
   document.getElementById('enc-puntos-card').style.display='none';
 }
 
-// IDs reales de cada campo del Google Form
-const FORM_SUBMIT_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSd6wofiLsofbgiW1vw8o3Upqc8LUMi0Tjqj_b_fGtmVP_hS5Q/formResponse';
-const FORM_ENTRIES = {
-  corte:    'entry.1947473599',
-  programa: 'entry.1951935409',
-  modelo:   'entry.1380981039',
-  prev:     'entry.1891805099',
-  prec:     'entry.1453855016',
-  auditor:  'entry.2104310288',
-  maquilero:'entry.1027777862',
-  tipo:     'entry.1993568250',
-  cal:      'entry.1099290045',
-  cal2:     '',                  // este form tiene una sola sección de calificación
-  puntos:   'entry.1348801101',  // campo múltiple (se repite por cada punto)
-  obs:      'entry.213021728',
-};
+// ============================================================
+// CONFIGURACIÓN DE ENVÍO
+// Pega aquí la URL de tu Google Apps Script (ver pestaña Publicar)
+// ============================================================
+const APPS_SCRIPT_URL = 'PENDIENTE'; // <-- reemplaza con tu URL
 
 async function enviarAGoogleForms(datos) {
-  const params = new URLSearchParams();
-  params.append(FORM_ENTRIES.corte,     datos.corte);
-  params.append(FORM_ENTRIES.programa,  datos.programa);
-  params.append(FORM_ENTRIES.modelo,    datos.modelo);
-  params.append(FORM_ENTRIES.prev,      datos.prev);
-  params.append(FORM_ENTRIES.prec,      datos.prec);
-  params.append(FORM_ENTRIES.auditor,   datos.auditor);
-  params.append(FORM_ENTRIES.maquilero, datos.maquilero);
-  params.append(FORM_ENTRIES.tipo,      datos.tipo);
-  params.append(FORM_ENTRIES.cal,       datos.cal);
-  if(FORM_ENTRIES.cal2) params.append(FORM_ENTRIES.cal2, datos.cal);
-  // Puntos de revisión: un entry por cada punto seleccionado
-  datos.puntos.forEach(p => params.append(FORM_ENTRIES.puntos, p));
-  params.append(FORM_ENTRIES.obs, datos.obs);
-
-  // Envío en background con no-cors (Google Forms lo acepta)
+  // Si no hay Apps Script configurado, abre el form manualmente
+  // Usar URL dinámica (guardada por usuario) o la constante
+  const urlToUse = window.APPS_SCRIPT_URL_DYNAMIC || APPS_SCRIPT_URL;
+  if (!urlToUse || urlToUse === 'PENDIENTE') {
+    abrirFormManual(datos);
+    return false;
+  }
+  // Envío directo vía Apps Script (sin restricciones CORS)
   try {
-    await fetch(FORM_SUBMIT_URL, {
+    const payload = {
+      corte:     datos.corte,
+      programa:  datos.programa,
+      modelo:    datos.modelo,
+      prev:      datos.prev,
+      prec:      datos.prec,
+      auditor:   datos.auditor,
+      maquilero: datos.maquilero,
+      tipo:      datos.tipo,
+      cal:       datos.cal,
+      puntos:    datos.puntos.join(', '),
+      obs:       datos.obs,
+    };
+    await fetch(urlToUse, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
     });
     return true;
   } catch(e) {
-    console.warn('Error enviando a Google Forms:', e);
+    console.warn('Error Apps Script:', e);
+    abrirFormManual(datos);
     return false;
   }
+}
+
+// Fallback: abre el Google Form pre-rellenado en nueva pestaña
+function abrirFormManual(datos) {
+  const base = 'https://docs.google.com/forms/d/e/1FAIpQLSd6wofiLsofbgiW1vw8o3Upqc8LUMi0Tjqj_b_fGtmVP_hS5Q/viewform';
+  const params = new URLSearchParams();
+  params.append('entry.1947473599', datos.corte);
+  params.append('entry.1951935409', datos.programa);
+  params.append('entry.1380981039', datos.modelo);
+  params.append('entry.1891805099', datos.prev);
+  params.append('entry.1453855016', datos.prec);
+  params.append('entry.2104310288', datos.auditor);
+  params.append('entry.1027777862', datos.maquilero);
+  params.append('entry.1993568250', datos.tipo);
+  params.append('entry.1099290045', datos.cal);
+  datos.puntos.forEach(p => params.append('entry.1348801101', p));
+  params.append('entry.213021728',  datos.obs);
+  window.open(`${base}?${params.toString()}`, '_blank');
 }
 
 async function enviarEncuesta(){
@@ -1139,11 +1233,77 @@ function importarDelSheet(){
   const b=document.getElementById('detected-banner');b.textContent=`Se importaron ${added} valores. Edita para unificar variantes.`;b.style.display='block';
 }
 
-function descargarHTML(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();}
+function descargarHTML(){
+  // Antes de descargar, verificar si hay URL de Apps Script configurada
+  const urlGuardada = localStorage.getItem('apps_script_url');
+  const urlWarning = document.getElementById('url-warning');
+  if (!urlGuardada || urlGuardada === 'PENDIENTE') {
+    if (urlWarning) urlWarning.style.display = 'block';
+  } else {
+    if (urlWarning) urlWarning.style.display = 'none';
+  }
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='index.html';
+  a.click();
+}
+
+function guardarAppsScriptURL() {
+  const input = document.getElementById('apps-script-url-input');
+  const status = document.getElementById('url-status');
+  const url = input ? input.value.trim() : '';
+  if (!url || !url.startsWith('https://script.google.com')) {
+    if (status) {
+      status.textContent = '✗ URL inválida. Debe empezar con https://script.google.com/macros/s/...';
+      status.style.color = 'var(--red)';
+      status.style.display = 'block';
+    }
+    return;
+  }
+  // Guardar en localStorage Y en la variable global
+  localStorage.setItem('apps_script_url', url);
+  // Actualizar la variable en tiempo real (sin recargar)
+  window.APPS_SCRIPT_URL_DYNAMIC = url;
+  if (status) {
+    status.textContent = '✓ URL guardada. Ahora descarga el archivo y súbelo a GitHub.';
+    status.style.color = 'var(--green)';
+    status.style.display = 'block';
+  }
+}
+
+function copiarScript() {
+  const code = document.getElementById('script-code');
+  if (code) {
+    navigator.clipboard.writeText(code.textContent).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copiado';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      // Fallback
+      const range = document.createRange();
+      range.selectNode(code);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+  }
+}
+
+// Cargar URL guardada al iniciar
+function cargarAppsScriptURL() {
+  const saved = localStorage.getItem('apps_script_url');
+  if (saved && saved !== 'PENDIENTE') {
+    window.APPS_SCRIPT_URL_DYNAMIC = saved;
+    const input = document.getElementById('apps-script-url-input');
+    if (input) input.value = saved;
+  }
+}
 
 // ===== INIT =====
 loadConfig();
 renderConfigLists();
+cargarAppsScriptURL();
 if(sessionStorage.getItem('auth')==='1'){
   const u=sessionStorage.getItem('auditorActivo')||'';
   currentUser=u;
