@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Auditoría de Producto Terminado</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e0ddd4;--border2:#c8c5ba;--text:#1a1917;--text2:#6b6860;--text3:#9e9b92;--green:#2d6a4f;--green-bg:#d8f3dc;--amber:#7d4e00;--amber-bg:#fff3cd;--red:#7f1d1d;--red-bg:#fee2e2;--blue:#1e3a5f;--blue-bg:#dbeafe;--radius:10px;--radius-sm:6px;}
@@ -203,11 +201,11 @@ tbody tr:hover td{background:var(--bg);}
   .tabs-bar{padding:0 1rem;}
 }
 </style>
-</head>
+<meta name="promodescuentos-browser-extension" version="12.7.0"></head>
 <body>
 
 <!-- LOGIN -->
-<div class="login-screen" id="login-screen">
+<div class="login-screen" id="login-screen" style="display: none;">
   <div class="login-card">
     <div class="login-logo">Auditoría</div>
     <div class="login-sub">Producto Terminado · Calidad</div>
@@ -224,11 +222,11 @@ tbody tr:hover td{background:var(--bg);}
 </div>
 
 <!-- APP -->
-<div class="app-shell" id="app-shell">
+<div class="app-shell" id="app-shell" style="display: block;">
   <div class="topbar">
     <div>
       <div class="topbar-title">Auditoría de Producto Terminado</div>
-      <div class="topbar-sub" id="topbar-user">Calidad</div>
+      <div class="topbar-sub" id="topbar-user">Sesión: Admin</div>
     </div>
     <div class="topbar-right">
       <button class="btn btn-dark" onclick="loadData()" id="refresh-btn">↻ Actualizar</button>
@@ -237,47 +235,41 @@ tbody tr:hover td{background:var(--bg);}
   </div>
 
   <div class="tabs-bar" id="tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('registros',this)">Registros</button>
+    <button class="tab-btn" onclick="switchTab('registros',this)">Registros</button>
     <button class="tab-btn" onclick="switchTab('encuesta',this)">Nueva auditoría</button>
     <!-- Pestañas solo maestro -->
-    <button class="tab-btn master-only" id="tab-btn-dashboard" style="display:none;" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
-    <button class="tab-btn master-only" id="tab-btn-config" style="display:none;" onclick="switchTab('config',this)">Configuración</button>
-    <button class="tab-btn master-only" id="tab-btn-publicar" style="display:none;" onclick="switchTab('publicar',this)">Publicar en línea</button>
+    <button class="tab-btn master-only" id="tab-btn-dashboard" style="display: block;" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn master-only" id="tab-btn-config" style="display: block;" onclick="switchTab('config',this)">Configuración</button>
+    <button class="tab-btn master-only active" id="tab-btn-publicar" style="display: block;" onclick="switchTab('publicar',this)">Publicar en línea</button>
   </div>
 
   <!-- ===== REGISTROS ===== -->
-  <div class="tab-panel active" id="tab-registros">
+  <div class="tab-panel" id="tab-registros">
     <div class="main">
       <div id="alert-area"></div>
-      <div class="stats-grid" id="stats" style="display:none;">
-        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">0</div><div class="stat-sub">en el Sheet</div></div>
-        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">—</div><div class="stat-sub">de 5 puntos</div></div>
-        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">0</div><div class="stat-sub">únicos</div></div>
-        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">0</div><div class="stat-sub">auditorías</div></div>
+      <div class="stats-grid" id="stats" style="display: grid;">
+        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">6</div><div class="stat-sub">en el Sheet</div></div>
+        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">3.0</div><div class="stat-sub">de 5 puntos</div></div>
+        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">3</div><div class="stat-sub">únicos</div></div>
+        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">5</div><div class="stat-sub">auditorías</div></div>
       </div>
 
       <!-- Filtros año/mes -->
-      <div id="filtros-periodo" style="display:none;">
-        <div class="filter-pills" id="pills-anio" style="margin-bottom:6px;">
-          <span class="pill-label">Año:</span>
-        </div>
-        <div class="filter-pills" id="pills-mes">
-          <span class="pill-label">Mes:</span>
-        </div>
+      <div id="filtros-periodo" style="display: block;">
+        <div class="filter-pills" id="pills-anio" style="margin-bottom:6px;"><span class="pill-label">Año:</span><span class="pill active">Todos</span><span class="pill">2026</span></div>
+        <div class="filter-pills" id="pills-mes"><span class="pill-label">Mes:</span><span class="pill active">Todos</span><span class="pill">Abril</span></div>
       </div>
 
-      <div class="controls-bar" id="controls" style="display:none;">
+      <div class="controls-bar" id="controls" style="display: flex;">
         <div class="search-wrap">
           <span class="search-icon">⌕</span>
           <input type="text" id="search" placeholder="Buscar por corte, maquilero, modelo..." oninput="filterData()">
         </div>
-        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option></select>
-        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option></select>
-        <span class="count-label" id="count-label"></span>
+        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option><option>AGUSTINA</option><option>ARMANDO</option><option>RAFAEL</option></select>
+        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option><option>FILIPINA MANGA CORTA</option><option>Filipina Manga corta</option><option>Filipina manga Larga</option><option>Mandil</option></select>
+        <span class="count-label" id="count-label">6 / 6 registros</span>
       </div>
-      <div id="table-area">
-        <div class="table-card"><div class="empty-state"><div class="empty-icon">⟳</div><p>Cargando datos...</p></div></div>
-      </div>
+      <div id="table-area"><div class="table-card"><div class="table-wrap"><table><thead><tr><th onclick="sortBy(0)">Fecha ↓</th><th onclick="sortBy(1)"># Corte </th><th onclick="sortBy(2)">Programa </th><th onclick="sortBy(3)">Modelo </th><th onclick="sortBy(8)">Tipo </th><th onclick="sortBy(7)">Maquilero </th><th onclick="sortBy(5)">Rev. </th><th onclick="sortBy(4)">Rec. </th><th></th><th></th></tr></thead><tbody><tr><td class="mono" style="font-size:11px;">08/04/2026, 06:00 p.m.</td><td><strong class="mono">26020127</strong></td><td>446</td><td>CISNEU</td><td><span class="badge badge-blue">FILIPINA MANGA CORTA</span></td><td>AGUSTINA</td><td class="mono">161</td><td class="mono">161</td><td><span class="score-dot"><span class="dot dot-red"></span>2.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(5)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">08/04/2026, 06:00 p.m.</td><td><strong class="mono">26020139</strong></td><td>4476</td><td>CEUBLU00NE</td><td><span class="badge badge-blue">FILIPINA MANGA CORTA</span></td><td>AGUSTINA</td><td class="mono">50</td><td class="mono">50</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(4)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">7/4/2026 8:33:33</td><td><strong class="mono">26030159</strong></td><td>455</td><td>FCAVMC</td><td><span class="badge badge-blue">Filipina Manga corta</span></td><td>ARMANDO</td><td class="mono">290</td><td class="mono">290</td><td><span class="score-dot"><span class="dot "></span>—</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(3)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:50 a.m.</td><td><strong class="mono">26030196</strong></td><td>562</td><td>M2BLU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(2)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:43 a.m.</td><td><strong class="mono">26020157</strong></td><td>456</td><td>BOLPERCVM</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">416</td><td class="mono">416</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(1)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:38 a.m.</td><td><strong class="mono">005/ 005-1</strong></td><td>392/432</td><td>FMAAMC</td><td><span class="badge badge-blue">Filipina manga Larga</span></td><td>ARMANDO</td><td class="mono">203/48</td><td class="mono">203/48</td><td><span class="score-dot"><span class="dot "></span>—</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(0)">Ver PDF</button></td></tr></tbody></table></div></div></div>
     </div>
   </div>
 
@@ -415,12 +407,12 @@ tbody tr:hover td{background:var(--bg);}
       <div class="config-grid">
         <div class="config-card">
           <div class="config-card-head"><div><div class="config-card-title">Maquileros</div><div class="config-card-sub">Nombres normalizados</div></div><span id="maq-count" class="config-item-badge">0</span></div>
-          <div class="config-list" id="maq-list"></div>
+          <div class="config-list" id="maq-list"><div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin maquileros — importa del Sheet</div></div>
           <div class="add-row"><input type="text" id="new-maq" placeholder="Agregar maquilero..." onkeydown="if(event.key==='Enter')agregarMaquilero()"><button class="btn btn-sm btn-dark" onclick="agregarMaquilero()">+ Agregar</button></div>
         </div>
         <div class="config-card">
           <div class="config-card-head"><div><div class="config-card-title">Tipos de producto</div><div class="config-card-sub">Categorías normalizadas</div></div><span id="tipo-count" class="config-item-badge">0</span></div>
-          <div class="config-list" id="tipo-list"></div>
+          <div class="config-list" id="tipo-list"><div style="padding:12px;font-size:13px;color:var(--text3);text-align:center;">Sin tipos — importa del Sheet</div></div>
           <div class="add-row"><input type="text" id="new-tipo" placeholder="Agregar tipo..." onkeydown="if(event.key==='Enter')agregarTipo()"><button class="btn btn-sm btn-dark" onclick="agregarTipo()">+ Agregar</button></div>
         </div>
       </div>
@@ -432,7 +424,7 @@ tbody tr:hover td{background:var(--bg);}
   </div>
 
   <!-- ===== PUBLICAR (SOLO MAESTRO) ===== -->
-  <div class="tab-panel" id="tab-publicar">
+  <div class="tab-panel active" id="tab-publicar">
     <div class="main" style="max-width:720px;">
       <!-- PASO 1: Apps Script -->
       <div class="guide-card" style="border-color:#86efac;">
@@ -504,7 +496,7 @@ function doGet(e) {
               <input type="text" id="apps-script-url-input" placeholder="https://script.google.com/macros/s/..." style="flex:1;min-width:200px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:12px;outline:none;">
               <button class="btn btn-dark" onclick="guardarAppsScriptURL()">Guardar URL</button>
             </div>
-            <div id="url-status" style="font-size:12px;margin-top:6px;display:none;"></div>
+            <div id="url-status" style="font-size: 12px; margin-top: 6px; display: block; color: var(--green);">✓ URL guardada. Ahora descarga el archivo y súbelo a GitHub.</div>
           </div>
         </div>
       </div>
@@ -1311,5 +1303,6 @@ if(sessionStorage.getItem('auth')==='1'){
   loadData();
 }
 </script>
-</body>
-</html>
+
+
+<img src="logo.png" title="To learn how to download this using IDM please click here" style="position: absolute; width: 24px; height: 24px; background-color: rgba(0, 0, 0, 0.7); border-radius: 50%; display: none; cursor: pointer; z-index: 9999;"></body></html>
