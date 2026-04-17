@@ -106,8 +106,8 @@ tbody tr:hover td{background:var(--bg);}
 #formato-print .sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}
 #formato-print .sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}
 #formato-print .obs{min-height:180px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}
-#formato-print .puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}
-  #formato-print .puntos-row{padding:5px 10px;font-size:11px;line-height:1.7;color:#000;vertical-align:top;width:100%;border-bottom:0.5px solid #eee;}
+#formato-print .puntos-cel{padding:4px 8px;font-size:11px;line-height:1.55;color:#000;vertical-align:top;width:50%;border:0.5px solid #ddd;word-break:normal;white-space:normal;}
+  #formato-print .puntos-row{padding:4px 8px;font-size:11px;line-height:1.55;color:#000;vertical-align:top;}
 /* ENCUESTA */
 .encuesta-wrap{max-width:680px;margin:0 auto;}
 .enc-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
@@ -217,6 +217,8 @@ tbody tr:hover td{background:var(--bg);}
       <option value="Admin">Admin (Maestro)</option>
       <option value="Eloisa">Eloisa</option>
       <option value="Luis">Luis</option>
+      <option value="Arely">Arely</option>
+      <option value="Equipo de calidad">Equipo de calidad</option>
     </select>
     <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn-full" onclick="doLogin()">Ingresar</button>
@@ -565,9 +567,11 @@ function getPuntosPorTipo(tipo){if(!tipo)return[];const t=tipo.toLowerCase();for
 // ===== CREDENCIALES =====
 // Admin = usuario maestro con acceso a Dashboard, Configuración y Publicar
 const CREDENCIALES = {
-  'Admin':             'admin26#',
+  'Admin':             'admin2026',
   'Eloisa':            '3loi$a2026',
   'Luis':              'lui$2026',
+  'Arely':             'arely2026',
+  'Equipo de calidad': 'calidad2024'
 };
 const MASTER_USER = 'Admin';
 
@@ -1000,20 +1004,49 @@ function generarHTMLFormato(datos){
   const pct=(!isNaN(prevVal)&&!isNaN(precVal)&&precVal>0)?Math.round(prevVal/precVal*100)+'%':'—';
   const calStr=cal?`${cal} / 5`:'—';
   const promStr=promedio?` · Prom: ${promedio}`:'';
-  // Lista vertical simple — sin columnas para evitar texto cortado
-  const puntosHTML = puntos.length
-    ? puntos.map(p=>`<tr><td class="puntos-row">• ${p}</td></tr>`).join('')
-    : '<tr><td class="puntos-row" style="color:#666;">Sin puntos registrados</td></tr>';
+  // Dos columnas: cada punto completo en su celda, sin partir texto
+  const mitad=Math.ceil(puntos.length/2);
+  const col1=puntos.slice(0,mitad);
+  const col2=puntos.slice(mitad);
+  const maxR=Math.max(col1.length,col2.length,1);
+  let puntosHTML='';
+  for(let i=0;i<maxR;i++){
+    const p1=col1[i]?`• ${col1[i]}`:'';
+    const p2=col2[i]?`• ${col2[i]}`:'';
+    puntosHTML+=`<tr><td class="puntos-cel">${p1}</td><td class="puntos-cel">${p2}</td></tr>`;
+  }
+  if(!puntos.length) puntosHTML='<tr><td colspan="2" class="puntos-cel" style="color:#888;">Sin puntos registrados</td></tr>';
   return`<table>
-    <tr><td colspan="8" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
-    <tr><td class="lbl">CORTE:</td><td class="val">${corte||''}</td><td class="lbl">PROGRAMA:</td><td class="val">${programa||''}</td><td class="lbl">MODELO:</td><td class="val">${modelo||''}</td><td class="lbl">FECHA:</td><td class="val">${fecha||''}</td></tr>
-    <tr><td class="lbl">PRENDAS REVISADAS</td><td class="val">${prev||''}</td><td class="lbl">PRENDAS RECIBIDAS</td><td class="val">${prec||''}</td><td class="lbl">%</td><td class="val">${pct}</td><td class="lbl">CALIFICACIÓN</td><td class="val">${calStr}${promStr}</td></tr>
-    <tr><td class="lbl">REVISA:</td><td class="val">${auditor||''}</td><td class="lbl">MAQUILERO</td><td class="val" colspan="5">${maquilero||''}</td></tr>
-    <tr><td class="lbl">TIPO DE PRODUCTO:</td><td class="val" colspan="7">${tipo||''}</td></tr>
-    <tr><td colspan="8" class="sec">PUNTOS IMPORTANTES DE REVISIÓN</td></tr>
-    ${puntosHTML}
-    <tr><td colspan="8" class="sec">OBSERVACIONES GENERALES</td></tr>
-    <tr><td colspan="8" class="obs">${obs||'—'}</td></tr>
+    <tr><td colspan="2" class="f-title">AUDITORIA DE PRODUCTO TERMINADO</td></tr>
+    <tr>
+      <td colspan="2"><table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td class="lbl" style="width:8%;">CORTE:</td><td class="val" style="width:17%;">${corte||''}</td>
+          <td class="lbl" style="width:10%;">PROGRAMA:</td><td class="val" style="width:10%;">${programa||''}</td>
+          <td class="lbl" style="width:9%;">MODELO:</td><td class="val" style="width:12%;">${modelo||''}</td>
+          <td class="lbl" style="width:8%;">FECHA:</td><td class="val">${fecha||''}</td>
+        </tr>
+        <tr>
+          <td class="lbl">PRENDAS REV.</td><td class="val">${prev||''}</td>
+          <td class="lbl">PRENDAS REC.</td><td class="val">${prec||''}</td>
+          <td class="lbl">%</td><td class="val">${pct}</td>
+          <td class="lbl">CALIF.</td><td class="val">${calStr}${promStr}</td>
+        </tr>
+        <tr>
+          <td class="lbl">REVISA:</td><td class="val">${auditor||''}</td>
+          <td class="lbl">MAQUILERO</td><td class="val" colspan="5">${maquilero||''}</td>
+        </tr>
+        <tr>
+          <td class="lbl">TIPO:</td><td class="val" colspan="7">${tipo||''}</td>
+        </tr>
+      </table></td>
+    </tr>
+    <tr><td colspan="2" class="sec">PUNTOS IMPORTANTES DE REVISIÓN</td></tr>
+    <tr>
+      <td colspan="2"><table style="width:100%;border-collapse:collapse;">${puntosHTML}</table></td>
+    </tr>
+    <tr><td colspan="2" class="sec">OBSERVACIONES GENERALES</td></tr>
+    <tr><td colspan="2" class="obs">${obs||'—'}</td></tr>
   </table>`;
 }
 
@@ -1054,7 +1087,7 @@ function imprimirFormato(){
   if(!frame){frame=document.createElement('iframe');frame.id='print-frame';frame.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';document.body.appendChild(frame);}
   const doc=frame.contentWindow.document;
   doc.open();
-  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:11px;line-height:1.5;color:#000;vertical-align:top;width:50%;}.puntos-row{padding:4px 10px;font-size:11px;line-height:1.6;color:#000;vertical-align:top;width:100%;}@page{margin:15mm;}</style></head><body>${contenido}</body></html>`);
+  doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Auditoría</title><style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}table{width:100%;border-collapse:collapse;}td{border:1px solid #555;padding:5px 8px;}.f-title{background:#111;color:#fff;text-align:center;font-size:15px;font-weight:bold;padding:10px;letter-spacing:1px;text-transform:uppercase;}.lbl{background:#111;color:#fff;font-weight:bold;font-size:10px;text-transform:uppercase;white-space:nowrap;}.val{background:#fff;color:#000;}.sec{background:#333;color:#fff;text-align:center;font-weight:bold;font-size:10px;text-transform:uppercase;padding:5px;}.sec-sub{background:#555;color:#fff;text-align:center;font-size:10px;padding:3px;}.obs{min-height:200px;padding:8px;color:#000;white-space:pre-wrap;font-size:11px;line-height:1.6;vertical-align:top;}.puntos-cel{padding:4px 8px;font-size:10.5px;line-height:1.55;color:#000;vertical-align:top;width:50%;border:0.5px solid #ddd;word-break:normal;white-space:normal;}.puntos-row{padding:4px 8px;font-size:10.5px;line-height:1.55;color:#000;vertical-align:top;}@page{size:letter;margin:10mm 12mm;}</style></head><body>${contenido}</body></html>`);
   doc.close();
   setTimeout(()=>{frame.contentWindow.focus();frame.contentWindow.print();},300);
 }
