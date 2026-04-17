@@ -968,9 +968,9 @@ function renderChartAuditores(){
 function renderChartPareto(){
   const defMap={};
   allData.forEach(r=>{
-    const pun=[g(r,C.PUN1),g(r,C.PUN2)].join(',');
+    const pun=[g(r,C.PUN1),g(r,C.PUN2),g(r,C.PUN3??-1),g(r,C.PUN4??-1)].filter(Boolean).join(',');
     if(!pun.trim())return;
-    pun.split(',').map(p=>p.trim()).filter(Boolean).forEach(p=>{
+    puntosALista(pun).forEach(p=>{
       if(p==='NA'||p==='Otros'||p==='')return;
       defMap[p]=(defMap[p]||0)+1;
     });
@@ -1055,7 +1055,19 @@ function abrirFormato(idx){
     const r=allData[idx];
     const cal=g(r,C.CAL1)||g(r,C.CAL2)||'';
     const prom=parseFloat(cal);
-    function puntosALista(v){return v?v.split(',').map(p=>p.trim()).filter(Boolean):[];}
+    function puntosALista(v){
+    if(!v)return[];
+    // Split inteligente: respeta comas dentro de paréntesis
+    const partes=[];let actual='',paren=0;
+    for(const ch of v){
+      if(ch==='('){paren++;actual+=ch;}
+      else if(ch===')'){paren--;actual+=ch;}
+      else if(ch===','&&paren===0){if(actual.trim())partes.push(actual.trim());actual='';}
+      else actual+=ch;
+    }
+    if(actual.trim())partes.push(actual.trim());
+    return partes.filter(Boolean);
+  }
     // Combinar todas las columnas de puntos del nuevo sheet y deduplicar
     const todosLosPuntos=[
       ...puntosALista(g(r,C.PUN1)),
