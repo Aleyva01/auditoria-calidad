@@ -184,7 +184,7 @@ tbody tr:hover td{background:var(--bg);}
 .sem-val{font-size:18px;font-weight:500;margin-bottom:2px;}
 .sem-arrow{font-size:28px;color:var(--text3);align-self:center;}
 /* RANKING */
-.rank-list{display:flex;flex-direction:column;gap:8px;}
+.rank-list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;padding-right:4px;}
 .rank-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);}
 .rank-item.top{background:#f0fdf4;border-color:#86efac;}
 .rank-item.bot{background:#fef2f2;border-color:#fca5a5;}
@@ -385,7 +385,7 @@ tbody tr:hover td{background:var(--bg);}
         <!-- Ranking maquileros -->
         <div class="dash-card">
           <div class="dash-card-title">Ranking de maquileros</div>
-          <div class="dash-card-sub">Top 3 mejores y 3 con más oportunidad de mejora</div>
+          <div class="dash-card-sub">Todos los maquileros ordenados de mejor a peor calificación</div>
           <div class="rank-list" id="rank-list"><div style="font-size:13px;color:var(--text3);">Cargando...</div></div>
         </div>
 
@@ -976,18 +976,27 @@ function renderRanking(){
     if(avg>=3)return'#fde047';
     return'#fca5a5';
   }
-  let html='';
+  const maxAvg = ranking[0]?.avg || 5;
+  let html=`<div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;padding:0 4px 6px;display:flex;justify-content:space-between;">
+    <span>${ranking.length} maquileros</span><span>Promedio histórico</span>
+  </div>`;
   ranking.forEach((m,i)=>{
     const color=scoreColor(m.avg);
     const bg=scoreBg(m.avg);
     const border=scoreBorder(m.avg);
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-    html+=`<div class="rank-item" style="background:${bg};border-color:${border};">
-      <div class="rank-pos" style="background:${color};color:#fff;font-weight:600;">${i+1}</div>
-      <div class="rank-name">${medal} ${m.name}</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="rank-score" style="color:${color};">${m.avg.toFixed(2)}</div>
-        <div style="font-size:11px;color:var(--text3);">${m.cnt} aud.</div>
+    const barW=Math.round((m.avg/5)*100);
+    html+=`<div class="rank-item" style="background:${bg};border-color:${border};flex-direction:column;gap:4px;padding:8px 10px;">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <div class="rank-pos" style="background:${color};color:#fff;font-weight:600;flex-shrink:0;">${i+1}</div>
+        <div class="rank-name" style="flex:1;">${medal} ${m.name}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="rank-score" style="color:${color};font-size:15px;">${m.avg.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--text3);">${m.cnt} aud.</div>
+        </div>
+      </div>
+      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
+        <div style="width:${barW}%;height:100%;background:${color};border-radius:2px;transition:width 0.3s;"></div>
       </div>
     </div>`;
   });
