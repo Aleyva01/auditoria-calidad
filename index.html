@@ -212,8 +212,7 @@ tbody tr:hover td{background:var(--bg);}
   <div class="login-card">
     <div class="login-logo">Auditoría</div>
     <div class="login-sub">Producto Terminado · Calidad</div>
-    <select id="login-user">
-      <option value="">Selecciona tu nombre...</option>
+    <select id="login-user">      <option value="">Selecciona tu nombre...</option>
       <option value="Admin">Admin (Maestro)</option>
       <option value="Eloisa">Eloisa</option>
       <option value="Luis">Luis</option>
@@ -891,7 +890,11 @@ function renderDashboard(){
 
 function getPromedioMes(anio,mes){
   const registros=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getFullYear()===anio&&d.getMonth()===mes;});
-  const vals=registros.map(r=>parseFloat(g(r,C.PROM))).filter(v=>!isNaN(v));
+  const vals=registros.map(r=>{
+    // Usar PROM si existe, sino CAL1
+    const v=C.PROM>=0?g(r,C.PROM):g(r,C.CAL1);
+    return parseFloat(v);
+  }).filter(v=>!isNaN(v)&&v>0);
   return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
 }
 
@@ -934,18 +937,59 @@ function renderRanking(){
     if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
     maqMap[maq].sum+=prom;maqMap[maq].cnt++;
   });
-  const ranking=Object.entries(maqMap).map(([name,{sum,cnt}])=>({name,avg:sum/cnt,cnt})).sort((a,b)=>b.avg-a.avg);
-  const top=ranking.slice(0,3);
-  const bot=ranking.slice(-3).reverse();
+  const ranking=Object.entries(maqMap)
+    .map(([name,{sum,cnt}])=>({name,avg:sum/cnt,cnt}))
+    .sort((a,b)=>b.avg-a.avg);
   const container=document.getElementById('rank-list');
-  if(!ranking.length){container.innerHTML='<div style="font-size:13px;color:var(--text3);">Sin datos suficientes.</div>';return;}
+  if(!ranking.length){
+    container.innerHTML='<div style="font-size:13px;color:var(--text3);padding:12px;">Sin datos suficientes.</div>';
+    return;
+  }
+  // Escala de color: verde(5) → amarillo(3) → rojo(1)
+  function scoreColor(avg){
+    // Interpolar entre rojo(1), amarillo(3) y verde(5)
+    if(avg>=4){
+      // verde-amarillo
+      const t=(avg-4)/1;
+      const r=Math.round(255*(1-t)+22*t);
+      const g2=Math.round(193*(1-t)+163*t);
+      const b=Math.round(7*(1-t)+74*t);
+      return`rgb(${r},${g2},${b})`;
+    } else if(avg>=2.5){
+      // amarillo-rojo
+      const t=(avg-2.5)/1.5;
+      const r=Math.round(220*(1-t)+255*t);
+      const g2=Math.round(38*(1-t)+193*t);
+      const b=Math.round(38*(1-t)+7*t);
+      return`rgb(${r},${g2},${b})`;
+    } else {
+      return'#dc2626';
+    }
+  }
+  function scoreBg(avg){
+    if(avg>=4)return'#f0fdf4';
+    if(avg>=3)return'#fefce8';
+    return'#fef2f2';
+  }
+  function scoreBorder(avg){
+    if(avg>=4)return'#86efac';
+    if(avg>=3)return'#fde047';
+    return'#fca5a5';
+  }
   let html='';
-  top.forEach((m,i)=>{
-    html+=`<div class="rank-item top"><div class="rank-pos top">${i+1}</div><div class="rank-name">${m.name}</div><div class="rank-score" style="color:#16a34a;">${m.avg.toFixed(2)}</div><div style="font-size:11px;color:var(--text3);margin-left:4px;">${m.cnt} aud.</div></div>`;
-  });
-  if(ranking.length>6){html+=`<div class="rank-divider">· · ·</div>`;}
-  bot.forEach((m,i)=>{
-    html+=`<div class="rank-item bot"><div class="rank-pos bot">${ranking.length-2+i}</div><div class="rank-name">${m.name}</div><div class="rank-score" style="color:#dc2626;">${m.avg.toFixed(2)}</div><div style="font-size:11px;color:var(--text3);margin-left:4px;">${m.cnt} aud.</div></div>`;
+  ranking.forEach((m,i)=>{
+    const color=scoreColor(m.avg);
+    const bg=scoreBg(m.avg);
+    const border=scoreBorder(m.avg);
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    html+=`<div class="rank-item" style="background:${bg};border-color:${border};">
+      <div class="rank-pos" style="background:${color};color:#fff;font-weight:600;">${i+1}</div>
+      <div class="rank-name">${medal} ${m.name}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="rank-score" style="color:${color};">${m.avg.toFixed(2)}</div>
+        <div style="font-size:11px;color:var(--text3);">${m.cnt} aud.</div>
+      </div>
+    </div>`;
   });
   container.innerHTML=html;
 }
@@ -964,15 +1008,22 @@ function renderChartAuditores(){
 function renderChartPareto(){
   const defMap={};
   allData.forEach(r=>{
-    const pun=[g(r,C.PUN1),g(r,C.PUN2),g(r,C.PUN3??-1),g(r,C.PUN4??-1)].filter(Boolean).join(',');
+    // Recoger todas las columnas de puntos de forma segura
+    const cols=[C.PUN1,C.PUN2,C.PUN3,C.PUN4].filter(c=>c!==undefined&&c>=0);
+    const pun=cols.map(c=>g(r,c)).filter(Boolean).join(',');
     if(!pun.trim())return;
     puntosALista(pun).forEach(p=>{
-      if(p==='NA'||p==='Otros'||p==='')return;
-      defMap[p]=(defMap[p]||0)+1;
+      const pt=p.trim();
+      if(!pt||pt==='NA'||pt==='Otros'||pt==='-')return;
+      defMap[pt]=(defMap[pt]||0)+1;
     });
   });
   const sorted=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  if(!sorted.length)return;
+  if(!sorted.length){
+    const ctx=document.getElementById('chart-pareto');
+    if(ctx)ctx.parentElement.innerHTML+='<p style="font-size:13px;color:var(--text3);text-align:center;padding:1rem;">No hay puntos de revisión registrados aún.</p>';
+    return;
+  }
   const labels=sorted.map(([k])=>k.length>30?k.slice(0,30)+'…':k);
   const vals=sorted.map(([,v])=>v);
   const total=vals.reduce((a,b)=>a+b,0);
@@ -1068,8 +1119,8 @@ function abrirFormato(idx){
     const todosLosPuntos=[
       ...puntosALista(g(r,C.PUN1)),
       ...puntosALista(g(r,C.PUN2)),
-      ...puntosALista(g(r,C.PUN3??-1)),
-      ...puntosALista(g(r,C.PUN4??-1)),
+      ...puntosALista(C.PUN3>=0?g(r,C.PUN3):''),
+      ...puntosALista(C.PUN4>=0?g(r,C.PUN4):''),
     ].filter((v,i,a)=>v&&a.indexOf(v)===i);
     const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal,promedio:'',puntos:todosLosPuntos,obs:[g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')};
     document.getElementById('modal-meta').textContent=`Corte ${datos.corte||'—'} · ${datos.fecha}`;
