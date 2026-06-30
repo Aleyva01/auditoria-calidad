@@ -403,6 +403,25 @@ tbody tr:hover td{background:var(--bg);}
           <canvas id="chart-pareto" height="180"></canvas>
         </div>
       </div>
+
+      <!-- Fallas por maquilero -->
+      <div class="dash-card" style="margin-bottom:1.5rem;">
+        <div class="dash-card-title">Fallas más frecuentes por maquilero</div>
+        <div class="dash-card-sub">Top 3 puntos de revisión fallidos por cada maquilero, ordenados del peor al mejor</div>
+        <div id="fallas-maq-list" style="max-height:500px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;">
+          <p style="font-size:13px;color:var(--text3);">Cargando...</p>
+        </div>
+      </div>
+
+      <!-- Ranking por tipo de producto -->
+      <div class="dash-card" style="margin-bottom:1.5rem;">
+        <div class="dash-card-title">Ranking de maquileros por tipo de producto</div>
+        <div class="dash-card-sub">Desempeño de cada maquilero según el tipo de prenda auditada</div>
+        <div id="ranking-tipo-list" style="max-height:600px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;">
+          <p style="font-size:13px;color:var(--text3);">Cargando...</p>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -886,6 +905,8 @@ function renderDashboard(){
   renderRanking();
   renderChartAuditores();
   renderChartPareto();
+  renderFallasPorMaquilero();
+  renderRankingPorTipo();
 }
 
 function getPromedioMes(anio,mes){
@@ -1014,29 +1035,55 @@ function renderChartAuditores(){
   chartAuditores=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors.slice(0,labels.length),borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}});
 }
 
+// Helper: obtiene todos los puntos de un registro como array
+function puntosDeRegistro(r){
+  const cols=[C.PUN1,C.PUN2,C.PUN3,C.PUN4].filter(c=>c!==undefined&&c>=0);
+  // Unir todas las columnas de puntos
+  const partes=cols.map(c=>g(r,c)).filter(Boolean);
+  // Si hay una sola columna con todo el texto, procesarla directamente
+  // Si hay múltiples columnas, unirlas
+  const texto=partes.join('|||'); // separador que no aparece en los puntos
+  // Dividir por ||| primero (columnas separadas), luego cada parte con smart split
+  const todos=[];
+  texto.split('|||').forEach(parte=>{
+    if(!parte.trim())return;
+    puntosALista(parte).forEach(p=>{
+      const pt=p.trim();
+      if(pt&&pt!=='NA'&&pt!=='Otros'&&pt!=='-'&&pt!=='N/A')todos.push(pt);
+    });
+  });
+  return todos;
+}
+
 function renderChartPareto(){
   const defMap={};
   allData.forEach(r=>{
-    // Recoger todas las columnas de puntos de forma segura
-    const cols=[C.PUN1,C.PUN2,C.PUN3,C.PUN4].filter(c=>c!==undefined&&c>=0);
-    const pun=cols.map(c=>g(r,c)).filter(Boolean).join(',');
-    if(!pun.trim())return;
-    puntosALista(pun).forEach(p=>{
-      const pt=p.trim();
-      if(!pt||pt==='NA'||pt==='Otros'||pt==='-')return;
+    puntosDeRegistro(r).forEach(pt=>{
       defMap[pt]=(defMap[pt]||0)+1;
     });
   });
-  const sorted=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  if(!sorted.length){
-    const ctx=document.getElementById('chart-pareto');
-    if(ctx)ctx.parentElement.innerHTML+='<p style="font-size:13px;color:var(--text3);text-align:center;padding:1rem;">No hay puntos de revisión registrados aún.</p>';
+
+  const paretoEl=document.getElementById('chart-pareto');
+  const parentEl=paretoEl?paretoEl.parentElement:null;
+
+  if(!Object.keys(defMap).length){
+    if(parentEl)parentEl.innerHTML=`
+      <div class="dash-card-title">Puntos críticos de falla (Pareto de defectos)</div>
+      <div class="dash-card-sub">Los puntos de revisión que más frecuentemente presentan fallas</div>
+      <p style="font-size:13px;color:var(--text3);text-align:center;padding:2rem;">
+        No hay puntos de revisión registrados aún.<br>
+        <small>Los puntos se toman de las auditorías guardadas en el Sheet.</small>
+      </p>`;
     return;
   }
-  const labels=sorted.map(([k])=>k.length>30?k.slice(0,30)+'…':k);
+
+  const sorted=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const labels=sorted.map(([k])=>k.length>35?k.slice(0,35)+'…':k);
   const vals=sorted.map(([,v])=>v);
   const total=vals.reduce((a,b)=>a+b,0);
-  let acum=0;const acumPct=vals.map(v=>{acum+=v;return Math.round(acum/total*100);});
+  let acum=0;
+  const acumPct=vals.map(v=>{acum+=v;return Math.round(acum/total*100);});
+
   const ctx=document.getElementById('chart-pareto').getContext('2d');
   if(chartPareto)chartPareto.destroy();
   chartPareto=new Chart(ctx,{
@@ -1046,11 +1093,136 @@ function renderChartPareto(){
       {type:'line',label:'% acumulado',data:acumPct,borderColor:'#dc2626',backgroundColor:'transparent',borderWidth:2,pointRadius:3,yAxisID:'y2'}
     ]},
     options:{responsive:true,interaction:{mode:'index'},plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}},scales:{
-      x:{ticks:{font:{size:10},maxRotation:40}},
+      x:{ticks:{font:{size:10},maxRotation:45,minRotation:30}},
       y:{position:'left',title:{display:true,text:'Frecuencia',font:{size:11}}},
       y2:{position:'right',min:0,max:100,title:{display:true,text:'% acumulado',font:{size:11}},grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}
     }}
   });
+}
+
+// ===== RANKING FALLAS POR MAQUILERO =====
+function renderFallasPorMaquilero(){
+  // Para cada maquilero: cuáles son sus top 3 fallas más frecuentes
+  const maqFallas={};
+  allData.forEach(r=>{
+    const maq=g(r,C.MAQ);
+    if(!maq)return;
+    if(!maqFallas[maq])maqFallas[maq]={};
+    puntosDeRegistro(r).forEach(pt=>{
+      maqFallas[maq][pt]=(maqFallas[maq][pt]||0)+1;
+    });
+  });
+
+  const container=document.getElementById('fallas-maq-list');
+  if(!container)return;
+  if(!Object.keys(maqFallas).length){
+    container.innerHTML='<p style="font-size:13px;color:var(--text3);padding:12px;">Sin datos suficientes.</p>';
+    return;
+  }
+
+  // Ordenar maquileros por promedio de calificación (peor primero = más urgente)
+  const maqMap={};
+  allData.forEach(r=>{
+    const maq=g(r,C.MAQ);
+    const val=parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1));
+    if(!maq||isNaN(val)||val<=0)return;
+    if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
+    maqMap[maq].sum+=val;maqMap[maq].cnt++;
+  });
+
+  const maqsSorted=Object.keys(maqFallas).sort((a,b)=>{
+    const avgA=maqMap[a]?(maqMap[a].sum/maqMap[a].cnt):3;
+    const avgB=maqMap[b]?(maqMap[b].sum/maqMap[b].cnt):3;
+    return avgA-avgB; // peor primero
+  });
+
+  let html='';
+  maqsSorted.forEach(maq=>{
+    const avg=maqMap[maq]?(maqMap[maq].sum/maqMap[maq].cnt):null;
+    const topFallas=Object.entries(maqFallas[maq])
+      .sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const dotCls=avg?(avg>=4?'dot-green':avg>=3?'dot-amber':'dot-red'):'dot-amber';
+    const avgStr=avg?avg.toFixed(1):'—';
+
+    html+=`<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span class="dot ${dotCls}" style="width:10px;height:10px;"></span>
+        <span style="font-size:13px;font-weight:600;flex:1;">${maq}</span>
+        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>${avgStr}</strong></span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${topFallas.length ? topFallas.map(([falla,cnt],i)=>`
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;font-weight:600;color:#fff;background:${i===0?'#dc2626':i===1?'#d97706':'#9e9b92'};width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+            <span style="font-size:11px;flex:1;color:var(--text2);">${falla.length>50?falla.slice(0,50)+'…':falla}</span>
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">${cnt}x</span>
+          </div>`).join('')
+        : '<span style="font-size:12px;color:var(--text3);">Sin fallas registradas</span>'}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=html;
+}
+
+// ===== RANKING POR TIPO DE PRODUCTO =====
+function renderRankingPorTipo(){
+  // Para cada tipo: ranking de maquileros con su promedio
+  const tipoMaqMap={};
+  allData.forEach(r=>{
+    const tipo=g(r,C.TIPO);
+    const maq=g(r,C.MAQ);
+    const val=parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1));
+    if(!tipo||!maq||isNaN(val)||val<=0)return;
+    if(!tipoMaqMap[tipo])tipoMaqMap[tipo]={};
+    if(!tipoMaqMap[tipo][maq])tipoMaqMap[tipo][maq]={sum:0,cnt:0};
+    tipoMaqMap[tipo][maq].sum+=val;
+    tipoMaqMap[tipo][maq].cnt++;
+  });
+
+  const container=document.getElementById('ranking-tipo-list');
+  if(!container)return;
+  if(!Object.keys(tipoMaqMap).length){
+    container.innerHTML='<p style="font-size:13px;color:var(--text3);padding:12px;">Sin datos suficientes.</p>';
+    return;
+  }
+
+  function scoreColorSimple(avg){
+    if(avg>=4)return'#16a34a';
+    if(avg>=3)return'#d97706';
+    return'#dc2626';
+  }
+
+  let html='';
+  Object.entries(tipoMaqMap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([tipo,maqs])=>{
+    const ranking=Object.entries(maqs)
+      .map(([name,{sum,cnt}])=>({name,avg:sum/cnt,cnt}))
+      .sort((a,b)=>b.avg-a.avg);
+
+    const tipoLabel=tipo.charAt(0).toUpperCase()+tipo.slice(1);
+    html+=`<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
+      <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">${tipoLabel}</span>
+        <span style="font-size:11px;color:var(--text3);">${ranking.length} maquilero${ranking.length!==1?'s':''}</span>
+      </div>
+      <div style="padding:8px;">
+        ${ranking.map((m,i)=>{
+          const color=scoreColorSimple(m.avg);
+          const barW=Math.round((m.avg/5)*100);
+          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+          return`<div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
+            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">${i+1}</span>
+            <span style="flex:1;font-size:12px;">${medal} ${m.name}</span>
+            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+              <div style="width:${barW}%;height:100%;background:${color};border-radius:3px;"></div>
+            </div>
+            <span style="font-size:12px;font-weight:600;color:${color};font-family:'DM Mono',monospace;width:30px;text-align:right;">${m.avg.toFixed(1)}</span>
+            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">${m.cnt} aud.</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=html;
 }
 
 // ===== FORMATO PDF =====
