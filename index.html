@@ -667,10 +667,6 @@ let lastEncuesta=null;
 let anioActivo='todos',mesActivo='todos';
 
 function buildColumnMap(headers){
-  // Nuevo Sheet: columnas fijas según estructura real detectada
-  // [0]Fecha [1]Corte [2]Prog [3]Mod [4]PrendasRec [5]PrendasRev
-  // [6]Auditor [7]Maquilero [8]Tipo [9]PunVacio [10]PUN1 [11]PUN2
-  // [12]PUN3 [13]PUN4 [14]CalVacio [15]ObsVacio [16]Vacia [17]CAL [18]OBS
   const h=headers.map(x=>String(x).toLowerCase().trim());
   function find(...terms){for(const t of terms){const i=h.findIndex(x=>x.includes(t));if(i>=0)return i;}return -1;}
   C={
@@ -683,26 +679,46 @@ function buildColumnMap(headers){
     AUD:   find('auditor'),
     MAQ:   find('maquilero'),
     TIPO:  find('producto recibido','tipo de producto'),
-    PROM:  -1,  // No hay columna promedio en este sheet
+    PROM:  -1,
   };
-  // Puntos: columnas K(10), L(11), M(12), N(13) — buscamos todas las que digan "puntos"
+  // Puntos: todas las columnas que digan "puntos importantes"
   const punIdx=h.reduce((a,x,i)=>x.includes('puntos')?[...a,i]:a,[]);
   C.PUN1=punIdx[0]??-1;
   C.PUN2=punIdx[1]??-1;
   C.PUN3=punIdx[2]??-1;
   C.PUN4=punIdx[3]??-1;
-  // Calificación: buscar columna que diga "evalúas" o "calidad del producto"
-  // Si no la encuentra por nombre, usamos índice 17 como fallback
-  const calIdx=h.findIndex(x=>x.includes('eval') || (x.includes('calidad') && x.includes('producto')));
-  C.CAL1 = calIdx>=0 ? calIdx : 17;
+
+  // CLAVE: el formulario tiene múltiples secciones (una por tipo de producto)
+  // cada sección genera su propia columna de calificación y observaciones.
+  // Guardamos TODOS los índices para buscar en tiempo real cuál tiene datos.
+  C.ALL_CAL = h.reduce((a,x,i)=>(x.includes('eval')||(x.includes('calidad')&&x.includes('producto')))?[...a,i]:a,[]);
+  C.ALL_OBS = h.reduce((a,x,i)=>x.includes('observacion')?[...a,i]:a,[]);
+
+  // Fallbacks para compatibilidad
+  C.CAL1 = C.ALL_CAL[0]??-1;
+  C.OBS1 = C.ALL_OBS[C.ALL_OBS.length-1]??-1;
   C.CAL2 = -1;
-  // Observaciones: buscar columna "observaciones generales"
-  const obsIdx=h.findIndex(x=>x.includes('observaciones'));
-  // El sheet tiene dos candidatas: índice 15 (vacía en datos) e índice 18 (con datos)
-  // Tomamos la última ocurrencia que tenga datos
-  const allObs=h.reduce((a,x,i)=>x.includes('observacion')?[...a,i]:a,[]);
-  C.OBS1 = allObs[allObs.length-1]??15;
   C.OBS2 = -1;
+}
+
+// Obtiene la calificación real de un registro buscando en todas las columnas posibles
+function getCAL(r){
+  if(!C.ALL_CAL||!C.ALL_CAL.length) return g(r,C.CAL1);
+  for(const idx of C.ALL_CAL){
+    const v=g(r,idx);
+    if(v&&v.trim()&&!isNaN(parseFloat(v)))return v.trim();
+  }
+  return '';
+}
+
+// Obtiene las observaciones reales buscando en todas las columnas posibles
+function getOBS(r){
+  if(!C.ALL_OBS||!C.ALL_OBS.length) return g(r,C.OBS1);
+  for(const idx of C.ALL_OBS){
+    const v=g(r,idx);
+    if(v&&v.trim()&&v.trim()!=='-')return v.trim();
+  }
+  return '';
 }
 
 function g(r,idx){return(idx>=0&&idx<r.length)?(r[idx]||''):'';}
@@ -789,7 +805,7 @@ async function loadData(){
 function buildStats(){
   const src=filtered.length?filtered:allData;
   document.getElementById('s-total').textContent=src.length;
-  const proms=src.map(r=>parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1))).filter(v=>!isNaN(v)&&v>0);
+  const proms=src.map(r=>parseFloat(getCAL(r))).filter(v=>!isNaN(v)&&v>0);
   document.getElementById('s-avg').textContent=proms.length?(proms.reduce((a,b)=>a+b,0)/proms.length).toFixed(1):'—';
   document.getElementById('s-maq').textContent=new Set(src.map(r=>g(r,C.MAQ)).filter(Boolean)).size;
   const now=new Date();
@@ -890,7 +906,7 @@ function renderTable(){
   const labels=['Fecha','# Corte','Programa','Modelo','Tipo','Maquilero','Rev.','Rec.','Calif.',''];
   const ths=labels.map((l,i)=>colKeys[i]>=0?`<th onclick="sortBy(${colKeys[i]})">${l} ${sortCol===colKeys[i]?(sortAsc?'↑':'↓'):''}</th>`:`<th></th>`).join('');
   const trs=regs.map(r=>{
-    const siVal=C.PROM>=0&&g(r,C.PROM)?g(r,C.PROM):g(r,C.CAL1);const si=scoreInfo(siVal);const idx=allData.indexOf(r);
+    const siVal=getCAL(r);const si=scoreInfo(siVal);const idx=allData.indexOf(r);
     return`<tr><td class="mono" style="font-size:11px;">${fmtFecha(g(r,C.FECHA))}</td><td><strong class="mono">${g(r,C.CORTE)||'—'}</strong></td><td>${g(r,C.PROG)||'—'}</td><td>${g(r,C.MOD)||'—'}</td><td>${tipoBadge(g(r,C.TIPO))}</td><td>${g(r,C.MAQ)||'—'}</td><td class="mono">${g(r,C.PREV)||'—'}</td><td class="mono">${g(r,C.PREC)||'—'}</td><td><span class="score-dot"><span class="dot ${si.cls}"></span>${si.label}</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(${idx})">Ver PDF</button></td></tr>`;
   }).join('');
   document.getElementById('table-area').innerHTML=`<div class="table-card"><div class="table-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div></div>`;
@@ -911,11 +927,7 @@ function renderDashboard(){
 
 function getPromedioMes(anio,mes){
   const registros=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getFullYear()===anio&&d.getMonth()===mes;});
-  const vals=registros.map(r=>{
-    // Usar PROM si existe, sino CAL1
-    const v=C.PROM>=0?g(r,C.PROM):g(r,C.CAL1);
-    return parseFloat(v);
-  }).filter(v=>!isNaN(v)&&v>0);
+  const vals=registros.map(r=>parseFloat(getCAL(r))).filter(v=>!isNaN(v)&&v>0);
   return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
 }
 
@@ -952,8 +964,7 @@ function renderRanking(){
   const maqMap={};
   allData.forEach(r=>{
     const maq=g(r,C.MAQ);
-    const promVal=C.PROM>=0?g(r,C.PROM):g(r,C.CAL1);
-    const prom=parseFloat(promVal);
+    const prom=parseFloat(getCAL(r));
     if(!maq||isNaN(prom)||prom<=0)return;
     if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
     maqMap[maq].sum+=prom;maqMap[maq].cnt++;
@@ -1124,7 +1135,7 @@ function renderFallasPorMaquilero(){
   const maqMap={};
   allData.forEach(r=>{
     const maq=g(r,C.MAQ);
-    const val=parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1));
+    const val=parseFloat(getCAL(r));
     if(!maq||isNaN(val)||val<=0)return;
     if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
     maqMap[maq].sum+=val;maqMap[maq].cnt++;
@@ -1171,7 +1182,7 @@ function renderRankingPorTipo(){
   allData.forEach(r=>{
     const tipo=g(r,C.TIPO);
     const maq=g(r,C.MAQ);
-    const val=parseFloat(C.PROM>=0?g(r,C.PROM):g(r,C.CAL1));
+    const val=parseFloat(getCAL(r));
     if(!tipo||!maq||isNaN(val)||val<=0)return;
     if(!tipoMaqMap[tipo])tipoMaqMap[tipo]={};
     if(!tipoMaqMap[tipo][maq])tipoMaqMap[tipo][maq]={sum:0,cnt:0};
@@ -1281,29 +1292,16 @@ function generarHTMLFormato(datos){
 function abrirFormato(idx){
   try{
     const r=allData[idx];
-    const cal=g(r,C.CAL1)||g(r,C.CAL2)||'';
-    const prom=parseFloat(cal);
-    function puntosALista(v){
-    if(!v)return[];
-    // Split inteligente: respeta comas dentro de paréntesis
-    const partes=[];let actual='',paren=0;
-    for(const ch of v){
-      if(ch==='('){paren++;actual+=ch;}
-      else if(ch===')'){paren--;actual+=ch;}
-      else if(ch===','&&paren===0){if(actual.trim())partes.push(actual.trim());actual='';}
-      else actual+=ch;
-    }
-    if(actual.trim())partes.push(actual.trim());
-    return partes.filter(Boolean);
-  }
-    // Combinar todas las columnas de puntos del nuevo sheet y deduplicar
+    const cal=getCAL(r);
+    const obs=getOBS(r);
+    // Combinar todas las columnas de puntos y deduplicar
     const todosLosPuntos=[
       ...puntosALista(g(r,C.PUN1)),
       ...puntosALista(g(r,C.PUN2)),
       ...puntosALista(C.PUN3>=0?g(r,C.PUN3):''),
       ...puntosALista(C.PUN4>=0?g(r,C.PUN4):''),
     ].filter((v,i,a)=>v&&a.indexOf(v)===i);
-    const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal,promedio:'',puntos:todosLosPuntos,obs:[g(r,C.OBS1),g(r,C.OBS2)].filter(Boolean).join('\n\n')};
+    const datos={corte:g(r,C.CORTE),programa:g(r,C.PROG),modelo:g(r,C.MOD),fecha:fmtFecha(g(r,C.FECHA)),prev:g(r,C.PREV),prec:g(r,C.PREC),auditor:g(r,C.AUD),maquilero:g(r,C.MAQ),tipo:g(r,C.TIPO),cal,promedio:'',puntos:todosLosPuntos,obs};
     document.getElementById('modal-meta').textContent=`Corte ${datos.corte||'—'} · ${datos.fecha}`;
     document.getElementById('formato-print').innerHTML=generarHTMLFormato(datos);
     document.getElementById('overlay').classList.add('open');
@@ -1591,3 +1589,4 @@ if(sessionStorage.getItem('auth')==='1'){
 </script>
 </body>
 </html>
+
