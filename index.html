@@ -688,38 +688,22 @@ function buildColumnMap(headers){
   C.PUN3=punIdx[2]??-1;
   C.PUN4=punIdx[3]??-1;
 
-  // CLAVE: el formulario tiene múltiples secciones (una por tipo de producto)
-  // cada sección genera su propia columna de calificación y observaciones.
-  // Guardamos TODOS los índices para buscar en tiempo real cuál tiene datos.
-  C.ALL_CAL = h.reduce((a,x,i)=>(x.includes('eval')||(x.includes('calidad')&&x.includes('producto')))?[...a,i]:a,[]);
-  C.ALL_OBS = h.reduce((a,x,i)=>x.includes('observacion')?[...a,i]:a,[]);
-
-  // Fallbacks para compatibilidad
-  C.CAL1 = C.ALL_CAL[0]??-1;
-  C.OBS1 = C.ALL_OBS[C.ALL_OBS.length-1]??-1;
+  // Columnas fijas confirmadas por el usuario:
+  // Columna O (índice 14) = ¿Cómo evalúas la calidad del producto?
+  // Columna P (índice 15) = Observaciones generales del producto
+  C.CAL1 = 14;
+  C.OBS1 = 15;
   C.CAL2 = -1;
   C.OBS2 = -1;
+  C.ALL_CAL = [14];
+  C.ALL_OBS = [15];
 }
 
-// Obtiene la calificación real de un registro buscando en todas las columnas posibles
-function getCAL(r){
-  if(!C.ALL_CAL||!C.ALL_CAL.length) return g(r,C.CAL1);
-  for(const idx of C.ALL_CAL){
-    const v=g(r,idx);
-    if(v&&v.trim()&&!isNaN(parseFloat(v)))return v.trim();
-  }
-  return '';
-}
+// Obtiene la calificación — columna O (índice 14)
+function getCAL(r){ return g(r,14); }
 
-// Obtiene las observaciones reales buscando en todas las columnas posibles
-function getOBS(r){
-  if(!C.ALL_OBS||!C.ALL_OBS.length) return g(r,C.OBS1);
-  for(const idx of C.ALL_OBS){
-    const v=g(r,idx);
-    if(v&&v.trim()&&v.trim()!=='-')return v.trim();
-  }
-  return '';
-}
+// Obtiene las observaciones — columna P (índice 15)
+function getOBS(r){ return g(r,15); }
 
 function g(r,idx){return(idx>=0&&idx<r.length)?(r[idx]||''):'';}
 function normalize(val,list){if(!val)return val;const v=val.trim().toLowerCase();const m=list.find(x=>x.trim().toLowerCase()===v);return m||val.trim();}
@@ -1589,4 +1573,3 @@ if(sessionStorage.getItem('auth')==='1'){
 </script>
 </body>
 </html>
-
