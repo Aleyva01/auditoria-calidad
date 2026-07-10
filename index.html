@@ -1030,6 +1030,20 @@ function renderChartAuditores(){
   chartAuditores=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors.slice(0,labels.length),borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}});
 }
 
+// Split inteligente: divide por coma respetando paréntesis
+function puntosALista(v){
+  if(!v)return[];
+  const partes=[];let actual='',paren=0;
+  for(const ch of String(v)){
+    if(ch==='('){paren++;actual+=ch;}
+    else if(ch===')'){paren--;actual+=ch;}
+    else if(ch===','&&paren===0){if(actual.trim())partes.push(actual.trim());actual='';}
+    else actual+=ch;
+  }
+  if(actual.trim())partes.push(actual.trim());
+  return partes.filter(Boolean);
+}
+
 // Helper: obtiene todos los puntos de un registro como array
 function puntosDeRegistro(r){
   const cols=[C.PUN1,C.PUN2,C.PUN3,C.PUN4].filter(c=>c!==undefined&&c>=0);
