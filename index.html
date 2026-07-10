@@ -1114,7 +1114,7 @@ function renderFallasPorMaquilero(){
   // Para cada maquilero: cuáles son sus top 3 fallas más frecuentes
   const maqFallas={};
   allData.forEach(r=>{
-    const maq=g(r,C.MAQ);
+    const maq=normalize(g(r,C.MAQ),config.maquileros)||g(r,C.MAQ).trim();
     if(!maq)return;
     if(!maqFallas[maq])maqFallas[maq]={};
     puntosDeRegistro(r).forEach(pt=>{
@@ -1178,14 +1178,18 @@ function renderRankingPorTipo(){
   // Para cada tipo: ranking de maquileros con su promedio
   const tipoMaqMap={};
   allData.forEach(r=>{
-    const tipo=g(r,C.TIPO);
-    const maq=g(r,C.MAQ);
+    // Normalizar tipo a minúsculas para evitar duplicados por mayúsculas
+    const tipoRaw=g(r,C.TIPO);
+    const tipo=tipoRaw.trim().toLowerCase();
+    const maq=g(r,C.MAQ).trim();
     const val=parseFloat(getCAL(r));
     if(!tipo||!maq||isNaN(val)||val<=0)return;
     if(!tipoMaqMap[tipo])tipoMaqMap[tipo]={};
-    if(!tipoMaqMap[tipo][maq])tipoMaqMap[tipo][maq]={sum:0,cnt:0};
-    tipoMaqMap[tipo][maq].sum+=val;
-    tipoMaqMap[tipo][maq].cnt++;
+    // Normalizar también el nombre del maquilero
+    const maqKey=maq.toLowerCase();
+    if(!tipoMaqMap[tipo][maqKey])tipoMaqMap[tipo][maqKey]={sum:0,cnt:0,nombre:maq};
+    tipoMaqMap[tipo][maqKey].sum+=val;
+    tipoMaqMap[tipo][maqKey].cnt++;
   });
 
   const container=document.getElementById('ranking-tipo-list');
@@ -1203,11 +1207,11 @@ function renderRankingPorTipo(){
 
   let html='';
   Object.entries(tipoMaqMap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([tipo,maqs])=>{
+    // Título: primera letra mayúscula de cada palabra
+    const tipoLabel=tipo.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     const ranking=Object.entries(maqs)
-      .map(([name,{sum,cnt}])=>({name,avg:sum/cnt,cnt}))
+      .map(([key,{sum,cnt,nombre}])=>({name:nombre,avg:sum/cnt,cnt}))
       .sort((a,b)=>b.avg-a.avg);
-
-    const tipoLabel=tipo.charAt(0).toUpperCase()+tipo.slice(1);
     html+=`<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
       <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">${tipoLabel}</span>
