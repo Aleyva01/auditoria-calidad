@@ -1052,14 +1052,12 @@ function renderPrendasMensual(){
 function generarAnalisisIA(){
   const container = document.getElementById('ia-analisis');
   if(!container||!allData.length)return;
-
   container.innerHTML = '<div style="text-align:center;padding:1rem;color:#7c3aed;font-size:13px;">🤖 Analizando datos...</div>';
 
-  // Calcular métricas base
   const now = new Date();
-  const mesActual = now.getMonth(), anioActual = now.getFullYear();
-  const mesPrev = mesActual===0?11:mesActual-1;
-  const anioPrev = mesActual===0?anioActual-1:anioActual;
+  const mesActual=now.getMonth(), anioActual=now.getFullYear();
+  const mesPrev=mesActual===0?11:mesActual-1;
+  const anioPrev=mesActual===0?anioActual-1:anioActual;
 
   function promMes(a,m){
     const regs=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getMonth()===m&&d.getFullYear()===a;});
@@ -1067,9 +1065,9 @@ function generarAnalisisIA(){
     return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
   }
 
-  const promCurr = promMes(anioActual,mesActual);
-  const promAnterior = promMes(anioPrev,mesPrev);
-  const tendencia = promCurr&&promAnterior?(promCurr-promAnterior):null;
+  const promCurr=promMes(anioActual,mesActual);
+  const promAnterior=promMes(anioPrev,mesPrev);
+  const tendencia=promCurr&&promAnterior?(promCurr-promAnterior):null;
 
   // Ranking maquileros
   const maqMap={};
@@ -1080,71 +1078,162 @@ function generarAnalisisIA(){
     maqMap[maq].sum+=val;maqMap[maq].cnt++;
   });
   const ranking=Object.entries(maqMap).map(([n,{sum,cnt}])=>({n,avg:sum/cnt,cnt})).sort((a,b)=>b.avg-a.avg);
-  const mejorMaq = ranking[0];
-  const peorMaq = ranking[ranking.length-1];
+  const mejorMaq=ranking[0];
+  const peorMaq=ranking[ranking.length-1];
 
-  // Top falla
+  // Top fallas
   const defMap={};
   allData.forEach(r=>puntosDeRegistro(r).forEach(p=>{defMap[p]=(defMap[p]||0)+1;}));
-  const topFallas=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const topFallas=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-  // Total prendas este mes
+  // Métricas del mes
   const regsMes=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getMonth()===mesActual&&d.getFullYear()===anioActual;});
   const totalPrendasMes=regsMes.reduce((s,r)=>s+(parseInt(g(r,C.PREC))||0),0);
   const totalRevisadasMes=regsMes.reduce((s,r)=>s+(parseInt(g(r,C.PREV))||0),0);
   const pctRevision=totalPrendasMes>0?Math.round(totalRevisadasMes/totalPrendasMes*100):0;
 
-  // Generar recomendaciones
-  const recomendaciones=[];
+  // Métricas históricas
+  const todosProms=allData.map(r=>parseFloat(getCAL(r))).filter(v=>!isNaN(v)&&v>0);
+  const promHistorico=todosProms.length?(todosProms.reduce((a,b)=>a+b,0)/todosProms.length):null;
 
-  if(tendencia!==null){
-    if(tendencia>0.3)
-      recomendaciones.push({tipo:'success',icon:'📈',titulo:'Tendencia positiva',texto:`La calidad subió ${tendencia.toFixed(1)} puntos vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). Identifica qué cambió este mes y documenta las buenas prácticas.`});
-    else if(tendencia<-0.3)
-      recomendaciones.push({tipo:'danger',icon:'📉',titulo:'Alerta: calidad a la baja',texto:`La calidad bajó ${Math.abs(tendencia).toFixed(1)} puntos vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). Revisar causas inmediatamente con el equipo.`});
-    else
-      recomendaciones.push({tipo:'info',icon:'📊',titulo:'Calidad estable',texto:`El promedio se mantiene en ${promCurr?promCurr.toFixed(1):'—'}/5. Busca oportunidades para subir al siguiente nivel.`});
+  // Tendencia histórica (primero vs último mes con datos)
+  const mesMap2={};
+  allData.forEach(r=>{const d=parseFechaMX(g(r,C.FECHA));const v=parseFloat(getCAL(r));if(!d||isNaN(v)||v<=0)return;const k=`${d.getFullYear()}-${d.getMonth()}`;if(!mesMap2[k])mesMap2[k]={sum:0,cnt:0};mesMap2[k].sum+=v;mesMap2[k].cnt++;});
+  const mesesData=Object.entries(mesMap2).sort((a,b)=>a[0].localeCompare(b[0])).map(([,{sum,cnt}])=>sum/cnt);
+  const tendGlobal=mesesData.length>=2?(mesesData[mesesData.length-1]-mesesData[0]):null;
+
+  // Maquileros bajo 3.0
+  const maqBajos=ranking.filter(m=>m.avg<3.0);
+  // Maquileros en riesgo (3.0-3.4)
+  const maqRiesgo=ranking.filter(m=>m.avg>=3.0&&m.avg<3.5);
+
+  const colores={success:'#d8f3dc',danger:'#fee2e2',warning:'#fff3cd',info:'#dbeafe',purple:'#f5f3ff',gray:'#f0efe9'};
+  const bordes={success:'#86efac',danger:'#fca5a5',warning:'#fbbf24',info:'#93c5fd',purple:'#c4b5fd',gray:'#e0ddd4'};
+  const textos={success:'#166534',danger:'#7f1d1d',warning:'#7d4e00',info:'#1e3a5f',purple:'#6d28d9',gray:'#4b4840'};
+
+  function card(tipo,icon,titulo,texto,acciones=''){
+    return`<div style="background:${colores[tipo]};border:0.5px solid ${bordes[tipo]};border-radius:8px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;color:${textos[tipo]};margin-bottom:4px;">${icon} ${titulo}</div>
+      <div style="font-size:12px;color:${textos[tipo]};line-height:1.6;">${texto}</div>
+      ${acciones?`<div style="margin-top:8px;padding-top:8px;border-top:0.5px solid ${bordes[tipo]};">${acciones}</div>`:''}
+    </div>`;
   }
 
-  if(peorMaq&&peorMaq.avg<3)
-    recomendaciones.push({tipo:'danger',icon:'⚠️',titulo:`Visita técnica urgente: ${peorMaq.n}`,texto:`Promedio de ${peorMaq.avg.toFixed(2)}/5 en ${peorMaq.cnt} auditorías. Se recomienda reunión técnica inmediata para identificar y corregir el proceso.`});
+  let html=`<div style="font-size:11px;color:#7c3aed;font-family:'DM Mono',monospace;margin-bottom:12px;padding:8px;background:#f5f3ff;border-radius:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+    <span>📊 ${allData.length} registros totales</span>
+    <span>📅 ${regsMes.length} auditorías este mes</span>
+    <span>⌀ Histórico: ${promHistorico?promHistorico.toFixed(2):'—'}/5</span>
+    <span>👕 ${totalPrendasMes.toLocaleString()} prendas recibidas</span>
+  </div>`;
 
-  if(mejorMaq)
-    recomendaciones.push({tipo:'success',icon:'🏆',titulo:`Mejor maquilero: ${mejorMaq.n}`,texto:`Promedio de ${mejorMaq.avg.toFixed(2)}/5 en ${mejorMaq.cnt} auditorías. Considera usarlo como referencia para capacitar a otros maquileros.`});
+  // SECCIÓN 1: ESTADO ACTUAL
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;font-family:'DM Mono',monospace;">📋 Estado actual</div>`;
 
-  if(topFallas.length>0)
-    recomendaciones.push({tipo:'warning',icon:'🔧',titulo:`Falla #1: "${topFallas[0][0].slice(0,40)}${topFallas[0][0].length>40?'…':''}"`,texto:`Aparece ${topFallas[0][1]} veces en auditorías. Prioriza la capacitación en este punto en la próxima junta de calidad.`});
+  if(tendencia!==null){
+    if(tendencia>0.3) html+=card('success','📈','Tendencia mensual positiva',`La calidad subió <strong>${tendencia.toFixed(1)} puntos</strong> vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). ¡Buen trabajo! Identifica qué cambió y documenta las buenas prácticas para replicarlas.`);
+    else if(tendencia<-0.3) html+=card('danger','📉','Alerta: calidad a la baja',`La calidad bajó <strong>${Math.abs(tendencia).toFixed(1)} puntos</strong> vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). Se recomienda revisar inmediatamente con los maquileros involucrados.`);
+    else html+=card('info','📊','Calidad estable este mes',`El promedio se mantiene en <strong>${promCurr?promCurr.toFixed(1):'—'}/5</strong>. Busca oportunidades de mejora incremental.`);
+  } else if(promCurr){
+    html+=card('info','📊',`Promedio este mes: ${promCurr.toFixed(1)}/5`,`Sin datos del mes anterior para comparar. Histórico general: ${promHistorico?promHistorico.toFixed(2):'—'}/5.`);
+  }
 
-  if(pctRevision<50)
-    recomendaciones.push({tipo:'warning',icon:'👁️',titulo:'Cobertura de revisión baja',texto:`Solo se revisa el ${pctRevision}% de las prendas recibidas este mes. Considera aumentar el porcentaje de muestreo para mayor control.`});
+  if(tendGlobal!==null&&mesesData.length>=3){
+    if(tendGlobal>0.5) html+=card('success','🚀','Tendencia histórica excelente',`En ${mesesData.length} meses de datos, la calidad mejoró <strong>${tendGlobal.toFixed(1)} puntos</strong> en total. El programa de auditorías está generando resultados.`);
+    else if(tendGlobal<-0.5) html+=card('danger','⚠️','Tendencia histórica negativa',`En ${mesesData.length} meses la calidad bajó <strong>${Math.abs(tendGlobal).toFixed(1)} puntos</strong> acumulados. Se recomienda una revisión profunda de los procesos de confección.`);
+  }
+
+  // SECCIÓN 2: MAQUILEROS
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">👷 Análisis de maquileros</div>`;
+
+  if(mejorMaq) html+=card('success','🏆',`Mejor maquilero: ${mejorMaq.n}`,
+    `Promedio <strong>${mejorMaq.avg.toFixed(2)}/5</strong> en ${mejorMaq.cnt} auditorías.<br>
+    <strong>Sugerencia:</strong> Organiza una visita de intercambio donde otros maquileros observen el proceso de ${mejorMaq.n}. Documenta sus buenas prácticas y crea un manual de referencia.`);
+
+  if(maqBajos.length>0) html+=card('danger','🚨',`${maqBajos.length} maquilero${maqBajos.length>1?'s':''} bajo 3.0/5 — Acción urgente`,
+    maqBajos.map(m=>`<strong>${m.name||m.n}</strong>: ${m.avg.toFixed(2)}/5 (${m.cnt} aud.)`).join(' · ')+'<br><br>'+
+    `<strong>Acciones inmediatas:</strong><br>
+    1. Visita técnica en planta esta semana<br>
+    2. Revisión del proceso de confección punto por punto<br>
+    3. Capacitación específica en las fallas más frecuentes<br>
+    4. Auditorías de seguimiento quincenal hasta superar 3.5/5`);
+
+  if(maqRiesgo.length>0) html+=card('warning','⚠️',`${maqRiesgo.length} maquilero${maqRiesgo.length>1?'s':''} en zona de riesgo (3.0–3.4)`,
+    maqRiesgo.map(m=>`<strong>${m.name||m.n}</strong>: ${m.avg.toFixed(2)}/5`).join(' · ')+'<br><br>'+
+    `<strong>Seguimiento recomendado:</strong> Reunión mensual de retroalimentación, compartir los puntos críticos de falla detectados y establecer metas de mejora medibles.`);
 
   if(ranking.length>=3){
     const dispersión=mejorMaq.avg-peorMaq.avg;
-    if(dispersión>1.5)
-      recomendaciones.push({tipo:'info',icon:'📋',titulo:'Alta variabilidad entre maquileros',texto:`Diferencia de ${dispersión.toFixed(1)} puntos entre el mejor y peor maquilero. Esto indica procesos muy desiguales — estandarizar es clave.`});
+    if(dispersión>1.5) html+=card('warning','📋','Alta variabilidad entre maquileros',
+      `Diferencia de <strong>${dispersión.toFixed(1)} puntos</strong> entre el mejor y peor maquilero. Esto indica procesos muy desiguales.<br><br>
+      <strong>¿Cómo medirlo?</strong> Compara las fallas específicas de cada maquilero en el Ranking de Fallas. Busca patrones: ¿los de menor calificación fallan en los mismos puntos?<br>
+      <strong>Solución:</strong> Estandarizar el proceso con fichas de confección detalladas y capacitación uniforme.`);
   }
 
-  // Renderizar
-  const colores={success:'#d8f3dc',danger:'#fee2e2',warning:'#fff3cd',info:'#dbeafe'};
-  const bordes={success:'#86efac',danger:'#fca5a5',warning:'#fbbf24',info:'#93c5fd'};
-  const textos={success:'#166534',danger:'#7f1d1d',warning:'#7d4e00',info:'#1e3a5f'};
+  // SECCIÓN 3: PARÁMETROS A MEDIR
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">🔬 Parámetros clave a monitorear</div>`;
 
-  let html=`<div style="font-size:11px;color:#7c3aed;font-family:'DM Mono',monospace;margin-bottom:12px;padding:8px;background:#f5f3ff;border-radius:6px;">
-    Basado en ${allData.length} registros · ${MESES[mesActual]} ${anioActual} · ${regsMes.length} auditorías este mes
-  </div>`;
+  html+=card('purple','📐','Indicadores de calidad recomendados',
+    `<strong>1. Tasa de defectos por prenda</strong> — Meta: &lt;5%<br>
+    &nbsp;&nbsp;&nbsp;Cómo medirlo: (prendas con defecto / prendas revisadas) × 100<br><br>
+    <strong>2. Calificación promedio mensual</strong> — Meta: ≥4.0/5<br>
+    &nbsp;&nbsp;&nbsp;Cómo medirlo: Promedio de calificaciones en las auditorías del mes<br><br>
+    <strong>3. % de cobertura de revisión</strong> — Meta: ≥80% de prendas recibidas<br>
+    &nbsp;&nbsp;&nbsp;Cómo medirlo: (prendas revisadas / prendas recibidas) × 100<br><br>
+    <strong>4. Índice de reincidencia</strong> — Meta: 0 fallas repetidas 3+ meses<br>
+    &nbsp;&nbsp;&nbsp;Cómo medirlo: Fallas que aparecen en el Pareto mes tras mes<br><br>
+    <strong>5. Tiempo de respuesta a fallas críticas</strong> — Meta: &lt;48 horas<br>
+    &nbsp;&nbsp;&nbsp;Cómo medirlo: Registrar fecha de detección vs fecha de corrección`);
 
-  recomendaciones.forEach(r=>{
-    html+=`<div style="background:${colores[r.tipo]};border:0.5px solid ${bordes[r.tipo]};border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:${textos[r.tipo]};margin-bottom:4px;">${r.icon} ${r.titulo}</div>
-      <div style="font-size:12px;color:${textos[r.tipo]};line-height:1.6;">${r.texto}</div>
-    </div>`;
-  });
+  // SECCIÓN 4: FALLAS CRÍTICAS
+  if(topFallas.length>0){
+    html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">🔧 Plan de acción sobre fallas críticas</div>`;
+    const total=topFallas.reduce((s,[,v])=>s+v,0);
+    let fallaHTML=topFallas.map(([falla,cnt],i)=>{
+      const pct=Math.round(cnt/total*100);
+      const prioridad=i===0?'🔴 CRÍTICA':i===1?'🟠 ALTA':'🟡 MEDIA';
+      return`<div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <strong style="font-size:12px;">${i+1}. ${falla.slice(0,55)}${falla.length>55?'…':''}</strong>
+          <span style="font-size:11px;">${prioridad}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);">${cnt} ocurrencias (${pct}% del total detectado)</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
+          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
+        </div>
+      </div>`;
+    }).join('');
+    html+=card('warning','⚠️','Top fallas detectadas — Plan de acción',fallaHTML);
+  }
 
-  if(!recomendaciones.length)
-    html+='<div style="text-align:center;font-size:13px;color:var(--text3);padding:1rem;">Sin suficientes datos para generar recomendaciones.</div>';
+  // SECCIÓN 5: COBERTURA
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">📦 Cobertura de auditoría</div>`;
+
+  if(pctRevision<50) html+=card('danger','👁️','Cobertura de revisión crítica',
+    `Solo se revisó el <strong>${pctRevision}%</strong> de las ${totalPrendasMes.toLocaleString()} prendas recibidas este mes.<br><br>
+    <strong>Meta recomendada:</strong> Revisar al menos el 80% de cada entrega.<br>
+    <strong>Cómo lograrlo:</strong> Implementar muestreo sistemático — revisar al menos 1 de cada 2 prendas en cada lote recibido. Para lotes &gt;200 piezas, aplicar AQL 2.5 (inspección normal, nivel II).`);
+  else if(pctRevision<80) html+=card('warning','👁️','Cobertura de revisión media',
+    `Se revisó el <strong>${pctRevision}%</strong> de las prendas. Meta: 80%.<br>
+    <strong>Sugerencia:</strong> Priorizar revisión completa de maquileros con historial de fallas.`);
+  else html+=card('success','✅','Buena cobertura de revisión',
+    `Se revisó el <strong>${pctRevision}%</strong> de las prendas recibidas este mes. Excelente control.`);
+
+  // SECCIÓN 6: PRÓXIMAS ACCIONES
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">✅ Próximas acciones sugeridas</div>`;
+  html+=card('gray','📅','Agenda de mejora continua',
+    `<strong>Esta semana:</strong><br>
+    ${maqBajos.length>0?`• Visita técnica a: ${maqBajos.map(m=>m.n||m.name).join(', ')}<br>`:''}
+    ${topFallas.length>0?`• Incluir "${topFallas[0][0].slice(0,40)}" en el checklist de recepción<br>`:''}
+    • Actualizar registros de auditoría pendientes<br><br>
+    <strong>Este mes:</strong><br>
+    • Junta de calidad con todos los maquileros (compartir resultados)<br>
+    • Definir meta de calificación para el próximo mes: <strong>${promCurr?(Math.min(5,promCurr+0.2)).toFixed(1):'4.0'}/5</strong><br>
+    • Revisar fichas de confección de los productos con más fallas<br><br>
+    <strong>Indicador de éxito:</strong> Reducir las fallas del Pareto en un 20% el próximo mes.`);
 
   container.innerHTML=html;
 }
+
 
 function exportarAnalisis(){
   const contenido=document.getElementById('ia-analisis');
@@ -1169,31 +1258,108 @@ function getPromedioMes(anio,mes){
 
 function renderSemaforo(){
   const now=new Date();
-  const currAnio=now.getFullYear(),currMes=now.getMonth();
-  const prevAnio=currMes===0?currAnio-1:currAnio;
-  const prevMes=currMes===0?11:currMes-1;
-  const curr=getPromedioMes(currAnio,currMes);
-  const prev=getPromedioMes(prevAnio,prevMes);
-  const setDot=(id,val)=>{
-    const el=document.getElementById(id);
-    if(val===null){el.textContent='—';el.className='sem-dot gray';return;}
-    el.textContent=val.toFixed(1);
-    el.className='sem-dot '+(val>=4?'green':val>=3?'amber':'red');
-  };
-  setDot('sem-curr-dot',curr);setDot('sem-prev-dot',prev);
-  document.getElementById('sem-curr-val').textContent=curr?curr.toFixed(1):'Sin datos';
-  document.getElementById('sem-prev-val').textContent=prev?prev.toFixed(1):'Sin datos';
-  document.getElementById('sem-curr-label').textContent=MESES[currMes]+' '+currAnio;
-  document.getElementById('sem-prev-label').textContent=MESES[prevMes]+' '+prevAnio;
-  const arrow=document.getElementById('sem-arrow');
-  let msg='';
-  if(curr&&prev){
-    const diff=curr-prev;
-    if(diff>0.2){arrow.textContent='↑';arrow.style.color='#16a34a';msg=`La calidad subió ${diff.toFixed(1)} puntos. ¡Buen trabajo!`;}
-    else if(diff<-0.2){arrow.textContent='↓';arrow.style.color='#dc2626';msg=`La calidad bajó ${Math.abs(diff).toFixed(1)} puntos. Se requiere atención.`;}
-    else{arrow.textContent='→';arrow.style.color='#9e9b92';msg='La calidad se mantiene estable.';}
-  }else{arrow.textContent='→';arrow.style.color='#9e9b92';}
-  document.getElementById('sem-mensaje').textContent=msg;
+  const currAnio=now.getFullYear(), currMes=now.getMonth();
+
+  // Recopilar todos los meses con datos
+  const mesMap={};
+  allData.forEach(r=>{
+    const d=parseFechaMX(g(r,C.FECHA));
+    const v=parseFloat(getCAL(r));
+    if(!d||isNaN(v)||v<=0)return;
+    const key=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+    if(!mesMap[key])mesMap[key]={sum:0,cnt:0,anio:d.getFullYear(),mes:d.getMonth()};
+    mesMap[key].sum+=v; mesMap[key].cnt++;
+  });
+
+  const mesesOrdenados=Object.entries(mesMap)
+    .map(([k,{sum,cnt,anio,mes}])=>({key:k,avg:sum/cnt,cnt,anio,mes}))
+    .sort((a,b)=>a.key.localeCompare(b.key));
+
+  if(!mesesOrdenados.length){
+    document.getElementById('semaforo-wrap').innerHTML=
+      '<p style="text-align:center;color:var(--text3);font-size:13px;padding:1rem;">Sin datos suficientes.</p>';
+    return;
+  }
+
+  // Mejor mes histórico
+  const mejorMes=[...mesesOrdenados].sort((a,b)=>b.avg-a.avg)[0];
+  // Mes actual y anterior
+  const currKey=`${currAnio}-${String(currMes).padStart(2,'0')}`;
+  const prevMes2=currMes===0?11:currMes-1;
+  const prevAnio2=currMes===0?currAnio-1:currAnio;
+  const prevKey=`${prevAnio2}-${String(prevMes2).padStart(2,'0')}`;
+  const curr=mesMap[currKey]?mesMap[currKey].sum/mesMap[currKey].cnt:null;
+  const prev=mesMap[prevKey]?mesMap[prevKey].sum/mesMap[prevKey].cnt:null;
+
+  function dotColor(v){ return v>=4?'#16a34a':v>=3?'#d97706':'#dc2626'; }
+  function dotClass(v){ return v>=4?'green':v>=3?'amber':'red'; }
+
+  // Tendencia entre el primer y último mes
+  const primero=mesesOrdenados[0];
+  const ultimo=mesesOrdenados[mesesOrdenados.length-1];
+  const tendenciaGlobal=ultimo.avg-primero.avg;
+
+  // Renderizar timeline de todos los meses
+  const timelineHTML=mesesOrdenados.map((m,i)=>{
+    const esActual=m.key===currKey;
+    const esMejor=m.key===mejorMes.key;
+    const barH=Math.round((m.avg/5)*100);
+    const color=dotColor(m.avg);
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
+      ${esMejor?'<span style="font-size:9px;font-weight:700;color:#7c3aed;font-family:'DM Mono',monospace;">MEJOR</span>':'<span style="font-size:9px;opacity:0;"> </span>'}
+      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:${esActual?'2px solid #1a1917':'1px solid var(--border2)'};">
+        <div style="position:absolute;bottom:0;width:100%;height:${barH}%;background:${color};border-radius:2px;transition:height 0.4s;"></div>
+        ${esMejor?`<div style="position:absolute;top:2px;width:100%;text-align:center;font-size:9px;">⭐</div>`:''}
+      </div>
+      <div style="font-size:11px;font-weight:600;color:${color};">${m.avg.toFixed(1)}</div>
+      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">${MESES[m.mes].slice(0,3)}<br>${m.anio}</div>
+      <div style="font-size:10px;color:var(--text3);">${m.cnt}✓</div>
+    </div>`;
+  }).join('');
+
+  // Armar mensaje de tendencia
+  let trendMsg='', trendColor='var(--text3)';
+  if(tendenciaGlobal>0.3){trendMsg=`📈 Tendencia histórica positiva: +${tendenciaGlobal.toFixed(1)} pts desde ${MESES[primero.mes]} ${primero.anio}`;trendColor='#16a34a';}
+  else if(tendenciaGlobal<-0.3){trendMsg=`📉 Tendencia histórica negativa: ${tendenciaGlobal.toFixed(1)} pts desde ${MESES[primero.mes]} ${primero.anio}`;trendColor='#dc2626';}
+  else{trendMsg=`→ Calidad estable desde ${MESES[primero.mes]} ${primero.anio}`;trendColor='var(--text3)';}
+
+  const semWrap=document.getElementById('semaforo-wrap');
+  semWrap.innerHTML=`
+    <!-- Timeline horizontal -->
+    <div style="width:100%;overflow-x:auto;padding-bottom:4px;">
+      <div style="display:flex;gap:8px;align-items:flex-end;padding:8px 4px;min-width:max-content;">
+        ${timelineHTML}
+      </div>
+    </div>
+    <!-- Resumen -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;width:100%;">
+      <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">MES ANTERIOR</div>
+        <div style="font-size:22px;font-weight:600;color:${prev?dotColor(prev):'var(--text3)'};">${prev?prev.toFixed(1):'—'}</div>
+        <div style="font-size:11px;color:var(--text3);">${MESES[prevMes2]} ${prevAnio2}</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:8px;border:2px solid #1a1917;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">ESTE MES</div>
+        <div style="font-size:22px;font-weight:600;color:${curr?dotColor(curr):'var(--text3)'};">${curr?curr.toFixed(1):'—'}</div>
+        <div style="font-size:11px;color:var(--text3);">${MESES[currMes]} ${currAnio}</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
+        <div style="font-size:11px;color:#7c3aed;margin-bottom:4px;">⭐ MEJOR MES</div>
+        <div style="font-size:22px;font-weight:600;color:#7c3aed;">${mejorMes.avg.toFixed(1)}</div>
+        <div style="font-size:11px;color:#7c3aed;">${MESES[mejorMes.mes]} ${mejorMes.anio}</div>
+      </div>
+    </div>`;
+
+  // Mensaje tendencia
+  const msgEl=document.getElementById('sem-mensaje');
+  if(msgEl){
+    let diffMsg='';
+    if(curr&&prev){
+      const d=curr-prev;
+      diffMsg=d>0.2?` · Este mes subió ${d.toFixed(1)} pts ↑`:d<-0.2?` · Este mes bajó ${Math.abs(d).toFixed(1)} pts ↓`:' · Sin cambio vs mes anterior';
+    }
+    msgEl.innerHTML=`<span style="color:${trendColor};font-size:13px;">${trendMsg}${diffMsg}</span>`;
+  }
 }
 
 function renderRanking(){
