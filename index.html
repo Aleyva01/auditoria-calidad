@@ -768,26 +768,37 @@ async function loadData(){
     const rows=parseCSV(txt);
     if(rows.length<2)throw new Error('Sin datos.');
     buildColumnMap(rows[0]);
-    // Mapa de normalización de tipos conocidos (todas las variantes → forma canónica)
+    // Quitar acentos y normalizar texto para comparar
+    function sinAcentos(s){
+      if(!s)return'';
+      // Reemplazar manualmente las letras con acento más comunes del español
+      return String(s).trim().toLowerCase()
+        .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+        .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+        .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+        .replace(/\s+/g,' ');
+    }
+    // Mapa de normalización: clave SIN acentos → forma canónica con acentos
     const TIPOS_CANON = {
-      'filipina manga corta':  'Filipina Manga Corta',
-      'filipina manga larga':  'Filipina Manga Larga',
-      'mandil':                'Mandil',
-      'pantalon':              'Pantalón',
-      'pantalón':              'Pantalón',
+      'filipina manga corta': 'Filipina Manga Corta',
+      'filipina manga larga': 'Filipina Manga Larga',
+      'mandil':               'Mandil',
+      'pantalon':             'Pantalón',
+      'filipina':             'Filipina',
     };
     function normalizarTipo(v){
-      if(!v)return v;
-      const key=v.trim().toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quitar acentos para comparar
-        .replace(/\s+/g,' ');                              // espacios múltiples → uno
-      // Buscar en el mapa sin acentos
+      if(!v||!v.trim())return v;
+      const key=sinAcentos(v); // sin acentos, minúsculas, sin espacios extra
+      // Buscar coincidencia exacta en el mapa (también sin acentos)
       for(const [k,canon] of Object.entries(TIPOS_CANON)){
-        const kNorm=k.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-        if(key===kNorm)return canon;
+        if(key===k)return canon;
       }
-      // Si no está en el mapa, capitalizar cada palabra
-      return v.trim().toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+      // Búsqueda parcial: si contiene alguna clave conocida
+      for(const [k,canon] of Object.entries(TIPOS_CANON)){
+        if(key.includes(k))return canon;
+      }
+      // Fallback: capitalizar cada palabra
+      return v.trim().split(/\s+/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
     }
     function normalizarMaq(v){
       if(!v)return v;
