@@ -404,6 +404,29 @@ tbody tr:hover td{background:var(--bg);}
         </div>
       </div>
 
+      <!-- Prendas recibidas por maquilero este mes -->
+      <div class="dash-card" style="margin-bottom:1.5rem;">
+        <div class="dash-card-title">Prendas recibidas por maquilero — mes actual</div>
+        <div class="dash-card-sub" id="prendas-mes-label">Volumen total de prendas recibidas este mes por maquilero</div>
+        <div id="prendas-maq-list" style="margin-top:0.75rem;"></div>
+      </div>
+
+      <!-- IA de mejora continua -->
+      <div class="dash-card" style="margin-bottom:1.5rem;border-color:#7c3aed;background:linear-gradient(135deg,#faf5ff 0%,#fff 100%);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:16px;">🤖</span>
+          <div class="dash-card-title" style="color:#7c3aed;">Asistente IA de Mejora Continua</div>
+        </div>
+        <div class="dash-card-sub">Análisis automático basado en los datos de auditoría — recomendaciones accionables</div>
+        <div id="ia-analisis" style="margin-top:1rem;">
+          <div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px;">Cargando análisis...</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-dark" style="background:#7c3aed;border-color:#7c3aed;" onclick="generarAnalisisIA()">🔄 Regenerar análisis</button>
+          <button class="btn" onclick="exportarAnalisis()">↓ Exportar reporte</button>
+        </div>
+      </div>
+
       <!-- Fallas por maquilero -->
       <div class="dash-card" style="margin-bottom:1.5rem;">
         <div class="dash-card-title">Fallas más frecuentes por maquilero</div>
@@ -776,7 +799,7 @@ async function loadData(){
         .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
         .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
         .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
-        .replace(/\s+/g,' ');
+        .replace(/ {2,}/g,' ');
     }
     // Mapa de normalización: clave SIN acentos → forma canónica con acentos
     const TIPOS_CANON = {
@@ -945,8 +968,197 @@ function renderDashboard(){
   renderRanking();
   renderChartAuditores();
   renderChartPareto();
+  renderPrendasMensual();
+  generarAnalisisIA();
   renderFallasPorMaquilero();
   renderRankingPorTipo();
+}
+
+// ===== PRENDAS RECIBIDAS POR MAQUILERO MENSUAL =====
+function renderPrendasMensual(){
+  const now = new Date();
+  const mesActualIdx = now.getMonth();
+  const anioActual = now.getFullYear();
+
+  // Filtrar registros del mes actual
+  const registrosMes = allData.filter(r=>{
+    const d = parseFechaMX(g(r,C.FECHA));
+    return d && d.getMonth()===mesActualIdx && d.getFullYear()===anioActual;
+  });
+
+  const label = document.getElementById('prendas-mes-label');
+  if(label) label.textContent = `${MESES[mesActualIdx]} ${anioActual} — ${registrosMes.length} auditorías`;
+
+  // Sumar prendas recibidas por maquilero
+  const maqPrendas = {};
+  registrosMes.forEach(r=>{
+    const maq = g(r,C.MAQ).trim();
+    const prec = parseInt(g(r,C.PREC))||0;
+    const prev = parseInt(g(r,C.PREV))||0;
+    if(!maq)return;
+    if(!maqPrendas[maq])maqPrendas[maq]={recibidas:0,revisadas:0,auds:0};
+    maqPrendas[maq].recibidas += prec;
+    maqPrendas[maq].revisadas += prev;
+    maqPrendas[maq].auds++;
+  });
+
+  const container = document.getElementById('prendas-maq-list');
+  if(!container)return;
+
+  const sorted = Object.entries(maqPrendas).sort((a,b)=>b[1].recibidas-a[1].recibidas);
+  const totalPrendas = sorted.reduce((s,[,v])=>s+v.recibidas,0);
+
+  if(!sorted.length){
+    container.innerHTML='<p style="font-size:13px;color:var(--text3);padding:8px;">Sin registros este mes.</p>';
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;padding:0 4px 8px;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+    <span>MAQUILERO</span>
+    <span style="display:flex;gap:40px;">
+      <span>RECIBIDAS</span><span>REVISADAS</span><span>% REVISADO</span>
+    </span>
+  </div>`;
+
+  sorted.forEach(([maq,{recibidas,revisadas,auds}])=>{
+    const pct = recibidas>0 ? Math.round(revisadas/recibidas*100) : 0;
+    const barW = Math.round(recibidas/totalPrendas*100);
+    const pctColor = pct>=80?'#16a34a':pct>=50?'#d97706':'#dc2626';
+    html += `<div style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:13px;font-weight:500;">${maq}</span>
+        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
+          <span style="font-weight:600;">${recibidas.toLocaleString()}</span>
+          <span style="color:var(--text2);">${revisadas.toLocaleString()}</span>
+          <span style="color:${pctColor};font-weight:600;">${pct}%</span>
+        </span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="width:${barW}%;height:100%;background:#1a1917;border-radius:3px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;">${auds} auditoría${auds!==1?'s':''}</div>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;font-size:12px;font-weight:600;">
+    <span>TOTAL</span>
+    <span style="font-family:'DM Mono',monospace;">${totalPrendas.toLocaleString()} prendas</span>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+// ===== IA DE MEJORA CONTINUA =====
+function generarAnalisisIA(){
+  const container = document.getElementById('ia-analisis');
+  if(!container||!allData.length)return;
+
+  container.innerHTML = '<div style="text-align:center;padding:1rem;color:#7c3aed;font-size:13px;">🤖 Analizando datos...</div>';
+
+  // Calcular métricas base
+  const now = new Date();
+  const mesActual = now.getMonth(), anioActual = now.getFullYear();
+  const mesPrev = mesActual===0?11:mesActual-1;
+  const anioPrev = mesActual===0?anioActual-1:anioActual;
+
+  function promMes(a,m){
+    const regs=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getMonth()===m&&d.getFullYear()===a;});
+    const vals=regs.map(r=>parseFloat(getCAL(r))).filter(v=>!isNaN(v)&&v>0);
+    return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+  }
+
+  const promCurr = promMes(anioActual,mesActual);
+  const promAnterior = promMes(anioPrev,mesPrev);
+  const tendencia = promCurr&&promAnterior?(promCurr-promAnterior):null;
+
+  // Ranking maquileros
+  const maqMap={};
+  allData.forEach(r=>{
+    const maq=g(r,C.MAQ),val=parseFloat(getCAL(r));
+    if(!maq||isNaN(val)||val<=0)return;
+    if(!maqMap[maq])maqMap[maq]={sum:0,cnt:0};
+    maqMap[maq].sum+=val;maqMap[maq].cnt++;
+  });
+  const ranking=Object.entries(maqMap).map(([n,{sum,cnt}])=>({n,avg:sum/cnt,cnt})).sort((a,b)=>b.avg-a.avg);
+  const mejorMaq = ranking[0];
+  const peorMaq = ranking[ranking.length-1];
+
+  // Top falla
+  const defMap={};
+  allData.forEach(r=>puntosDeRegistro(r).forEach(p=>{defMap[p]=(defMap[p]||0)+1;}));
+  const topFallas=Object.entries(defMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  // Total prendas este mes
+  const regsMes=allData.filter(r=>{const d=parseFechaMX(g(r,C.FECHA));return d&&d.getMonth()===mesActual&&d.getFullYear()===anioActual;});
+  const totalPrendasMes=regsMes.reduce((s,r)=>s+(parseInt(g(r,C.PREC))||0),0);
+  const totalRevisadasMes=regsMes.reduce((s,r)=>s+(parseInt(g(r,C.PREV))||0),0);
+  const pctRevision=totalPrendasMes>0?Math.round(totalRevisadasMes/totalPrendasMes*100):0;
+
+  // Generar recomendaciones
+  const recomendaciones=[];
+
+  if(tendencia!==null){
+    if(tendencia>0.3)
+      recomendaciones.push({tipo:'success',icon:'📈',titulo:'Tendencia positiva',texto:`La calidad subió ${tendencia.toFixed(1)} puntos vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). Identifica qué cambió este mes y documenta las buenas prácticas.`});
+    else if(tendencia<-0.3)
+      recomendaciones.push({tipo:'danger',icon:'📉',titulo:'Alerta: calidad a la baja',texto:`La calidad bajó ${Math.abs(tendencia).toFixed(1)} puntos vs el mes anterior (${promAnterior.toFixed(1)} → ${promCurr.toFixed(1)}). Revisar causas inmediatamente con el equipo.`});
+    else
+      recomendaciones.push({tipo:'info',icon:'📊',titulo:'Calidad estable',texto:`El promedio se mantiene en ${promCurr?promCurr.toFixed(1):'—'}/5. Busca oportunidades para subir al siguiente nivel.`});
+  }
+
+  if(peorMaq&&peorMaq.avg<3)
+    recomendaciones.push({tipo:'danger',icon:'⚠️',titulo:`Visita técnica urgente: ${peorMaq.n}`,texto:`Promedio de ${peorMaq.avg.toFixed(2)}/5 en ${peorMaq.cnt} auditorías. Se recomienda reunión técnica inmediata para identificar y corregir el proceso.`});
+
+  if(mejorMaq)
+    recomendaciones.push({tipo:'success',icon:'🏆',titulo:`Mejor maquilero: ${mejorMaq.n}`,texto:`Promedio de ${mejorMaq.avg.toFixed(2)}/5 en ${mejorMaq.cnt} auditorías. Considera usarlo como referencia para capacitar a otros maquileros.`});
+
+  if(topFallas.length>0)
+    recomendaciones.push({tipo:'warning',icon:'🔧',titulo:`Falla #1: "${topFallas[0][0].slice(0,40)}${topFallas[0][0].length>40?'…':''}"`,texto:`Aparece ${topFallas[0][1]} veces en auditorías. Prioriza la capacitación en este punto en la próxima junta de calidad.`});
+
+  if(pctRevision<50)
+    recomendaciones.push({tipo:'warning',icon:'👁️',titulo:'Cobertura de revisión baja',texto:`Solo se revisa el ${pctRevision}% de las prendas recibidas este mes. Considera aumentar el porcentaje de muestreo para mayor control.`});
+
+  if(ranking.length>=3){
+    const dispersión=mejorMaq.avg-peorMaq.avg;
+    if(dispersión>1.5)
+      recomendaciones.push({tipo:'info',icon:'📋',titulo:'Alta variabilidad entre maquileros',texto:`Diferencia de ${dispersión.toFixed(1)} puntos entre el mejor y peor maquilero. Esto indica procesos muy desiguales — estandarizar es clave.`});
+  }
+
+  // Renderizar
+  const colores={success:'#d8f3dc',danger:'#fee2e2',warning:'#fff3cd',info:'#dbeafe'};
+  const bordes={success:'#86efac',danger:'#fca5a5',warning:'#fbbf24',info:'#93c5fd'};
+  const textos={success:'#166534',danger:'#7f1d1d',warning:'#7d4e00',info:'#1e3a5f'};
+
+  let html=`<div style="font-size:11px;color:#7c3aed;font-family:'DM Mono',monospace;margin-bottom:12px;padding:8px;background:#f5f3ff;border-radius:6px;">
+    Basado en ${allData.length} registros · ${MESES[mesActual]} ${anioActual} · ${regsMes.length} auditorías este mes
+  </div>`;
+
+  recomendaciones.forEach(r=>{
+    html+=`<div style="background:${colores[r.tipo]};border:0.5px solid ${bordes[r.tipo]};border-radius:8px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;color:${textos[r.tipo]};margin-bottom:4px;">${r.icon} ${r.titulo}</div>
+      <div style="font-size:12px;color:${textos[r.tipo]};line-height:1.6;">${r.texto}</div>
+    </div>`;
+  });
+
+  if(!recomendaciones.length)
+    html+='<div style="text-align:center;font-size:13px;color:var(--text3);padding:1rem;">Sin suficientes datos para generar recomendaciones.</div>';
+
+  container.innerHTML=html;
+}
+
+function exportarAnalisis(){
+  const contenido=document.getElementById('ia-analisis');
+  if(!contenido)return;
+  const now=new Date();
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte IA Calidad</title>
+  <style>body{font-family:Arial,sans-serif;font-size:13px;margin:30px;color:#1a1917;}h1{font-size:18px;margin-bottom:4px;}h2{font-size:13px;color:#6b6860;margin-bottom:20px;font-weight:400;}.card{padding:12px;border-radius:6px;margin-bottom:10px;border:1px solid #ddd;}@page{margin:20mm;}</style>
+  </head><body>
+  <h1>Reporte de Mejora Continua — Auditoría de Calidad</h1>
+  <h2>Generado: ${now.toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</h2>
+  ${contenido.innerHTML}
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
 }
 
 function getPromedioMes(anio,mes){
