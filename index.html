@@ -768,10 +768,39 @@ async function loadData(){
     const rows=parseCSV(txt);
     if(rows.length<2)throw new Error('Sin datos.');
     buildColumnMap(rows[0]);
+    // Mapa de normalización de tipos conocidos (todas las variantes → forma canónica)
+    const TIPOS_CANON = {
+      'filipina manga corta':  'Filipina Manga Corta',
+      'filipina manga larga':  'Filipina Manga Larga',
+      'mandil':                'Mandil',
+      'pantalon':              'Pantalón',
+      'pantalón':              'Pantalón',
+    };
+    function normalizarTipo(v){
+      if(!v)return v;
+      const key=v.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quitar acentos para comparar
+        .replace(/\s+/g,' ');                              // espacios múltiples → uno
+      // Buscar en el mapa sin acentos
+      for(const [k,canon] of Object.entries(TIPOS_CANON)){
+        const kNorm=k.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        if(key===kNorm)return canon;
+      }
+      // Si no está en el mapa, capitalizar cada palabra
+      return v.trim().toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+    }
+    function normalizarMaq(v){
+      if(!v)return v;
+      // Buscar en config primero (case-insensitive)
+      const found=config.maquileros.find(m=>m.trim().toLowerCase()===v.trim().toLowerCase());
+      if(found)return found;
+      // Si no, capitalizar
+      return v.trim().toUpperCase();
+    }
     allData=rows.slice(1).filter(r=>r.some(c=>c)).map(r=>{
       const copy=[...r];
-      if(C.MAQ>=0)copy[C.MAQ]=normalize(copy[C.MAQ],config.maquileros);
-      if(C.TIPO>=0)copy[C.TIPO]=normalize(copy[C.TIPO],config.tipos);
+      if(C.MAQ>=0)copy[C.MAQ]=normalizarMaq(copy[C.MAQ]);
+      if(C.TIPO>=0)copy[C.TIPO]=normalizarTipo(copy[C.TIPO]);
       return copy;
     });
     anioActivo='todos';mesActivo='todos';
@@ -1178,14 +1207,12 @@ function renderRankingPorTipo(){
   // Para cada tipo: ranking de maquileros con su promedio
   const tipoMaqMap={};
   allData.forEach(r=>{
-    // Normalizar tipo a minúsculas para evitar duplicados por mayúsculas
-    const tipoRaw=g(r,C.TIPO);
-    const tipo=tipoRaw.trim().toLowerCase();
+    // Los datos ya vienen normalizados desde loadData
+    const tipo=g(r,C.TIPO).trim();
     const maq=g(r,C.MAQ).trim();
     const val=parseFloat(getCAL(r));
     if(!tipo||!maq||isNaN(val)||val<=0)return;
     if(!tipoMaqMap[tipo])tipoMaqMap[tipo]={};
-    // Normalizar también el nombre del maquilero
     const maqKey=maq.toLowerCase();
     if(!tipoMaqMap[tipo][maqKey])tipoMaqMap[tipo][maqKey]={sum:0,cnt:0,nombre:maq};
     tipoMaqMap[tipo][maqKey].sum+=val;
@@ -1208,7 +1235,7 @@ function renderRankingPorTipo(){
   let html='';
   Object.entries(tipoMaqMap).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([tipo,maqs])=>{
     // Título: primera letra mayúscula de cada palabra
-    const tipoLabel=tipo.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+    const tipoLabel=tipo; // ya viene normalizado desde loadData
     const ranking=Object.entries(maqs)
       .map(([key,{sum,cnt,nombre}])=>({name:nombre,avg:sum/cnt,cnt}))
       .sort((a,b)=>b.avg-a.avg);
