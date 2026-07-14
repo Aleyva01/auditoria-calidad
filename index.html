@@ -606,9 +606,9 @@ function getPuntosPorTipo(tipo){if(!tipo)return[];const t=tipo.toLowerCase();for
 // ===== CREDENCIALES =====
 // Admin = usuario maestro con acceso a Dashboard, Configuración y Publicar
 const CREDENCIALES = {
-  'Admin':   'Admin2026',
-  'Eloisa':  'Eloisa2026',
-  'Luis':    'Luis2026',
+  'Admin':             'admin2026#',
+  'Eloisa':            '3loi$a2026',
+  'Luis':              'lui$2026',
 };
 const MASTER_USER = 'Admin';
 
@@ -656,12 +656,14 @@ function doLogout(){
   switchTabById('registros');
 }
 
-async function registrarBitacora(usuario){
-  const LOG='https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse';
-  let ip='No disponible';
-  try{const c=new AbortController();setTimeout(()=>c.abort(),2000);const r=await fetch('https://api.ipify.org?format=json',{signal:c.signal});if(r.ok){const d=await r.json();ip=d.ip;}}catch(e){}
-  const p=new URLSearchParams();p.append('entry.2056068168',usuario);p.append('entry.368415568',ip);p.append('entry.1047010619',navigator.userAgent);
-  fetch(LOG,{method:'POST',mode:'no-cors',body:p}).catch(()=>{});
+async async function registrarBitacora(usuario){
+  try{
+    const LOG='https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse';
+    let ip='No disponible';
+    try{const c=new AbortController();setTimeout(()=>c.abort(),2000);const r=await fetch('https://api.ipify.org?format=json',{signal:c.signal});if(r.ok){const d=await r.json();ip=d.ip;}}catch(e){}
+    const p=new URLSearchParams();p.append('entry.2056068168',usuario);p.append('entry.368415568',ip);p.append('entry.1047010619',navigator.userAgent);
+    fetch(LOG,{method:'POST',mode:'no-cors',body:p}).catch(()=>{});
+  }catch(e){}
 }
 
 // ===== TABS =====
