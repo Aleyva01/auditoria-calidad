@@ -625,8 +625,7 @@ function doLogin(){
   const pass=document.getElementById('login-pass').value;
   const errEl=document.getElementById('login-err');
   if(!user){errEl.textContent='Selecciona tu nombre.';errEl.style.display='block';setTimeout(()=>errEl.style.display='none',2500);return;}
-  const now=new Date();const mins=now.getHours()*60+now.getMinutes();
-  if(mins<8*60+30||mins>17*60+30){errEl.textContent='Sistema disponible de 08:30 a 17:30.';errEl.style.display='block';setTimeout(()=>errEl.style.display='none',4000);return;}
+  // Sin restricción de horario — acceso disponible 24/7
   if(CREDENCIALES[user]===pass){
     currentUser=user;
     document.getElementById('login-screen').style.display='none';
