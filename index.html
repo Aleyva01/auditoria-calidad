@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Auditoría de Producto Terminado</title>
+<title>Auditoría de Producto Terminado v2.8</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -856,6 +856,7 @@ async function loadData(){
     anioActivo='todos';mesActivo='todos';
     filtered=[...allData];
     buildStats();buildPeriodoPills();buildFilters();renderTable();
+    cargarSelectsEncuesta(); // actualizar selects de encuesta con datos reales
     document.getElementById('stats').style.display='grid';
     document.getElementById('controls').style.display='flex';
     document.getElementById('filtros-periodo').style.display='block';
@@ -1774,11 +1775,13 @@ function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
-  // Combinar: tipos del Sheet + tipos con puntos definidos + config
-  const tiposSheet=[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))];
+  // Combinar todas las fuentes posibles de tipos
+  const tiposSheet=allData.length?[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))]:[];
   const tiposConfig=config.tipos||[];
   const tiposPuntos=Object.keys(PUNTOS_POR_TIPO);
-  const todosLosTipos=[...new Set([...tiposSheet,...tiposConfig,...tiposPuntos])].sort();
+  // Tipos adicionales conocidos aunque no tengan puntos definidos
+  const tiposExtra=['Gorro','Cofia','Babero','Delantal','Chaleco','Bermuda','Short'];
+  const todosLosTipos=[...new Set([...tiposSheet,...tiposConfig,...tiposPuntos,...tiposExtra])].sort();
   todosLosTipos.forEach(t=>{if(t)tSel.innerHTML+=`<option>${t}</option>`;});
   const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
