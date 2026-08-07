@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Auditoría de Producto Terminado v2.8</title>
+<title>Auditoría de Producto Terminado v2.9</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -614,6 +614,7 @@ const TIPOS_CANON={
   'pantalon':             'Pantalón',
   'gorro':                'Gorro',
   'devolucion eventos':   'Devolución Eventos',
+  'varios':               'Varios',
 };
 
 function normalizarTipo(v){
@@ -1766,7 +1767,10 @@ function cargarSelectsEncuesta(){
   const maqsBase=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const maqsFijos=['Compras','Eventos Permachef'];
   const maqs=[...new Set([...maqsBase,...maqsFijos])].sort();
-  const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
+  const mSel=document.getElementById('e-maquilero');
+  mSel.innerHTML='<option value="">Selecciona...</option>';
+  maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
+  mSel.onchange=actualizarTiposPorMaquilero;
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
   // Normalizar y deduplicar: Sheet + config + tipos del mapa TIPOS_CANON
   const mapaFinal={};
@@ -1783,6 +1787,28 @@ function cargarSelectsEncuesta(){
   Object.values(mapaFinal).sort().forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
   const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
+}
+
+function actualizarTiposPorMaquilero(){
+  const maq=document.getElementById('e-maquilero').value;
+  const tSel=document.getElementById('e-tipo');
+  const esCompras=maq.toLowerCase()==='compras';
+  // Verificar si "Varios" ya está en el select
+  const tieneVarios=[...tSel.options].some(o=>o.value==='Varios');
+  if(esCompras&&!tieneVarios){
+    const opt=document.createElement('option');
+    opt.value='Varios';opt.text='Varios';
+    tSel.appendChild(opt);
+    // Reordenar opciones alfabéticamente
+    const opts=[...tSel.options].slice(1).sort((a,b)=>a.text.localeCompare(b.text,'es'));
+    tSel.innerHTML='<option value="">Selecciona...</option>';
+    opts.forEach(o=>tSel.appendChild(o));
+  } else if(!esCompras&&tieneVarios){
+    // Quitar "Varios" si cambian a otro maquilero
+    [...tSel.options].forEach(o=>{if(o.value==='Varios')o.remove();});
+    // Resetear tipo si estaba en Varios
+    if(tSel.value==='Varios')tSel.value='';
+  }
 }
 
 function actualizarPuntos(){
