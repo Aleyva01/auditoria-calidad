@@ -642,7 +642,10 @@ function doLogin(){
 
 function aplicarPermisos(user){
   const esMaestro=user===MASTER_USER;
-  ['tab-btn-dashboard','tab-btn-config','tab-btn-publicar'].forEach(id=>{
+  // Dashboard visible para todos los usuarios
+  document.getElementById('tab-btn-dashboard').style.display='block';
+  // Config y Publicar solo para Admin
+  ['tab-btn-config','tab-btn-publicar'].forEach(id=>{
     document.getElementById(id).style.display=esMaestro?'block':'none';
   });
 }
