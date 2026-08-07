@@ -1775,14 +1775,18 @@ function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
-  // Combinar todas las fuentes posibles de tipos
-  const tiposSheet=allData.length?[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))]:[];
-  const tiposConfig=config.tipos||[];
-  const tiposPuntos=Object.keys(PUNTOS_POR_TIPO);
-  // Tipos adicionales conocidos aunque no tengan puntos definidos
+  // Combinar fuentes y normalizar TODO antes de deduplicar
+  const tiposSheet=allData.length?allData.map(r=>normalizarTipo(g(r,C.TIPO))).filter(Boolean):[];
+  const tiposConfig=(config.tipos||[]).map(t=>normalizarTipo(t)).filter(Boolean);
+  const tiposPuntos=Object.keys(PUNTOS_POR_TIPO).map(t=>normalizarTipo(t)).filter(Boolean);
   const tiposExtra=['Gorro','Cofia','Babero','Delantal','Chaleco','Bermuda','Short'];
-  const todosLosTipos=[...new Set([...tiposSheet,...tiposConfig,...tiposPuntos,...tiposExtra])].sort();
-  todosLosTipos.forEach(t=>{if(t)tSel.innerHTML+=`<option>${t}</option>`;});
+  // Deduplicar por lowercase para evitar "Gorro" + "GORRO" + "gorro"
+  const mapaFinal={};
+  [...tiposSheet,...tiposConfig,...tiposPuntos,...tiposExtra].forEach(t=>{
+    if(t) mapaFinal[t.toLowerCase()]=t; // último gana, pero normalizado gana sobre raw
+  });
+  const todosLosTipos=Object.values(mapaFinal).sort();
+  todosLosTipos.forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
   const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
 }
