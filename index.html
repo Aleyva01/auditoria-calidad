@@ -806,9 +806,17 @@ async function loadData(){
     const TIPOS_CANON = {
       'filipina manga corta': 'Filipina Manga Corta',
       'filipina manga larga': 'Filipina Manga Larga',
+      'filipina manga 3/4':   'Filipina Manga 3/4',
+      'filipina':             'Filipina',
       'mandil':               'Mandil',
       'pantalon':             'Pantalón',
-      'filipina':             'Filipina',
+      'gorro':                'Gorro',
+      'cofia':                'Cofia',
+      'babero':               'Babero',
+      'delantal':             'Delantal',
+      'chaleco':              'Chaleco',
+      'bermuda':              'Bermuda',
+      'short':                'Short',
     };
     function normalizarTipo(v){
       if(!v||!v.trim())return v;
@@ -817,12 +825,13 @@ async function loadData(){
       for(const [k,canon] of Object.entries(TIPOS_CANON)){
         if(key===k)return canon;
       }
-      // Búsqueda parcial: si contiene alguna clave conocida
+      // Búsqueda parcial controlada: solo si la clave ocupa más de 5 chars
+      // para evitar que "mandil" absorba otras palabras cortas
       for(const [k,canon] of Object.entries(TIPOS_CANON)){
-        if(key.includes(k))return canon;
+        if(k.length>4 && key.includes(k))return canon;
       }
       // Fallback: capitalizar cada palabra
-      return v.trim().split(/\s+/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+      return v.trim().split(/ {1,}/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
     }
     function normalizarMaq(v){
       if(!v)return v;
