@@ -1764,7 +1764,7 @@ function imprimirFormato(){
 // ===== ENCUESTA =====
 function cargarSelectsEncuesta(){
   const maqsBase=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
-  const maqsFijos=['Eventos Permachef'];
+  const maqsFijos=['Compras','Eventos Permachef'];
   const maqs=[...new Set([...maqsBase,...maqsFijos])].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
