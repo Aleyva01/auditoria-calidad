@@ -785,7 +785,7 @@ async function loadData(){
   document.getElementById('refresh-btn').textContent='↻ Cargando...';
   document.getElementById('refresh-btn').disabled=true;
   try{
-    const res=await fetch(CSV_URL);
+    const res=await fetch(CSV_URL+'&cachebust='+Date.now());
     if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const txt=await res.text();
     if(txt.trim().startsWith('<!DOCTYPE'))throw new Error('Sheet no publicado como CSV.');
@@ -939,8 +939,13 @@ function applyPeriodoFilter(){
 }
 
 function buildFilters(){
+  // Maquileros: preferir config si está definido
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
-  const tipos=config.tipos.length?config.tipos:[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  // Tipos: SIEMPRE combinar config + datos reales del Sheet (para no perder nuevos productos)
+  const tiposSheet=[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))].sort();
+  const tiposConfig=config.tipos||[];
+  const tiposSet=new Set([...tiposConfig,...tiposSheet]);
+  const tipos=[...tiposSet].sort();
   const mS=document.getElementById('filter-maq');mS.innerHTML='<option value="">Todos los maquileros</option>';maqs.forEach(m=>mS.innerHTML+=`<option>${m}</option>`);
   const tS=document.getElementById('filter-tipo');tS.innerHTML='<option value="">Todos los productos</option>';tipos.forEach(t=>tS.innerHTML+=`<option>${t}</option>`);
 }
