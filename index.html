@@ -787,6 +787,46 @@ function fmtFecha(v){
 function scoreInfo(v){const n=parseFloat(v);if(isNaN(n))return{label:'—',cls:''};return{label:n.toFixed(1),cls:n>=4?'dot-green':n>=3?'dot-amber':'dot-red'};}
 function tipoBadge(tipo){if(!tipo)return'—';const t=tipo.toLowerCase();let cls='badge-gray';if(t.includes('filipina'))cls='badge-blue';else if(t.includes('mandil'))cls='badge-amber';else if(t.includes('pantalón')||t.includes('pantalon'))cls='badge-green';return`<span class="badge ${cls}">${tipo}</span>`;}
 
+// ===== NORMALIZACIÓN DE TIPOS (GLOBAL) =====
+function sinAcentos(s){
+  if(!s)return'';
+  return String(s).trim().toLowerCase()
+    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+    .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+    .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+    .replace(/ {2,}/g,' ');
+}
+
+const TIPOS_CANON={
+  'filipina manga corta':'Filipina Manga Corta',
+  'filipina manga larga':'Filipina Manga Larga',
+  'filipina manga 3/4':  'Filipina Manga 3/4',
+  'filipina':            'Filipina',
+  'mandil':              'Mandil',
+  'pantalon':            'Pantalón',
+  'gorro':               'Gorro',
+};
+
+function normalizarTipo(v){
+  if(!v||!v.trim())return v;
+  const key=sinAcentos(v);
+  for(const [k,canon] of Object.entries(TIPOS_CANON)){
+    if(key===k)return canon;
+  }
+  for(const [k,canon] of Object.entries(TIPOS_CANON)){
+    if(k.length>4&&key.includes(k))return canon;
+  }
+  // Capitalizar cada palabra como fallback
+  return v.trim().split(/ +/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+}
+
+function normalizarMaq(v){
+  if(!v)return v;
+  const found=config.maquileros.find(m=>m.trim().toLowerCase()===v.trim().toLowerCase());
+  if(found)return found;
+  return v.trim().toUpperCase();
+}
+
 async function loadData(){
   document.getElementById('refresh-btn').textContent='↻ Cargando...';
   document.getElementById('refresh-btn').disabled=true;
@@ -798,55 +838,7 @@ async function loadData(){
     const rows=parseCSV(txt);
     if(rows.length<2)throw new Error('Sin datos.');
     buildColumnMap(rows[0]);
-    // Quitar acentos y normalizar texto para comparar
-    function sinAcentos(s){
-      if(!s)return'';
-      // Reemplazar manualmente las letras con acento más comunes del español
-      return String(s).trim().toLowerCase()
-        .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
-        .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
-        .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
-        .replace(/ {2,}/g,' ');
-    }
-    // Mapa de normalización: clave SIN acentos → forma canónica con acentos
-    const TIPOS_CANON = {
-      'filipina manga corta': 'Filipina Manga Corta',
-      'filipina manga larga': 'Filipina Manga Larga',
-      'filipina manga 3/4':   'Filipina Manga 3/4',
-      'filipina':             'Filipina',
-      'mandil':               'Mandil',
-      'pantalon':             'Pantalón',
-      'gorro':                'Gorro',
-      'cofia':                'Cofia',
-      'babero':               'Babero',
-      'delantal':             'Delantal',
-      'chaleco':              'Chaleco',
-      'bermuda':              'Bermuda',
-      'short':                'Short',
-    };
-    function normalizarTipo(v){
-      if(!v||!v.trim())return v;
-      const key=sinAcentos(v); // sin acentos, minúsculas, sin espacios extra
-      // Buscar coincidencia exacta en el mapa (también sin acentos)
-      for(const [k,canon] of Object.entries(TIPOS_CANON)){
-        if(key===k)return canon;
-      }
-      // Búsqueda parcial controlada: solo si la clave ocupa más de 5 chars
-      // para evitar que "mandil" absorba otras palabras cortas
-      for(const [k,canon] of Object.entries(TIPOS_CANON)){
-        if(k.length>4 && key.includes(k))return canon;
-      }
-      // Fallback: capitalizar cada palabra
-      return v.trim().split(/ {1,}/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-    }
-    function normalizarMaq(v){
-      if(!v)return v;
-      // Buscar en config primero (case-insensitive)
-      const found=config.maquileros.find(m=>m.trim().toLowerCase()===v.trim().toLowerCase());
-      if(found)return found;
-      // Si no, capitalizar
-      return v.trim().toUpperCase();
-    }
+    // normalización aplicada por funciones globales
     allData=rows.slice(1).filter(r=>r.some(c=>c)).map(r=>{
       const copy=[...r];
       if(C.MAQ>=0)copy[C.MAQ]=normalizarMaq(copy[C.MAQ]);
@@ -1775,18 +1767,18 @@ function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
-  // Combinar fuentes y normalizar TODO antes de deduplicar
-  const tiposSheet=allData.length?allData.map(r=>normalizarTipo(g(r,C.TIPO))).filter(Boolean):[];
-  const tiposConfig=(config.tipos||[]).map(t=>normalizarTipo(t)).filter(Boolean);
-  const tiposPuntos=Object.keys(PUNTOS_POR_TIPO).map(t=>normalizarTipo(t)).filter(Boolean);
-  const tiposExtra=['Gorro','Cofia','Babero','Delantal','Chaleco','Bermuda','Short'];
-  // Deduplicar por lowercase para evitar "Gorro" + "GORRO" + "gorro"
+  // Normalizar y deduplicar: Sheet + config + tipos del mapa TIPOS_CANON
   const mapaFinal={};
-  [...tiposSheet,...tiposConfig,...tiposPuntos,...tiposExtra].forEach(t=>{
-    if(t) mapaFinal[t.toLowerCase()]=t; // último gana, pero normalizado gana sobre raw
+  const fuentes=[
+    ...allData.map(r=>g(r,C.TIPO)),          // del Sheet
+    ...(config.tipos||[]),                     // de configuración
+    ...Object.values(TIPOS_CANON),             // tipos conocidos
+  ];
+  fuentes.forEach(t=>{
+    const norm=normalizarTipo(t);
+    if(norm&&norm.trim()) mapaFinal[sinAcentos(norm)]=norm;
   });
-  const todosLosTipos=Object.values(mapaFinal).sort();
-  todosLosTipos.forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
+  Object.values(mapaFinal).sort().forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
   const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
 }
