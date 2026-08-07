@@ -1773,7 +1773,13 @@ function imprimirFormato(){
 function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
-  const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';Object.keys(PUNTOS_POR_TIPO).forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
+  const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';
+  // Combinar: tipos del Sheet + tipos con puntos definidos + config
+  const tiposSheet=[...new Set(allData.map(r=>g(r,C.TIPO)).filter(Boolean))];
+  const tiposConfig=config.tipos||[];
+  const tiposPuntos=Object.keys(PUNTOS_POR_TIPO);
+  const todosLosTipos=[...new Set([...tiposSheet,...tiposConfig,...tiposPuntos])].sort();
+  todosLosTipos.forEach(t=>{if(t)tSel.innerHTML+=`<option>${t}</option>`;});
   const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
 }
@@ -1783,7 +1789,12 @@ function actualizarPuntos(){
   const puntos=getPuntosPorTipo(tipo);
   const card=document.getElementById('enc-puntos-card');
   const lista=document.getElementById('enc-puntos-lista');
-  if(!puntos.length){card.style.display='none';return;}
+  // Si no hay puntos definidos para este tipo, ocultar la sección de puntos
+  // pero continuar con el formulario normalmente
+  if(!puntos.length){
+    card.style.display='none';
+    return;
+  }
   document.getElementById('enc-puntos-titulo').textContent=`Puntos de revisión — ${tipo}`;
   lista.innerHTML=puntos.map((p,i)=>`<label class="check-item" id="ci-${i}" onclick="toggleCheck(${i})"><input type="checkbox" id="chk-${i}"><span>${p}</span></label>`).join('');
   card.style.display='block';
