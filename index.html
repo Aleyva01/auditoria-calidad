@@ -1,8 +1,10 @@
-<html lang="es"><head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Auditoría de Producto Terminado</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e0ddd4;--border2:#c8c5ba;--text:#1a1917;--text2:#6b6860;--text3:#9e9b92;--green:#2d6a4f;--green-bg:#d8f3dc;--amber:#7d4e00;--amber-bg:#fff3cd;--red:#7f1d1d;--red-bg:#fee2e2;--blue:#1e3a5f;--blue-bg:#dbeafe;--radius:10px;--radius-sm:6px;}
@@ -202,11 +204,11 @@ tbody tr:hover td{background:var(--bg);}
   .tabs-bar{padding:0 1rem;}
 }
 </style>
-<meta name="promodescuentos-browser-extension" version="12.7.0"></head>
+</head>
 <body>
 
 <!-- LOGIN -->
-<div class="login-screen" id="login-screen" style="display: none;">
+<div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo">Auditoría</div>
     <div class="login-sub">Producto Terminado · Calidad</div>
@@ -222,11 +224,11 @@ tbody tr:hover td{background:var(--bg);}
 </div>
 
 <!-- APP -->
-<div class="app-shell" id="app-shell" style="display: block;">
+<div class="app-shell" id="app-shell">
   <div class="topbar">
     <div>
       <div class="topbar-title">Auditoría de Producto Terminado</div>
-      <div class="topbar-sub" id="topbar-user">Sesión: Admin</div>
+      <div class="topbar-sub" id="topbar-user">Calidad</div>
     </div>
     <div class="topbar-right">
       <button class="btn btn-dark" onclick="loadData()" id="refresh-btn">↻ Actualizar</button>
@@ -235,41 +237,47 @@ tbody tr:hover td{background:var(--bg);}
   </div>
 
   <div class="tabs-bar" id="tabs-bar">
-    <button class="tab-btn" onclick="switchTab('registros',this)">Registros</button>
+    <button class="tab-btn active" onclick="switchTab('registros',this)">Registros</button>
     <button class="tab-btn" onclick="switchTab('encuesta',this)">Nueva auditoría</button>
     <!-- Pestañas solo maestro -->
-    <button class="tab-btn master-only" id="tab-btn-dashboard" style="display: block;" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
-    <button class="tab-btn master-only" id="tab-btn-config" style="display: block;" onclick="switchTab('config',this)">Configuración</button>
-    <button class="tab-btn master-only active" id="tab-btn-publicar" style="display: block;" onclick="switchTab('publicar',this)">Publicar en línea</button>
+    <button class="tab-btn master-only" id="tab-btn-dashboard" style="display:none;" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn master-only" id="tab-btn-config" style="display:none;" onclick="switchTab('config',this)">Configuración</button>
+    <button class="tab-btn master-only" id="tab-btn-publicar" style="display:none;" onclick="switchTab('publicar',this)">Publicar en línea</button>
   </div>
 
   <!-- ===== REGISTROS ===== -->
-  <div class="tab-panel" id="tab-registros">
+  <div class="tab-panel active" id="tab-registros">
     <div class="main">
       <div id="alert-area"></div>
-      <div class="stats-grid" id="stats" style="display: grid;">
-        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">156</div><div class="stat-sub">en el Sheet</div></div>
-        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">3.4</div><div class="stat-sub">de 5 puntos</div></div>
-        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">10</div><div class="stat-sub">únicos</div></div>
-        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">26</div><div class="stat-sub">auditorías</div></div>
+      <div class="stats-grid" id="stats" style="display:none;">
+        <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" id="s-total">0</div><div class="stat-sub">en el Sheet</div></div>
+        <div class="stat-card"><div class="stat-label">Promedio calificación</div><div class="stat-value" id="s-avg">—</div><div class="stat-sub">de 5 puntos</div></div>
+        <div class="stat-card"><div class="stat-label">Maquileros</div><div class="stat-value" id="s-maq">0</div><div class="stat-sub">únicos</div></div>
+        <div class="stat-card"><div class="stat-label">Este mes</div><div class="stat-value" id="s-mes">0</div><div class="stat-sub">auditorías</div></div>
       </div>
 
       <!-- Filtros año/mes -->
-      <div id="filtros-periodo" style="display: block;">
-        <div class="filter-pills" id="pills-anio" style="margin-bottom:6px;"><span class="pill-label">Año:</span><span class="pill active">Todos</span><span class="pill">2026</span></div>
-        <div class="filter-pills" id="pills-mes"><span class="pill-label">Mes:</span><span class="pill active">Todos</span><span class="pill">Abril</span><span class="pill">Mayo</span><span class="pill">Junio</span><span class="pill">Julio</span><span class="pill">Agosto</span></div>
+      <div id="filtros-periodo" style="display:none;">
+        <div class="filter-pills" id="pills-anio" style="margin-bottom:6px;">
+          <span class="pill-label">Año:</span>
+        </div>
+        <div class="filter-pills" id="pills-mes">
+          <span class="pill-label">Mes:</span>
+        </div>
       </div>
 
-      <div class="controls-bar" id="controls" style="display: flex;">
+      <div class="controls-bar" id="controls" style="display:none;">
         <div class="search-wrap">
           <span class="search-icon">⌕</span>
           <input type="text" id="search" placeholder="Buscar por corte, maquilero, modelo..." oninput="filterData()">
         </div>
-        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option><option>ZARATE</option><option>AGUSTINA</option><option>RODOLFO</option><option>RAFAEL</option><option>ARMANDO</option><option>TALLER</option><option>RUBEN</option><option>LETY</option><option>NORMA</option><option>CONVOY</option></select>
-        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option><option>GORRO</option></select>
-        <span class="count-label" id="count-label">156 / 156 registros</span>
+        <select id="filter-maq" onchange="filterData()"><option value="">Todos los maquileros</option></select>
+        <select id="filter-tipo" onchange="filterData()"><option value="">Todos los productos</option></select>
+        <span class="count-label" id="count-label"></span>
       </div>
-      <div id="table-area"><div class="table-card"><div class="table-wrap"><table><thead><tr><th onclick="sortBy(0)">Fecha ↓</th><th onclick="sortBy(1)"># Corte </th><th onclick="sortBy(2)">Programa </th><th onclick="sortBy(3)">Modelo </th><th onclick="sortBy(8)">Tipo </th><th onclick="sortBy(7)">Maquilero </th><th onclick="sortBy(5)">Rev. </th><th onclick="sortBy(4)">Rec. </th><th></th><th></th></tr></thead><tbody><tr><td class="mono" style="font-size:11px;">07/08/2026, 11:21 a.m.</td><td><strong class="mono">26070498</strong></td><td>646</td><td>M2GRU2B</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">15</td><td class="mono">30</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(155)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 11:17 a.m.</td><td><strong class="mono">26060407</strong></td><td>568</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">59</td><td class="mono">118</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(154)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 11:08 a.m.</td><td><strong class="mono">26040288</strong></td><td>527</td><td>FDUDIBLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">8</td><td class="mono">17</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(153)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 11:06 a.m.</td><td><strong class="mono">26040287</strong></td><td>518</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">3</td><td class="mono">3</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(152)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:42 a.m.</td><td><strong class="mono">26050382</strong></td><td>553</td><td>FNBLUISI00AM</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">70</td><td class="mono">140</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(151)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:36 a.m.</td><td><strong class="mono">26070466</strong></td><td>622</td><td>FDBLC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">48</td><td class="mono">96</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(150)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:31 a.m.</td><td><strong class="mono">26070469</strong></td><td>622</td><td>FBBLCCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">15</td><td class="mono">30</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(149)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:10 a.m.</td><td><strong class="mono">26070466</strong></td><td>622</td><td>FEBLC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">48</td><td class="mono">96</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(148)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:04 a.m.</td><td><strong class="mono">26070526</strong></td><td>634</td><td>FBAACCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">8</td><td class="mono">8</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(147)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026, 10:00 a.m.</td><td><strong class="mono">26070469</strong></td><td>622</td><td>FBBLCCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">15</td><td class="mono">30</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(146)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026 9:56:41</td><td><strong class="mono">26070469</strong></td><td>622</td><td>FBBLCCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">49</td><td class="mono">49</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(145)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026 9:50:43</td><td><strong class="mono">26060408</strong></td><td>568</td><td>M2SERGOU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">20</td><td class="mono">40</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(144)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026 9:43:00</td><td><strong class="mono">26060407</strong></td><td>568</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">158</td><td class="mono">317</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(143)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/08/2026 9:37:49</td><td><strong class="mono">26060399</strong></td><td>574</td><td>MSOMMNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">68</td><td class="mono">136</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(142)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 05:29 p.m.</td><td><strong class="mono">26070537</strong></td><td>637</td><td>MSBLUSP</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">26</td><td class="mono">51</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(141)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 05:24 p.m.</td><td><strong class="mono">26070528</strong></td><td>637</td><td>MABLUSP</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">75</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(140)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 05:07 p.m.</td><td><strong class="mono">26060407</strong></td><td>568</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">60</td><td class="mono">120</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(139)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 04:45 p.m.</td><td><strong class="mono">26070527</strong></td><td>637</td><td>MSNEUSP</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">63</td><td class="mono">126</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(138)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 04:18 p.m.</td><td><strong class="mono">26060407</strong></td><td>568</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">60</td><td class="mono">120</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(137)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 04:11 p.m.</td><td><strong class="mono">26070498</strong></td><td>646</td><td>M2GRU2B</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">15</td><td class="mono">30</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(136)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 03:02 p.m.</td><td><strong class="mono">26070528</strong></td><td>637</td><td>MABLUSP</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">75</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(135)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 02:58 p.m.</td><td><strong class="mono">26070537</strong></td><td>637</td><td>MSBLUSP</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">25</td><td class="mono">51</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(134)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 01:48 p.m.</td><td><strong class="mono">26050382</strong></td><td>553</td><td>FNBLUISI00AM</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">70</td><td class="mono">140</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(133)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 01:43 p.m.</td><td><strong class="mono">26040288</strong></td><td>527</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">9</td><td class="mono">17</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(132)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 11:59 a.m.</td><td><strong class="mono">26050381</strong></td><td>559</td><td>FDBLC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>TALLER</td><td class="mono">204</td><td class="mono">204</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(131)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 11:24 a.m.</td><td><strong class="mono">26050338</strong></td><td>535</td><td>MSBLUISI00AMISIMA</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">163</td><td class="mono">327</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(130)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 11:00 a.m.</td><td><strong class="mono">26060407</strong></td><td>568</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">59</td><td class="mono">118</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(129)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 10:37 a.m.</td><td><strong class="mono">26070490</strong></td><td>619</td><td>PCNEU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">215</td><td class="mono">215</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(128)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 10:27 a.m.</td><td><strong class="mono">26060454</strong></td><td>605</td><td>PANEU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">260</td><td class="mono">260</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(127)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/08/2026, 10:13 a.m.</td><td><strong class="mono">2606070482</strong></td><td>619</td><td>PALVAMU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">186</td><td class="mono">186</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(126)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/07/2026, 05:29 p.m.</td><td><strong class="mono">26050370</strong></td><td>550</td><td>M2SERNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">70</td><td class="mono">70</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(125)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/07/2026, 05:25 p.m.</td><td><strong class="mono">26070457</strong></td><td>596</td><td>M2VMU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(124)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/07/2026, 05:22 p.m.</td><td><strong class="mono">26070458</strong></td><td>596</td><td>M2BEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(123)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/07/2026, 05:18 p.m.</td><td><strong class="mono">26060392</strong></td><td>561</td><td>M2KANAM00CAU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">108</td><td class="mono">108</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(122)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">27/07/2026, 05:26 p.m.</td><td><strong class="mono">26050335</strong></td><td>526</td><td>MSOMMNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">1150</td><td class="mono">1150</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(121)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">27/07/2026, 05:20 p.m.</td><td><strong class="mono">26060398</strong></td><td>561</td><td>M2NACHEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(120)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">27/07/2026, 05:16 p.m.</td><td><strong class="mono">26070466</strong></td><td>604</td><td>FDBLC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>CANDIDO</td><td class="mono">136</td><td class="mono">136</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(119)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">24/07/2026, 05:28 p.m.</td><td><strong class="mono">26050373</strong></td><td>608</td><td>FELVIC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>RODOLFO</td><td class="mono">215</td><td class="mono">215</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(118)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">24/07/2026, 05:17 p.m.</td><td><strong class="mono">26060447</strong></td><td>592</td><td>MSNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">300</td><td class="mono">300</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(117)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">24/07/2026, 05:12 p.m.</td><td><strong class="mono">26060428</strong></td><td>584</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">180</td><td class="mono">180</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(116)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">24/07/2026, 05:10 p.m.</td><td><strong class="mono">26060427</strong></td><td>584</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">270</td><td class="mono">270</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(115)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/07/2026, 05:26 p.m.</td><td><strong class="mono">26050386</strong></td><td>568</td><td>M2LCAMU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">280</td><td class="mono">280</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(114)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/07/2026, 05:24 p.m.</td><td><strong class="mono">26060420</strong></td><td>584</td><td>M2LCAMU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">1200</td><td class="mono">1200</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(113)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/07/2026, 05:19 p.m.</td><td><strong class="mono">26050382</strong></td><td>553</td><td>FNBLUISI00AM</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">2801</td><td class="mono">2801</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(112)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/07/2026, 05:15 p.m.</td><td><strong class="mono">26050374</strong></td><td>608</td><td>FELNEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>RODOLFO</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(111)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/07/2026, 05:07 p.m.</td><td><strong class="mono">26070467</strong></td><td>604</td><td>FDUSIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>CANDIDO</td><td class="mono">115</td><td class="mono">115</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(110)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/07/2026, 03:17 p.m.</td><td><strong class="mono">26070471</strong></td><td>602</td><td>FHANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ZARATE</td><td class="mono">1</td><td class="mono">1</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(109)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">16/07/2026, 10:22 a.m.</td><td><strong class="mono">26060401</strong></td><td>565</td><td>FCANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>NORMA</td><td class="mono">10</td><td class="mono">10</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(108)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">14/07/2026, 01:03 p.m.</td><td><strong class="mono">26060402</strong></td><td>565</td><td>FDBLC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>NORMA</td><td class="mono">20</td><td class="mono">20</td><td><span class="score-dot"><span class="dot dot-red"></span>2.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(107)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">08/07/2026 9:05:48</td><td><strong class="mono">26060404</strong></td><td>566</td><td>FELNED</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>RODOLFO</td><td class="mono">25</td><td class="mono">25</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(106)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 11:17 a.m.</td><td><strong class="mono">26040287</strong></td><td>287</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">71</td><td class="mono">141</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(105)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 11:14 a.m.</td><td><strong class="mono">26040287</strong></td><td>287</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">71</td><td class="mono">141</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(104)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 10:10 a.m.</td><td><strong class="mono">26050362</strong></td><td>540</td><td>M2BEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">100</td><td class="mono">199</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(103)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 10:08 a.m.</td><td><strong class="mono">26050362</strong></td><td>540</td><td>M2BEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">100</td><td class="mono">199</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(102)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 10:07 a.m.</td><td><strong class="mono">26050356</strong></td><td>540</td><td>M2VMU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">40</td><td class="mono">80</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(101)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 10:06 a.m.</td><td><strong class="mono">26050356</strong></td><td>540</td><td>M2VMU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">40</td><td class="mono">80</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(100)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026, 10:00 a.m.</td><td><strong class="mono">26050335</strong></td><td>526</td><td>MSOMMNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">140</td><td class="mono">280</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(99)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026 9:58:46</td><td><strong class="mono">26050335</strong></td><td>526</td><td>MSOMMNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">140</td><td class="mono">280</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(98)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026 9:47:36</td><td><strong class="mono">26050361</strong></td><td>542</td><td>PALVAMU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">125</td><td class="mono">251</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(97)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">07/07/2026 9:45:33</td><td><strong class="mono">26050361</strong></td><td>542</td><td>PALVAMU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">125</td><td class="mono">251</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(96)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">03/07/2026, 02:40 p.m.</td><td><strong class="mono">26030238</strong></td><td>551</td><td>M2LCAMU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">170</td><td class="mono">85</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(95)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/07/2026, 03:45 p.m.</td><td><strong class="mono">26060448</strong></td><td>593</td><td>FELBLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ZARATE</td><td class="mono">1</td><td class="mono">1</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(94)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/06/2026, 11:39 a.m.</td><td><strong class="mono">26060448</strong></td><td>593</td><td>FELBLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ZARATE</td><td class="mono">1</td><td class="mono">1</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(93)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">26/06/2026, 03:06 p.m.</td><td><strong class="mono">26050336</strong></td><td>534</td><td>FBNECCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">213</td><td class="mono">425</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(92)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">26/06/2026, 03:04 p.m.</td><td><strong class="mono">26050336</strong></td><td>534</td><td>FBNECCR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">213</td><td class="mono">425</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(91)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:45 p.m.</td><td><strong class="mono">26060397</strong></td><td>560</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">130</td><td class="mono">260</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(90)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:44 p.m.</td><td><strong class="mono">26060397</strong></td><td>560</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">130</td><td class="mono">260</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(89)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:39 p.m.</td><td><strong class="mono">26060412</strong></td><td>571</td><td>M2CAU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">300</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(88)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:36 p.m.</td><td><strong class="mono">26060412</strong></td><td>571</td><td>M2CAU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">300</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(87)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:25 p.m.</td><td><strong class="mono">26050356</strong></td><td>590</td><td>M2VMU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">162</td><td class="mono">162</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(86)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:22 p.m.</td><td><strong class="mono">26050362</strong></td><td>590</td><td>M2BEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(85)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:03 p.m.</td><td><strong class="mono">26050383</strong></td><td>563</td><td>PARNU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(84)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 03:01 p.m.</td><td><strong class="mono">26050383</strong></td><td>563</td><td>PARNU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(83)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 02:54 p.m.</td><td><strong class="mono">26050317</strong></td><td>527</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">284</td><td class="mono">569</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(82)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 02:53 p.m.</td><td><strong class="mono">26050317</strong></td><td>527</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">284</td><td class="mono">569</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(81)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 02:44 p.m.</td><td><strong class="mono">26040288</strong></td><td>527</td><td>FDUDIBLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">47</td><td class="mono">47</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(80)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 02:40 p.m.</td><td><strong class="mono">26040287</strong></td><td>287</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">114</td><td class="mono">227</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(79)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">25/06/2026, 02:37 p.m.</td><td><strong class="mono">26040287</strong></td><td>287</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">114</td><td class="mono">227</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(78)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 12:26 p.m.</td><td><strong class="mono">26050351</strong></td><td>544</td><td>FDLAMC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">95</td><td class="mono">190</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(77)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 12:25 p.m.</td><td><strong class="mono">26050351</strong></td><td>544</td><td>FDLAMC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">95</td><td class="mono">190</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(76)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 12:22 p.m.</td><td><strong class="mono">26050360</strong></td><td>544</td><td>FDLAMD</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">100</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(75)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 12:21 p.m.</td><td><strong class="mono">26050360</strong></td><td>544</td><td>FDLAMD</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">100</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(74)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 12:20 p.m.</td><td><strong class="mono">26050363</strong></td><td>544</td><td>FDLAMD</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">78</td><td class="mono">155</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(73)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:42 a.m.</td><td><strong class="mono">26050317</strong></td><td>527</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">153</td><td class="mono">306</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(72)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:40 a.m.</td><td><strong class="mono">26050317</strong></td><td>527</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">153</td><td class="mono">306</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(71)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:26 a.m.</td><td><strong class="mono">26060406</strong></td><td>567</td><td>CUMAARVM92</td><td><span class="badge badge-amber">Mandil</span></td><td>SOCO</td><td class="mono">24</td><td class="mono">24</td><td><span class="score-dot"><span class="dot dot-red"></span>2.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(70)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:17 a.m.</td><td><strong class="mono">26050379</strong></td><td>548</td><td>CORAMU</td><td><span class="badge badge-amber">Mandil</span></td><td>SOCO</td><td class="mono">280</td><td class="mono">280</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(69)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:12 a.m.</td><td><strong class="mono">26060397</strong></td><td>560</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">120</td><td class="mono">240</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(68)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 11:06 a.m.</td><td><strong class="mono">26060397</strong></td><td>560</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">120</td><td class="mono">240</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(67)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 10:41 a.m.</td><td><strong class="mono">26050364</strong></td><td>541</td><td>BLUPBLDML</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>AGUSTINA</td><td class="mono">19</td><td class="mono">19</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(66)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">17/06/2026, 10:38 a.m.</td><td><strong class="mono">26050365</strong></td><td>541</td><td>BLUPNEDML</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">19</td><td class="mono">19</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(65)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/06/2026, 01:33 p.m.</td><td><strong class="mono">26050345</strong></td><td>534</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">24</td><td class="mono">23</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(64)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/06/2026, 01:30 p.m.</td><td><strong class="mono">26050345</strong></td><td>534</td><td>FDUDIBLD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">23</td><td class="mono">23</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(63)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/06/2026, 01:00 p.m.</td><td><strong class="mono">26040314</strong></td><td>520</td><td>FDBL00NAIEU</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(62)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 11:06 a.m.</td><td><strong class="mono">26040245</strong></td><td>499</td><td>M2LSAMCU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">108</td><td class="mono">108</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(61)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 10:39 a.m.</td><td><strong class="mono">26040310</strong></td><td>516</td><td>M2VBU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">100</td><td class="mono">100</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(60)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 10:33 a.m.</td><td><strong class="mono">26040309</strong></td><td>316</td><td>M2BEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">57</td><td class="mono">57</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(59)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 10:26 a.m.</td><td><strong class="mono">26040271</strong></td><td>502</td><td>FCANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">415</td><td class="mono">415</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(58)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 10:20 a.m.</td><td><strong class="mono">26040286</strong></td><td>511</td><td>FCAVMC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">511</td><td class="mono">511</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(57)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026, 10:10 a.m.</td><td><strong class="mono">26040284</strong></td><td>511</td><td>FCABLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">190</td><td class="mono">190</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(56)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026 9:51:44</td><td><strong class="mono">26040316</strong></td><td>519</td><td>PAJOPLU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">90</td><td class="mono">90</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(55)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026 9:39:54</td><td><strong class="mono">26040315</strong></td><td>519</td><td>PANEJOU(PAJOPLU)</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">84</td><td class="mono">84</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(54)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026 9:26:49</td><td><strong class="mono">26030233</strong></td><td>479</td><td>FDUGRU</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">42</td><td class="mono">42</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(53)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026 9:25:03</td><td><strong class="mono">26030234</strong></td><td>479</td><td>FDUGRD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">96</td><td class="mono">96</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(52)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">02/06/2026 9:02:57</td><td><strong class="mono">26020121</strong></td><td>458</td><td>FHANED</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">145</td><td class="mono">145</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(51)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">01/06/2026, 05:14 p.m.</td><td><strong class="mono">26940242</strong></td><td>493</td><td>FDBLD</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">244</td><td class="mono">244</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(50)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">01/06/2026, 04:50 p.m.</td><td><strong class="mono">26040257</strong></td><td>490</td><td>FBNEUJE</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">440</td><td class="mono">440</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(49)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/05/2026, 05:23 p.m.</td><td><strong class="mono">26040294</strong></td><td>507</td><td>FHANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">117</td><td class="mono">117</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(48)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/05/2026, 05:03 p.m.</td><td><strong class="mono">26040280</strong></td><td>498</td><td>MSNEU2B</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">60</td><td class="mono">60</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(47)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/05/2026, 04:59 p.m.</td><td><strong class="mono">26040281</strong></td><td>498</td><td>M2BLU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">80</td><td class="mono">80</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(46)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/05/2026, 04:50 p.m.</td><td><strong class="mono">26050326</strong></td><td>527</td><td>M2SAFCHU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">26</td><td class="mono">26</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(45)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">21/05/2026, 04:45 p.m.</td><td><strong class="mono">26040283</strong></td><td>511</td><td>PACVTVU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">98</td><td class="mono">98</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(44)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">12/05/2026, 05:21 p.m.</td><td><strong class="mono">26090308</strong></td><td>515</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">500</td><td class="mono">500</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(43)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">11/05/2026, 02:59 p.m.</td><td><strong class="mono">26030205</strong></td><td>467</td><td>FHABLC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">240</td><td class="mono">240</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(42)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 9:28:00</td><td><strong class="mono">26030177</strong></td><td>461</td><td>FCAVMD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">100</td><td class="mono">100</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(41)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 9:25:52</td><td><strong class="mono">26030188</strong></td><td>461</td><td>FCARSD</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">155</td><td class="mono">155</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(40)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 9:22:55</td><td><strong class="mono">26030176</strong></td><td>461</td><td>FCANED</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">95</td><td class="mono">95</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(39)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 9:10:41</td><td><strong class="mono">237</strong></td><td>482</td><td>HUPSMESU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">9</td><td class="mono">69</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(38)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 9:02:47</td><td><strong class="mono">26030214</strong></td><td>476</td><td>FFBLD00NECR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">95</td><td class="mono">95</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(37)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 8:53:17</td><td><strong class="mono">26030218</strong></td><td>474</td><td>M2TEXCSU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">101</td><td class="mono">101</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(36)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 8:50:10</td><td><strong class="mono">26030221</strong></td><td>474</td><td>M2TEXVNU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">101</td><td class="mono">101</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(35)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">06/05/2026 8:41:46</td><td><strong class="mono">29040293</strong></td><td>506</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">500</td><td class="mono">500</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(34)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 05:08 p.m.</td><td><strong class="mono">26030226</strong></td><td>481</td><td>PAMAU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">205</td><td class="mono">205</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(33)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 05:04 p.m.</td><td><strong class="mono">26030226</strong></td><td>481</td><td>PAMAU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">205</td><td class="mono">205</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(32)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:51 p.m.</td><td><strong class="mono">26020152</strong></td><td>453</td><td>FDUZANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">177</td><td class="mono">177</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(31)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:41 p.m.</td><td><strong class="mono">26030220</strong></td><td>474</td><td>C10BLPM</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(30)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:26 p.m.</td><td><strong class="mono">26030207</strong></td><td>474</td><td>FBNEUJE</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>AGUSTINA</td><td class="mono">145</td><td class="mono">145</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(29)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:21 p.m.</td><td><strong class="mono">26030222</strong></td><td>474</td><td>MSBLU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">168</td><td class="mono">166</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(28)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:17 p.m.</td><td><strong class="mono">26030214</strong></td><td>476</td><td>FFBLD00NECR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">20</td><td class="mono">20</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(27)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 04:14 p.m.</td><td><strong class="mono">26030213</strong></td><td>476</td><td>FFLC00NECR</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">130</td><td class="mono">129</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(26)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">30/04/2026, 03:39 p.m.</td><td><strong class="mono">22030173</strong></td><td>458</td><td>FDUZANED</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">324</td><td class="mono">324</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(25)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 05:23 p.m.</td><td><strong class="mono">26030208</strong></td><td>469</td><td>FINVDFNEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">375</td><td class="mono">375</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(24)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 05:20 p.m.</td><td><strong class="mono">26030179</strong></td><td>469</td><td>FINVSFNED</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">276</td><td class="mono">276</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(23)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 05:09 p.m.</td><td><strong class="mono">26030239</strong></td><td>481</td><td>PANED</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">155</td><td class="mono">154</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(22)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 05:02 p.m.</td><td><strong class="mono">26040272</strong></td><td>494</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(21)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 04:56 p.m.</td><td><strong class="mono">26040273</strong></td><td>494</td><td>M2RNU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(20)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">28/04/2026, 04:51 p.m.</td><td><strong class="mono">26030175</strong></td><td>454</td><td>M2TEXNEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">145</td><td class="mono">145</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(19)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/04/2026, 05:26 p.m.</td><td><strong class="mono">26030187</strong></td><td>459</td><td>M2TEXVEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">55</td><td class="mono">54</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(18)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/04/2026, 05:20 p.m.</td><td><strong class="mono">26030174</strong></td><td>454</td><td>M2TEXCSU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">102</td><td class="mono">102</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(17)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/04/2026, 05:17 p.m.</td><td><strong class="mono">26030187</strong></td><td>459</td><td>M2TEXVEU</td><td><span class="badge badge-amber">Mandil</span></td><td>AGUSTINA</td><td class="mono">124</td><td class="mono">124</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(16)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/04/2026, 05:10 p.m.</td><td><strong class="mono">26040249</strong></td><td>285</td><td>M2NEU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">500</td><td class="mono">500</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(15)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">23/04/2026, 04:59 p.m.</td><td><strong class="mono">26020152</strong></td><td>453</td><td>FDUZANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">200</td><td class="mono">200</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(14)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">22/04/2026, 04:50 p.m.</td><td><strong class="mono">26030182</strong></td><td>459</td><td>FDBLUFMO</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>AGUSTINA</td><td class="mono">320</td><td class="mono">319</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(13)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">22/04/2026, 01:31 p.m.</td><td><strong class="mono">26040256</strong></td><td>489</td><td>M2BAMKU</td><td><span class="badge badge-amber">Mandil</span></td><td>TALLER</td><td class="mono">30</td><td class="mono">30</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(12)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">22/04/2026, 12:15 p.m.</td><td><strong class="mono">26030224</strong></td><td>475</td><td>PAMAU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">300</td><td class="mono">299</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(11)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">22/04/2026, 12:02 p.m.</td><td><strong class="mono">20020152</strong></td><td>453</td><td>FDUZANEC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>TALLER</td><td class="mono">249</td><td class="mono">249</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(10)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">22/04/2026, 10:49 a.m.</td><td><strong class="mono">20030225</strong></td><td>475</td><td>PALVAMU</td><td><span class="badge badge-green">Pantalón</span></td><td>RODOLFO</td><td class="mono">366</td><td class="mono">366</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(9)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">13/04/2026, 05:24 p.m.</td><td><strong class="mono">26020118</strong></td><td>459</td><td>FBAVJC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">190</td><td class="mono">190</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(8)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">08/04/2026, 06:00 p.m.</td><td><strong class="mono">26020127</strong></td><td>446</td><td>CISNEU</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">161</td><td class="mono">161</td><td><span class="score-dot"><span class="dot dot-red"></span>2.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(7)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">08/04/2026, 06:00 p.m.</td><td><strong class="mono">26020139</strong></td><td>4476</td><td>CEUBLU00NE</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>AGUSTINA</td><td class="mono">50</td><td class="mono">50</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(6)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">7/4/2026 8:33:33</td><td><strong class="mono">26030159</strong></td><td>455</td><td>FCAVMC</td><td><span class="badge badge-blue">Filipina Manga Corta</span></td><td>ARMANDO</td><td class="mono">290</td><td class="mono">290</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(5)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:50 a.m.</td><td><strong class="mono">26030196</strong></td><td>562</td><td>M2BLU</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">150</td><td class="mono">150</td><td><span class="score-dot"><span class="dot dot-amber"></span>3.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(4)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:43 a.m.</td><td><strong class="mono">26020157</strong></td><td>456</td><td>BOLPERCVM</td><td><span class="badge badge-amber">Mandil</span></td><td>RAFAEL</td><td class="mono">416</td><td class="mono">416</td><td><span class="score-dot"><span class="dot dot-green"></span>4.0</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(3)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">04/04/2026, 11:38 a.m.</td><td><strong class="mono">005/ 005-1</strong></td><td>392/432</td><td>FMAAMC</td><td><span class="badge badge-blue">Filipina Manga Larga</span></td><td>ARMANDO</td><td class="mono">203/48</td><td class="mono">203/48</td><td><span class="score-dot"><span class="dot "></span>—</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(2)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">—</td><td><strong class="mono">—</strong></td><td>—</td><td>—</td><td>—</td><td>SOCO</td><td class="mono">—</td><td class="mono">—</td><td><span class="score-dot"><span class="dot "></span>—</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(1)">Ver PDF</button></td></tr><tr><td class="mono" style="font-size:11px;">—</td><td><strong class="mono">—</strong></td><td>—</td><td>—</td><td>—</td><td>LETY</td><td class="mono">—</td><td class="mono">—</td><td><span class="score-dot"><span class="dot "></span>—</span></td><td><button class="btn btn-sm btn-dark" onclick="abrirFormato(0)">Ver PDF</button></td></tr></tbody></table></div></div></div>
+      <div id="table-area">
+        <div class="table-card"><div class="empty-state"><div class="empty-icon">⟳</div><p>Cargando datos...</p></div></div>
+      </div>
     </div>
   </div>
 
@@ -294,8 +302,8 @@ tbody tr:hover td{background:var(--bg);}
             <label>Auditor <span class="req">*</span></label>
             <select id="e-auditor"><option value="">Selecciona...</option><option>Eloisa</option><option>Luis</option></select>
           </div>
-          <div class="field"><label>Maquilero <span class="req">*</span></label><select id="e-maquilero"><option value="">Selecciona...</option><option>ZARATE</option><option>AGUSTINA</option><option>RODOLFO</option><option>RAFAEL</option><option>ARMANDO</option><option>TALLER</option><option>RUBEN</option><option>LETY</option><option>NORMA</option><option>CONVOY</option></select></div>
-          <div class="field"><label>Tipo de producto <span class="req">*</span></label><select id="e-tipo" onchange="actualizarPuntos()"><option value="">Selecciona...</option><option>filipina manga larga</option><option>filipina manga corta</option><option>mandil</option><option>pantalón</option></select></div>
+          <div class="field"><label>Maquilero <span class="req">*</span></label><select id="e-maquilero"><option value="">Selecciona...</option></select></div>
+          <div class="field"><label>Tipo de producto <span class="req">*</span></label><select id="e-tipo" onchange="actualizarPuntos()"><option value="">Selecciona...</option></select></div>
         </div>
 
         <div class="enc-card" id="enc-puntos-card" style="display:none;">
@@ -366,76 +374,11 @@ tbody tr:hover td{background:var(--bg);}
         <div class="dash-card-title">Semáforo de tendencia mensual</div>
         <div class="dash-card-sub">Comparación del promedio de este mes vs el mes pasado</div>
         <div class="semaforo-wrap" id="semaforo-wrap">
-    <!-- Timeline horizontal -->
-    <div style="width:100%;overflow-x:auto;padding-bottom:4px;">
-      <div style="display:flex;gap:8px;align-items:flex-end;padding:8px 4px;min-width:max-content;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
-      <span style="font-size:9px;font-weight:700;color:#7c3aed;font-family:DM Mono,monospace;">MEJOR</span>
-      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:1px solid var(--border2);">
-        <div style="position:absolute;bottom:0;width:100%;height:71%;background:#d97706;border-radius:2px;transition:height 0.4s;"></div>
-        <div style="position:absolute;top:2px;width:100%;text-align:center;font-size:9px;">⭐</div>
-      </div>
-      <div style="font-size:11px;font-weight:600;color:#d97706;">3.6</div>
-      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">Abr<br>2026</div>
-      <div style="font-size:10px;color:var(--text3);">30✓</div>
-    </div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
-      <span style="font-size:9px;opacity:0;"> </span>
-      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:1px solid var(--border2);">
-        <div style="position:absolute;bottom:0;width:100%;height:69%;background:#d97706;border-radius:2px;transition:height 0.4s;"></div>
-        
-      </div>
-      <div style="font-size:11px;font-weight:600;color:#d97706;">3.4</div>
-      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">May<br>2026</div>
-      <div style="font-size:10px;color:var(--text3);">7✓</div>
-    </div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
-      <span style="font-size:9px;opacity:0;"> </span>
-      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:1px solid var(--border2);">
-        <div style="position:absolute;bottom:0;width:100%;height:64%;background:#d97706;border-radius:2px;transition:height 0.4s;"></div>
-        
-      </div>
-      <div style="font-size:11px;font-weight:600;color:#d97706;">3.2</div>
-      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">Jun<br>2026</div>
-      <div style="font-size:10px;color:var(--text3);">40✓</div>
-    </div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
-      <span style="font-size:9px;opacity:0;"> </span>
-      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:1px solid var(--border2);">
-        <div style="position:absolute;bottom:0;width:100%;height:66%;background:#d97706;border-radius:2px;transition:height 0.4s;"></div>
-        
-      </div>
-      <div style="font-size:11px;font-weight:600;color:#d97706;">3.3</div>
-      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">Jul<br>2026</div>
-      <div style="font-size:10px;color:var(--text3);">28✓</div>
-    </div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;">
-      <span style="font-size:9px;opacity:0;"> </span>
-      <div style="position:relative;width:36px;height:80px;background:var(--border);border-radius:4px;overflow:hidden;border:2px solid #1a1917;">
-        <div style="position:absolute;bottom:0;width:100%;height:69%;background:#d97706;border-radius:2px;transition:height 0.4s;"></div>
-        
-      </div>
-      <div style="font-size:11px;font-weight:600;color:#d97706;">3.5</div>
-      <div style="font-size:10px;color:var(--text3);text-align:center;line-height:1.2;">Ago<br>2026</div>
-      <div style="font-size:10px;color:var(--text3);">26✓</div>
-    </div>
-      </div>
-    </div>
-    <!-- Resumen -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;width:100%;">
-      <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:8px;">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">MES ANTERIOR</div>
-        <div style="font-size:22px;font-weight:600;color:#d97706;">3.3</div>
-        <div style="font-size:11px;color:var(--text3);">Julio 2026</div>
-      </div>
-      <div style="text-align:center;padding:10px;background:var(--surface2);border-radius:8px;border:2px solid #1a1917;">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">ESTE MES</div>
-        <div style="font-size:22px;font-weight:600;color:#d97706;">3.5</div>
-        <div style="font-size:11px;color:var(--text3);">Agosto 2026</div>
-      </div>
-      <div style="text-align:center;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
-        <div style="font-size:11px;color:#7c3aed;margin-bottom:4px;">⭐ MEJOR MES</div>
-        <div style="font-size:22px;font-weight:600;color:#7c3aed;">3.6</div>
-        <div style="font-size:11px;color:#7c3aed;">Abril 2026</div>
-      </div>
-    </div></div>
-        <div id="sem-mensaje" style="text-align:center;font-size:13px;color:var(--text3);padding-bottom:0.5rem;"><span style="color:var(--text3);font-size:13px;">→ Calidad estable desde Abril 2026 · Sin cambio vs mes anterior</span></div>
+          <div class="sem-item"><div class="sem-dot gray" id="sem-prev-dot">—</div><div class="sem-val" id="sem-prev-val">—</div><div class="sem-label" id="sem-prev-label">Mes anterior</div></div>
+          <div class="sem-arrow" id="sem-arrow">→</div>
+          <div class="sem-item"><div class="sem-dot gray" id="sem-curr-dot">—</div><div class="sem-val" id="sem-curr-val">—</div><div class="sem-label" id="sem-curr-label">Este mes</div></div>
+        </div>
+        <div id="sem-mensaje" style="text-align:center;font-size:13px;color:var(--text3);padding-bottom:0.5rem;"></div>
       </div>
 
       <div class="dash-grid">
@@ -443,212 +386,29 @@ tbody tr:hover td{background:var(--bg);}
         <div class="dash-card">
           <div class="dash-card-title">Ranking de maquileros</div>
           <div class="dash-card-sub">Todos los maquileros ordenados de mejor a peor calificación</div>
-          <div class="rank-list" id="rank-list"><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;padding:0 4px 6px;display:flex;justify-content:space-between;">
-    <span>9 maquileros</span><span>Promedio histórico</span>
-  </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(246,154,15);color:#fff;font-weight:600;flex-shrink:0;">1</div>
-        <div class="rank-name" style="flex:1;">🥇 CANDIDO</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(246,154,15);font-size:15px;">3.63</div>
-          <div style="font-size:11px;color:var(--text3);">8 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:73%;height:100%;background:rgb(246,154,15);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(245,147,16);color:#fff;font-weight:600;flex-shrink:0;">2</div>
-        <div class="rank-name" style="flex:1;">🥈 RODOLFO</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(245,147,16);font-size:15px;">3.56</div>
-          <div style="font-size:11px;color:var(--text3);">18 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:71%;height:100%;background:rgb(245,147,16);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(243,141,17);color:#fff;font-weight:600;flex-shrink:0;">3</div>
-        <div class="rank-name" style="flex:1;">🥉 RAFAEL</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(243,141,17);font-size:15px;">3.50</div>
-          <div style="font-size:11px;color:var(--text3);">20 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:70%;height:100%;background:rgb(243,141,17);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(241,133,19);color:#fff;font-weight:600;flex-shrink:0;">4</div>
-        <div class="rank-name" style="flex:1;"> AGUSTINA</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(241,133,19);font-size:15px;">3.42</div>
-          <div style="font-size:11px;color:var(--text3);">36 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:68%;height:100%;background:rgb(241,133,19);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(238,118,22);color:#fff;font-weight:600;flex-shrink:0;">5</div>
-        <div class="rank-name" style="flex:1;"> TALLER</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(238,118,22);font-size:15px;">3.28</div>
-          <div style="font-size:11px;color:var(--text3);">36 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:66%;height:100%;background:rgb(238,118,22);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(238,116,23);color:#fff;font-weight:600;flex-shrink:0;">6</div>
-        <div class="rank-name" style="flex:1;"> ARMANDO</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(238,116,23);font-size:15px;">3.25</div>
-          <div style="font-size:11px;color:var(--text3);">28 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:65%;height:100%;background:rgb(238,116,23);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(232,90,28);color:#fff;font-weight:600;flex-shrink:0;">7</div>
-        <div class="rank-name" style="flex:1;"> SOCO</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(232,90,28);font-size:15px;">3.00</div>
-          <div style="font-size:11px;color:var(--text3);">2 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:60%;height:100%;background:rgb(232,90,28);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fefce8;border-color:#fde047;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(232,90,28);color:#fff;font-weight:600;flex-shrink:0;">8</div>
-        <div class="rank-name" style="flex:1;"> ZARATE</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(232,90,28);font-size:15px;">3.00</div>
-          <div style="font-size:11px;color:var(--text3);">3 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:60%;height:100%;background:rgb(232,90,28);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div><div class="rank-item" style="background:#fef2f2;border-color:#fca5a5;flex-direction:column;gap:4px;padding:8px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <div class="rank-pos" style="background:rgb(220,38,38);color:#fff;font-weight:600;flex-shrink:0;">9</div>
-        <div class="rank-name" style="flex:1;"> NORMA</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rank-score" style="color:rgb(220,38,38);font-size:15px;">2.50</div>
-          <div style="font-size:11px;color:var(--text3);">2 aud.</div>
-        </div>
-      </div>
-      <div style="width:100%;height:4px;background:#e0ddd4;border-radius:2px;overflow:hidden;">
-        <div style="width:50%;height:100%;background:rgb(220,38,38);border-radius:2px;transition:width 0.3s;"></div>
-      </div>
-    </div></div>
+          <div class="rank-list" id="rank-list"><div style="font-size:13px;color:var(--text3);">Cargando...</div></div>
         </div>
 
         <!-- Balance auditores -->
         <div class="dash-card">
           <div class="dash-card-title">Balance de carga de trabajo</div>
           <div class="dash-card-sub">Auditorías realizadas por cada auditor</div>
-          <canvas id="chart-auditores" height="522" style="box-sizing: border-box; display: block; height: 522px; width: 522px;" width="522"></canvas>
+          <canvas id="chart-auditores" height="220"></canvas>
         </div>
 
         <!-- Pareto defectos -->
         <div class="dash-card" style="grid-column:1/-1;">
           <div class="dash-card-title">Puntos críticos de falla (Pareto de defectos)</div>
           <div class="dash-card-sub">Los puntos de revisión que más frecuentemente presentan fallas</div>
-          <canvas id="chart-pareto" height="666" style="box-sizing: border-box; display: block; height: 666px; width: 1110px;" width="1110"></canvas>
+          <canvas id="chart-pareto" height="180"></canvas>
         </div>
       </div>
 
       <!-- Prendas recibidas por maquilero este mes -->
       <div class="dash-card" style="margin-bottom:1.5rem;">
         <div class="dash-card-title">Prendas recibidas por maquilero — mes actual</div>
-        <div class="dash-card-sub" id="prendas-mes-label">Agosto 2026 — 26 auditorías</div>
-        <div id="prendas-maq-list" style="margin-top:0.75rem;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;padding:0 4px 8px;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-    <span>MAQUILERO</span>
-    <span style="display:flex;gap:40px;">
-      <span>RECIBIDAS</span><span>REVISADAS</span><span>% REVISADO</span>
-    </span>
-  </div><div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <span style="font-size:13px;font-weight:500;">TALLER</span>
-        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
-          <span style="font-weight:600;">1,104</span>
-          <span style="color:var(--text2);">655</span>
-          <span style="color:#d97706;font-weight:600;">59%</span>
-        </span>
-      </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="width:39%;height:100%;background:#1a1917;border-radius:3px;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;">11 auditorías</div>
-    </div><div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <span style="font-size:13px;font-weight:500;">RODOLFO</span>
-        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
-          <span style="font-weight:600;">661</span>
-          <span style="color:var(--text2);">661</span>
-          <span style="color:#16a34a;font-weight:600;">100%</span>
-        </span>
-      </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="width:23%;height:100%;background:#1a1917;border-radius:3px;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;">3 auditorías</div>
-    </div><div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <span style="font-size:13px;font-weight:500;">RAFAEL</span>
-        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
-          <span style="font-weight:600;">528</span>
-          <span style="color:var(--text2);">264</span>
-          <span style="color:#d97706;font-weight:600;">50%</span>
-        </span>
-      </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="width:19%;height:100%;background:#1a1917;border-radius:3px;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;">5 auditorías</div>
-    </div><div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <span style="font-size:13px;font-weight:500;">ARMANDO</span>
-        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
-          <span style="font-weight:600;">280</span>
-          <span style="color:var(--text2);">140</span>
-          <span style="color:#d97706;font-weight:600;">50%</span>
-        </span>
-      </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="width:10%;height:100%;background:#1a1917;border-radius:3px;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;">2 auditorías</div>
-    </div><div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <span style="font-size:13px;font-weight:500;">CANDIDO</span>
-        <span style="display:flex;gap:40px;font-family:'DM Mono',monospace;font-size:12px;">
-          <span style="font-weight:600;">260</span>
-          <span style="color:var(--text2);">134</span>
-          <span style="color:#d97706;font-weight:600;">52%</span>
-        </span>
-      </div>
-      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-        <div style="width:9%;height:100%;background:#1a1917;border-radius:3px;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px;">5 auditorías</div>
-    </div><div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;font-size:12px;font-weight:600;">
-    <span>TOTAL</span>
-    <span style="font-family:'DM Mono',monospace;">2,833 prendas</span>
-  </div></div>
+        <div class="dash-card-sub" id="prendas-mes-label">Volumen total de prendas recibidas este mes por maquilero</div>
+        <div id="prendas-maq-list" style="margin-top:0.75rem;"></div>
       </div>
 
       <!-- IA de mejora continua -->
@@ -658,112 +418,9 @@ tbody tr:hover td{background:var(--bg);}
           <div class="dash-card-title" style="color:#7c3aed;">Asistente IA de Mejora Continua</div>
         </div>
         <div class="dash-card-sub">Análisis automático basado en los datos de auditoría — recomendaciones accionables</div>
-        <div id="ia-analisis" style="margin-top:1rem;"><div style="font-size:11px;color:#7c3aed;font-family:'DM Mono',monospace;margin-bottom:12px;padding:8px;background:#f5f3ff;border-radius:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">
-    <span>📊 156 registros totales</span>
-    <span>📅 26 auditorías este mes</span>
-    <span>⌀ Histórico: 3.37/5</span>
-    <span>👕 2,833 prendas recibidas</span>
-  </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;font-family:'DM Mono',monospace;">📋 Estado actual</div><div style="background:#dbeafe;border:0.5px solid #93c5fd;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:4px;">📊 Calidad estable este mes</div>
-      <div style="font-size:12px;color:#1e3a5f;line-height:1.6;">El promedio se mantiene en <strong>3.5/5</strong>. Busca oportunidades de mejora incremental.</div>
-      
-    </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">👷 Análisis de maquileros</div><div style="background:#d8f3dc;border:0.5px solid #86efac;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:4px;">🏆 Mejor maquilero: CANDIDO</div>
-      <div style="font-size:12px;color:#166534;line-height:1.6;">Promedio <strong>3.63/5</strong> en 8 auditorías.<br>
-    <strong>Sugerencia:</strong> Organiza una visita de intercambio donde otros maquileros observen el proceso de CANDIDO. Documenta sus buenas prácticas y crea un manual de referencia.</div>
-      
-    </div><div style="background:#fee2e2;border:0.5px solid #fca5a5;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#7f1d1d;margin-bottom:4px;">🚨 1 maquilero bajo 3.0/5 — Acción urgente</div>
-      <div style="font-size:12px;color:#7f1d1d;line-height:1.6;"><strong>NORMA</strong>: 2.50/5 (2 aud.)<br><br><strong>Acciones inmediatas:</strong><br>
-    1. Visita técnica en planta esta semana<br>
-    2. Revisión del proceso de confección punto por punto<br>
-    3. Capacitación específica en las fallas más frecuentes<br>
-    4. Auditorías de seguimiento quincenal hasta superar 3.5/5</div>
-      
-    </div><div style="background:#fff3cd;border:0.5px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#7d4e00;margin-bottom:4px;">⚠️ 5 maquileros en zona de riesgo (3.0–3.4)</div>
-      <div style="font-size:12px;color:#7d4e00;line-height:1.6;"><strong>AGUSTINA</strong>: 3.42/5 · <strong>TALLER</strong>: 3.28/5 · <strong>ARMANDO</strong>: 3.25/5 · <strong>SOCO</strong>: 3.00/5 · <strong>ZARATE</strong>: 3.00/5<br><br><strong>Seguimiento recomendado:</strong> Reunión mensual de retroalimentación, compartir los puntos críticos de falla detectados y establecer metas de mejora medibles.</div>
-      
-    </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">🔬 Parámetros clave a monitorear</div><div style="background:#f5f3ff;border:0.5px solid #c4b5fd;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#6d28d9;margin-bottom:4px;">📐 Indicadores de calidad recomendados</div>
-      <div style="font-size:12px;color:#6d28d9;line-height:1.6;"><strong>1. Tasa de defectos por prenda</strong> — Meta: &lt;5%<br>
-    &nbsp;&nbsp;&nbsp;Cómo medirlo: (prendas con defecto / prendas revisadas) × 100<br><br>
-    <strong>2. Calificación promedio mensual</strong> — Meta: ≥4.0/5<br>
-    &nbsp;&nbsp;&nbsp;Cómo medirlo: Promedio de calificaciones en las auditorías del mes<br><br>
-    <strong>3. % de cobertura de revisión</strong> — Meta: ≥80% de prendas recibidas<br>
-    &nbsp;&nbsp;&nbsp;Cómo medirlo: (prendas revisadas / prendas recibidas) × 100<br><br>
-    <strong>4. Índice de reincidencia</strong> — Meta: 0 fallas repetidas 3+ meses<br>
-    &nbsp;&nbsp;&nbsp;Cómo medirlo: Fallas que aparecen en el Pareto mes tras mes<br><br>
-    <strong>5. Tiempo de respuesta a fallas críticas</strong> — Meta: &lt;48 horas<br>
-    &nbsp;&nbsp;&nbsp;Cómo medirlo: Registrar fecha de detección vs fecha de corrección</div>
-      
-    </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">🔧 Plan de acción sobre fallas críticas</div><div style="background:#fff3cd;border:0.5px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#7d4e00;margin-bottom:4px;">⚠️ Top fallas detectadas — Plan de acción</div>
-      <div style="font-size:12px;color:#7d4e00;line-height:1.6;"><div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <strong style="font-size:12px;">1. Color de hilo en armado</strong>
-          <span style="font-size:11px;">🔴 CRÍTICA</span>
+        <div id="ia-analisis" style="margin-top:1rem;">
+          <div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px;">Cargando análisis...</div>
         </div>
-        <div style="font-size:11px;color:var(--text2);">83 ocurrencias (20% del total detectado)</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
-        </div>
-      </div><div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <strong style="font-size:12px;">2. Medida de pespuntes</strong>
-          <span style="font-size:11px;">🟠 ALTA</span>
-        </div>
-        <div style="font-size:11px;color:var(--text2);">82 ocurrencias (20% del total detectado)</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
-        </div>
-      </div><div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <strong style="font-size:12px;">3. Remates a presillas</strong>
-          <span style="font-size:11px;">🟡 MEDIA</span>
-        </div>
-        <div style="font-size:11px;color:var(--text2);">82 ocurrencias (20% del total detectado)</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
-        </div>
-      </div><div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <strong style="font-size:12px;">4. Colocación y ubicación de etiqueta de composición</strong>
-          <span style="font-size:11px;">🟡 MEDIA</span>
-        </div>
-        <div style="font-size:11px;color:var(--text2);">81 ocurrencias (20% del total detectado)</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
-        </div>
-      </div><div style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <strong style="font-size:12px;">5. Color de hilo en pespuntes</strong>
-          <span style="font-size:11px;">🟡 MEDIA</span>
-        </div>
-        <div style="font-size:11px;color:var(--text2);">80 ocurrencias (20% del total detectado)</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          💡 <em>Revisar en capacitación mensual — incluir en checklist de control de proceso</em>
-        </div>
-      </div></div>
-      
-    </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">📦 Cobertura de auditoría</div><div style="background:#fff3cd;border:0.5px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#7d4e00;margin-bottom:4px;">👁️ Cobertura de revisión media</div>
-      <div style="font-size:12px;color:#7d4e00;line-height:1.6;">Se revisó el <strong>65%</strong> de las prendas. Meta: 80%.<br>
-    <strong>Sugerencia:</strong> Priorizar revisión completa de maquileros con historial de fallas.</div>
-      
-    </div><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;font-family:'DM Mono',monospace;">✅ Próximas acciones sugeridas</div><div style="background:#f0efe9;border:0.5px solid #e0ddd4;border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:#4b4840;margin-bottom:4px;">📅 Agenda de mejora continua</div>
-      <div style="font-size:12px;color:#4b4840;line-height:1.6;"><strong>Esta semana:</strong><br>
-    • Visita técnica a: NORMA<br>
-    • Incluir "Color de hilo en armado" en el checklist de recepción<br>
-    • Actualizar registros de auditoría pendientes<br><br>
-    <strong>Este mes:</strong><br>
-    • Junta de calidad con todos los maquileros (compartir resultados)<br>
-    • Definir meta de calificación para el próximo mes: <strong>3.7/5</strong><br>
-    • Revisar fichas de confección de los productos con más fallas<br><br>
-    <strong>Indicador de éxito:</strong> Reducir las fallas del Pareto en un 20% el próximo mes.</div>
-      
-    </div></div>
         <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-dark" style="background:#7c3aed;border-color:#7c3aed;" onclick="generarAnalisisIA()">🔄 Regenerar análisis</button>
           <button class="btn" onclick="exportarAnalisis()">↓ Exportar reporte</button>
@@ -774,407 +431,18 @@ tbody tr:hover td{background:var(--bg);}
       <div class="dash-card" style="margin-bottom:1.5rem;">
         <div class="dash-card-title">Fallas más frecuentes por maquilero</div>
         <div class="dash-card-sub">Top 3 puntos de revisión fallidos por cada maquilero, ordenados del peor al mejor</div>
-        <div id="fallas-maq-list" style="max-height:500px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;"><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-red" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">NORMA</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>2.5</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación de etiquetas talla de 5/8" a 3/4"</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Pespunte en el escote espalda</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Pespunte en el cuello y cruce</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">LETY</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>—</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <span style="font-size:12px;color:var(--text3);">Sin fallas registradas</span>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">SOCO</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.0</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Consumo en dobladillos (doble doblez de 3/8")</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Color de hilo en armado</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Remates a presillas</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">2x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">ZARATE</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.0</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación de etiquetas talla de 5/8" a 3/4"</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">3x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación y división de la bolsa</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">3x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Pespunte en el escote espalda</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">3x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">ARMANDO</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.3</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Pespunte en el cuello y cruce</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">27x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Terminado de las aberturas</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">27x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Medida de las abertura (5" Caballero y 4 3/4" Dama…</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">27x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">TALLER</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.3</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Consumo en dobladillos (doble doblez de 3/8")</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">22x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Colocación y ubicación de etiqueta de composición</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">22x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Medida de pespuntes</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">22x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">AGUSTINA</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.4</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Consumo en dobladillos (doble doblez de 3/8")</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">26x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Colocación y ubicación de etiqueta de composición</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">26x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Colocación y ubicación de etiqueta emblema (bander…</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">26x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">RAFAEL</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.5</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Consumo en dobladillos (doble doblez de 3/8")</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">18x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Colocación y ubicación de etiqueta emblema (bander…</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">18x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Medida de pespuntes</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">18x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">RODOLFO</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.6</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Colocación y ubicación de etiqueta de composición</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">15x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Medida de pespuntes</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">15x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Color de hilo en armado</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">15x</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span class="dot dot-amber" style="width:10px;height:10px;"></span>
-        <span style="font-size:13px;font-weight:600;flex:1;">CANDIDO</span>
-        <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);">Calif. promedio: <strong>3.6</strong></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#dc2626;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación de etiquetas talla de 5/8" a 3/4"</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">8x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#d97706;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación y orientación del parche emblema</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">8x</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:10px;font-weight:600;color:#fff;background:#9e9b92;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-            <span style="font-size:11px;flex:1;color:var(--text2);">Ubicación y división de la bolsa</span>
-            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap;">8x</span>
-          </div>
-      </div>
-    </div></div>
+        <div id="fallas-maq-list" style="max-height:500px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;">
+          <p style="font-size:13px;color:var(--text3);">Cargando...</p>
+        </div>
       </div>
 
       <!-- Ranking por tipo de producto -->
       <div class="dash-card" style="margin-bottom:1.5rem;">
         <div class="dash-card-title">Ranking de maquileros por tipo de producto</div>
         <div class="dash-card-sub">Desempeño de cada maquilero según el tipo de prenda auditada</div>
-        <div id="ranking-tipo-list" style="max-height:600px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;"><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
-      <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">Filipina Manga Corta</span>
-        <span style="font-size:11px;color:var(--text3);">7 maquileros</span>
-      </div>
-      <div style="padding:8px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">1</span>
-            <span style="flex:1;font-size:12px;">🥇 CANDIDO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:80%;height:100%;background:#16a34a;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#16a34a;font-family:'DM Mono',monospace;width:30px;text-align:right;">4.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">1 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">2</span>
-            <span style="flex:1;font-size:12px;">🥈 ARMANDO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:62%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.1</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">12 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">3</span>
-            <span style="flex:1;font-size:12px;">🥉 TALLER</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:62%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.1</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">13 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">4</span>
-            <span style="flex:1;font-size:12px;"> ZARATE</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">3 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">5</span>
-            <span style="flex:1;font-size:12px;"> RODOLFO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">3 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">6</span>
-            <span style="flex:1;font-size:12px;"> NORMA</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">1 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">7</span>
-            <span style="flex:1;font-size:12px;"> AGUSTINA</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:57%;height:100%;background:#dc2626;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#dc2626;font-family:'DM Mono',monospace;width:30px;text-align:right;">2.9</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">7 aud.</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
-      <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">Filipina Manga Larga</span>
-        <span style="font-size:11px;color:var(--text3);">5 maquileros</span>
-      </div>
-      <div style="padding:8px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">1</span>
-            <span style="flex:1;font-size:12px;">🥇 CANDIDO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:71%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.6</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">7 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">2</span>
-            <span style="flex:1;font-size:12px;">🥈 ARMANDO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:68%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.4</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">16 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">3</span>
-            <span style="flex:1;font-size:12px;">🥉 AGUSTINA</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">3 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">4</span>
-            <span style="flex:1;font-size:12px;"> TALLER</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">1 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">5</span>
-            <span style="flex:1;font-size:12px;"> NORMA</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:40%;height:100%;background:#dc2626;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#dc2626;font-family:'DM Mono',monospace;width:30px;text-align:right;">2.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">1 aud.</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
-      <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">Mandil</span>
-        <span style="font-size:11px;color:var(--text3);">4 maquileros</span>
-      </div>
-      <div style="padding:8px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">1</span>
-            <span style="flex:1;font-size:12px;">🥇 AGUSTINA</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:72%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.6</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">26 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">2</span>
-            <span style="flex:1;font-size:12px;">🥈 RAFAEL</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:70%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.5</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">20 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">3</span>
-            <span style="flex:1;font-size:12px;">🥉 TALLER</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:68%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.4</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">22 aud.</span>
-          </div><div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">4</span>
-            <span style="flex:1;font-size:12px;"> SOCO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:60%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.0</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">2 aud.</span>
-          </div>
-      </div>
-    </div><div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;">
-      <div style="background:var(--surface2);padding:8px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;font-family:'DM Mono',monospace;">Pantalón</span>
-        <span style="font-size:11px;color:var(--text3);">1 maquilero</span>
-      </div>
-      <div style="padding:8px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:0.5px solid var(--border);">
-            <span style="width:20px;font-size:11px;font-weight:600;color:var(--text3);text-align:center;">1</span>
-            <span style="flex:1;font-size:12px;">🥇 RODOLFO</span>
-            <div style="width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:73%;height:100%;background:#d97706;border-radius:3px;"></div>
-            </div>
-            <span style="font-size:12px;font-weight:600;color:#d97706;font-family:'DM Mono',monospace;width:30px;text-align:right;">3.7</span>
-            <span style="font-size:11px;color:var(--text3);width:40px;text-align:right;">15 aud.</span>
-          </div>
-      </div>
-    </div></div>
+        <div id="ranking-tipo-list" style="max-height:600px;overflow-y:auto;padding-right:4px;margin-top:0.5rem;">
+          <p style="font-size:13px;color:var(--text3);">Cargando...</p>
+        </div>
       </div>
 
     </div>
@@ -1187,18 +455,18 @@ tbody tr:hover td{background:var(--bg);}
       <div class="config-actions">
         <button class="btn btn-dark" onclick="importarDelSheet()">↓ Importar del Sheet</button>
         <button class="btn" onclick="guardarConfig()">Guardar cambios</button>
-        <span id="config-saved" style="font-size: 12px; color: var(--green); display: none;">✓ Guardado</span>
+        <span id="config-saved" style="font-size:12px;color:var(--green);display:none;">✓ Guardado</span>
       </div>
       <div id="detected-banner" class="detected-banner" style="display:none;"></div>
       <div class="config-grid">
         <div class="config-card">
-          <div class="config-card-head"><div><div class="config-card-title">Maquileros</div><div class="config-card-sub">Nombres normalizados</div></div><span id="maq-count" class="config-item-badge">10</span></div>
-          <div class="config-list" id="maq-list"><div class="config-item" id="maq-item-0"><span class="config-item-name" id="maq-name-0">ZARATE</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',0)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',0)">✕</button></div></div><div class="config-item" id="maq-item-1"><span class="config-item-name" id="maq-name-1">AGUSTINA</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',1)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',1)">✕</button></div></div><div class="config-item" id="maq-item-2"><span class="config-item-name" id="maq-name-2">RODOLFO</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',2)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',2)">✕</button></div></div><div class="config-item" id="maq-item-3"><span class="config-item-name" id="maq-name-3">RAFAEL</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',3)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',3)">✕</button></div></div><div class="config-item" id="maq-item-4"><span class="config-item-name" id="maq-name-4">ARMANDO</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',4)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',4)">✕</button></div></div><div class="config-item" id="maq-item-5"><span class="config-item-name" id="maq-name-5">TALLER</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',5)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',5)">✕</button></div></div><div class="config-item" id="maq-item-6"><span class="config-item-name" id="maq-name-6">RUBEN</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',6)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',6)">✕</button></div></div><div class="config-item" id="maq-item-7"><span class="config-item-name" id="maq-name-7">LETY</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',7)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',7)">✕</button></div></div><div class="config-item" id="maq-item-8"><span class="config-item-name" id="maq-name-8">NORMA</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',8)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',8)">✕</button></div></div><div class="config-item" id="maq-item-9"><span class="config-item-name" id="maq-name-9">CONVOY</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('maq',9)">✎</button><button class="icon-btn del" onclick="eliminarItem('maq',9)">✕</button></div></div></div>
+          <div class="config-card-head"><div><div class="config-card-title">Maquileros</div><div class="config-card-sub">Nombres normalizados</div></div><span id="maq-count" class="config-item-badge">0</span></div>
+          <div class="config-list" id="maq-list"></div>
           <div class="add-row"><input type="text" id="new-maq" placeholder="Agregar maquilero..." onkeydown="if(event.key==='Enter')agregarMaquilero()"><button class="btn btn-sm btn-dark" onclick="agregarMaquilero()">+ Agregar</button></div>
         </div>
         <div class="config-card">
-          <div class="config-card-head"><div><div class="config-card-title">Tipos de producto</div><div class="config-card-sub">Categorías normalizadas</div></div><span id="tipo-count" class="config-item-badge">1</span></div>
-          <div class="config-list" id="tipo-list"><div class="config-item" id="tipo-item-0"><span class="config-item-name" id="tipo-name-0">GORRO</span><div class="config-item-actions"><button class="icon-btn" onclick="editarItem('tipo',0)">✎</button><button class="icon-btn del" onclick="eliminarItem('tipo',0)">✕</button></div></div></div>
+          <div class="config-card-head"><div><div class="config-card-title">Tipos de producto</div><div class="config-card-sub">Categorías normalizadas</div></div><span id="tipo-count" class="config-item-badge">0</span></div>
+          <div class="config-list" id="tipo-list"></div>
           <div class="add-row"><input type="text" id="new-tipo" placeholder="Agregar tipo..." onkeydown="if(event.key==='Enter')agregarTipo()"><button class="btn btn-sm btn-dark" onclick="agregarTipo()">+ Agregar</button></div>
         </div>
       </div>
@@ -1210,7 +478,7 @@ tbody tr:hover td{background:var(--bg);}
   </div>
 
   <!-- ===== PUBLICAR (SOLO MAESTRO) ===== -->
-  <div class="tab-panel active" id="tab-publicar">
+  <div class="tab-panel" id="tab-publicar">
     <div class="main" style="max-width:720px;">
       <!-- PASO 1: Apps Script -->
       <div class="guide-card" style="border-color:#86efac;">
@@ -1282,7 +550,7 @@ function doGet(e) {
               <input type="text" id="apps-script-url-input" placeholder="https://script.google.com/macros/s/..." style="flex:1;min-width:200px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:12px;outline:none;">
               <button class="btn btn-dark" onclick="guardarAppsScriptURL()">Guardar URL</button>
             </div>
-            <div id="url-status" style="font-size: 12px; margin-top: 6px; display: block; color: var(--green);">✓ URL guardada. Ahora descarga el archivo y súbelo a GitHub.</div>
+            <div id="url-status" style="font-size:12px;margin-top:6px;display:none;"></div>
           </div>
         </div>
       </div>
@@ -1363,7 +631,7 @@ function doLogin(){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app-shell').style.display='block';
     document.getElementById('topbar-user').textContent=`Sesión: ${user}`;
-    sessionStorage.setItem('auth','1');sessionStorage.setItem('auditorActivo',user);
+    localStorage.setItem('auth_ok','1');localStorage.setItem('auth_user',user);
     aplicarPermisos(user);
     registrarBitacora(user);
     loadData();
@@ -1380,7 +648,7 @@ function aplicarPermisos(user){
 }
 
 function doLogout(){
-  sessionStorage.removeItem('auth');sessionStorage.removeItem('auditorActivo');currentUser='';
+  localStorage.removeItem('auth_ok');localStorage.removeItem('auth_user');currentUser='';
   document.getElementById('app-shell').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-pass').value='';document.getElementById('login-user').value='';
@@ -2486,7 +1754,7 @@ function cargarSelectsEncuesta(){
   const maqs=config.maquileros.length?config.maquileros:[...new Set(allData.map(r=>g(r,C.MAQ)).filter(Boolean))].sort();
   const mSel=document.getElementById('e-maquilero');mSel.innerHTML='<option value="">Selecciona...</option>';maqs.forEach(m=>mSel.innerHTML+=`<option>${m}</option>`);
   const tSel=document.getElementById('e-tipo');tSel.innerHTML='<option value="">Selecciona...</option>';Object.keys(PUNTOS_POR_TIPO).forEach(t=>tSel.innerHTML+=`<option>${t}</option>`);
-  const audActivo=sessionStorage.getItem('auditorActivo');
+  const audActivo=localStorage.getItem('auth_user');
   if(audActivo){const audSel=document.getElementById('e-auditor');for(let o of audSel.options){if(o.value===audActivo){o.selected=true;break;}}}
 }
 
@@ -2728,16 +1996,17 @@ function cargarAppsScriptURL() {
 loadConfig();
 renderConfigLists();
 cargarAppsScriptURL();
-if(sessionStorage.getItem('auth')==='1'){
-  const u=sessionStorage.getItem('auditorActivo')||'';
-  currentUser=u;
+// Usar localStorage para persistir sesión entre visitas
+const _savedUser = localStorage.getItem('auth_user');
+const _savedAuth = localStorage.getItem('auth_ok');
+if(_savedAuth==='1' && _savedUser && CREDENCIALES[_savedUser]!==undefined){
+  currentUser=_savedUser;
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-shell').style.display='block';
-  if(u)document.getElementById('topbar-user').textContent=`Sesión: ${u}`;
-  aplicarPermisos(u);
+  document.getElementById('topbar-user').textContent=`Sesión: ${_savedUser}`;
+  aplicarPermisos(_savedUser);
   loadData();
 }
 </script>
-
-
-<img src="logo.png" title="To learn how to download this using IDM please click here" style="position: absolute; width: 24px; height: 24px; background-color: rgba(0, 0, 0, 0.7); border-radius: 50%; display: none; cursor: pointer; z-index: 9999;"><div data-coupert-img-hover-container="true"></div></body></html>
+</body>
+</html>
