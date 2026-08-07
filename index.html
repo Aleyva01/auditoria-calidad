@@ -597,6 +597,46 @@ function doGet(e) {
 </div>
 
 <script>
+// ===== NORMALIZACIÓN DE TIPOS (GLOBAL) =====
+function sinAcentos(s){
+  if(!s)return'';
+  return String(s).trim().toLowerCase()
+    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+    .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+    .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+    .replace(/ {2,}/g,' ');
+}
+
+const TIPOS_CANON={
+  'filipina manga corta':'Filipina Manga Corta',
+  'filipina manga larga':'Filipina Manga Larga',
+  'filipina manga 3/4':  'Filipina Manga 3/4',
+  'filipina':            'Filipina',
+  'mandil':              'Mandil',
+  'pantalon':            'Pantalón',
+  'gorro':               'Gorro',
+};
+
+function normalizarTipo(v){
+  if(!v||!v.trim())return v;
+  const key=sinAcentos(v);
+  for(const [k,canon] of Object.entries(TIPOS_CANON)){
+    if(key===k)return canon;
+  }
+  for(const [k,canon] of Object.entries(TIPOS_CANON)){
+    if(k.length>4&&key.includes(k))return canon;
+  }
+  // Capitalizar cada palabra como fallback
+  return v.trim().split(/ +/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+}
+
+function normalizarMaq(v){
+  if(!v)return v;
+  const found=config.maquileros.find(m=>m.trim().toLowerCase()===v.trim().toLowerCase());
+  if(found)return found;
+  return v.trim().toUpperCase();
+}
+
 // ===== PUNTOS POR TIPO =====
 const PUNTOS_POR_TIPO = {
   'filipina manga larga':['Ubicación de etiquetas talla de 5/8" a 3/4"','Ubicación y orientación del parche emblema','Ubicación y división de la bolsa','Pespunte en el escote espalda','Pespunte en el cuello y cruce','Ubicación y orientación del ojal y botón','Terminado del ojal (100 puntadas)','Ubicación y funcionalidad del cierre','Terminado de las aberturas','Medida de las abertura (5" Caballero y 4 3/4" Dama)','Medida en bolsa (parche, vivo, etc.)','Calidad de la over (Medida del gancho)','Colocación de entretelas (cuellos, vistas, puños)','Costuras de seguridad ocultas','Colocación de broches','Colocación de traba','Colocación de elevadores','Terminado de los puños','NA','Otros'],
@@ -786,46 +826,6 @@ function fmtFecha(v){
 
 function scoreInfo(v){const n=parseFloat(v);if(isNaN(n))return{label:'—',cls:''};return{label:n.toFixed(1),cls:n>=4?'dot-green':n>=3?'dot-amber':'dot-red'};}
 function tipoBadge(tipo){if(!tipo)return'—';const t=tipo.toLowerCase();let cls='badge-gray';if(t.includes('filipina'))cls='badge-blue';else if(t.includes('mandil'))cls='badge-amber';else if(t.includes('pantalón')||t.includes('pantalon'))cls='badge-green';return`<span class="badge ${cls}">${tipo}</span>`;}
-
-// ===== NORMALIZACIÓN DE TIPOS (GLOBAL) =====
-function sinAcentos(s){
-  if(!s)return'';
-  return String(s).trim().toLowerCase()
-    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
-    .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
-    .replace(/[úùü]/g,'u').replace(/ñ/g,'n')
-    .replace(/ {2,}/g,' ');
-}
-
-const TIPOS_CANON={
-  'filipina manga corta':'Filipina Manga Corta',
-  'filipina manga larga':'Filipina Manga Larga',
-  'filipina manga 3/4':  'Filipina Manga 3/4',
-  'filipina':            'Filipina',
-  'mandil':              'Mandil',
-  'pantalon':            'Pantalón',
-  'gorro':               'Gorro',
-};
-
-function normalizarTipo(v){
-  if(!v||!v.trim())return v;
-  const key=sinAcentos(v);
-  for(const [k,canon] of Object.entries(TIPOS_CANON)){
-    if(key===k)return canon;
-  }
-  for(const [k,canon] of Object.entries(TIPOS_CANON)){
-    if(k.length>4&&key.includes(k))return canon;
-  }
-  // Capitalizar cada palabra como fallback
-  return v.trim().split(/ +/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-}
-
-function normalizarMaq(v){
-  if(!v)return v;
-  const found=config.maquileros.find(m=>m.trim().toLowerCase()===v.trim().toLowerCase());
-  if(found)return found;
-  return v.trim().toUpperCase();
-}
 
 async function loadData(){
   document.getElementById('refresh-btn').textContent='↻ Cargando...';
