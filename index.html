@@ -501,38 +501,44 @@ const SHEET_NAME = 'Respuestas de formulario 1';
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    // Aceptar tanto JSON como form-encoded
+    let data = {};
+    try { data = JSON.parse(e.postData.contents); } catch(ex) {
+      const params = e.parameter;
+      data = params;
+    }
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-    const now = new Date();
-    const fecha = Utilities.formatDate(now, 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
+    // Usar fecha enviada desde la app o generar una nueva
+    const fecha = data.fecha ||
+      Utilities.formatDate(new Date(), 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
     sheet.appendRow([
-      fecha,
-      data.corte    || '',
-      data.programa || '',
-      data.modelo   || '',
-      data.prec     || '',
-      data.prev     || '',
-      data.auditor  || '',
-      data.maquilero|| '',
-      data.tipo     || '',
-      '',
-      data.puntos   || '',
-      '', '', '', '',
-      '',
-      '',
-      data.cal      || '',
-      data.obs      || '',
+      fecha,               // A: Marca temporal
+      data.corte    || '', // B: # DE CORTE
+      data.programa || '', // C: PROGRAMA
+      data.modelo   || '', // D: MODELO
+      data.prec     || '', // E: CANTIDAD DE PRENDAS RECIBIDAS
+      data.prev     || '', // F: CANTIDAD DE PRENDAS REVISADAS
+      data.auditor  || '', // G: AUDITOR
+      data.maquilero|| '', // H: MAQUILERO
+      data.tipo     || '', // I: PRODUCTO RECIBIDO
+      '',                  // J: (vacío)
+      data.puntos   || '', // K: PUNTOS IMPORTANTES DE REVISIÓN
+      '', '', '',          // L, M, N: (vacías)
+      data.cal      || '', // O: ¿Cómo evalúas la calidad?
+      data.obs      || '', // P: OBSERVACIONES GENERALES
     ]);
-    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:true}))
       .setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({ok:false,error:err.message}))
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:false,error:err.message}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput('OK');
+  return ContentService.createTextOutput('OK — Apps Script activo');
 }</div>
             <button class="btn btn-sm" style="margin-top:8px;" onclick="copiarScript()">📋 Copiar código</button>
           </div>
@@ -676,7 +682,7 @@ function doLogin(){
     document.getElementById('topbar-user').textContent=`Sesión: ${user}`;
     localStorage.setItem('auth_ok','1');localStorage.setItem('auth_user',user);
     aplicarPermisos(user);
-    registrarBitacora(user);
+    setTimeout(()=>registrarBitacora(user), 3000); // no bloquea el login
     loadData();
   } else {
     errEl.textContent=`Contraseña incorrecta para ${user}.`;errEl.style.display='block';setTimeout(()=>errEl.style.display='none',2500);
@@ -705,9 +711,10 @@ function doLogout(){
 async function registrarBitacora(usuario){
   try{
     const LOG='https://docs.google.com/forms/d/e/1FAIpQLSdd0TvpEwhsZQ7jS-VVE53lzHaIujR32H2RL1wPyLjTzbbTcg/formResponse';
-    let ip='No disponible';
-    try{const c=new AbortController();setTimeout(()=>c.abort(),2000);const r=await fetch('https://api.ipify.org?format=json',{signal:c.signal});if(r.ok){const d=await r.json();ip=d.ip;}}catch(e){}
-    const p=new URLSearchParams();p.append('entry.2056068168',usuario);p.append('entry.368415568',ip);p.append('entry.1047010619',navigator.userAgent);
+    const p=new URLSearchParams();
+    p.append('entry.2056068168',usuario);
+    p.append('entry.368415568','No disponible');
+    p.append('entry.1047010619',navigator.userAgent);
     fetch(LOG,{method:'POST',mode:'no-cors',body:p}).catch(()=>{});
   }catch(e){}
 }
@@ -1861,8 +1868,9 @@ async function enviarAGoogleForms(datos) {
       maquilero: datos.maquilero,
       tipo:      datos.tipo,
       cal:       datos.cal,
-      puntos:    datos.puntos.join(', '),
+      puntos:    datos.puntos.join(', '),  // string para columna de puntos
       obs:       datos.obs,
+      fecha:     new Date().toLocaleString('es-MX',{timeZone:'America/Mexico_City'}),
     };
     // Usamos no-cors porque el Apps Script acepta requests cross-origin
     // La respuesta no es legible con no-cors, pero el dato SÍ llega al Sheet
