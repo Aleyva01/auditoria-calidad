@@ -501,44 +501,67 @@ const SHEET_NAME = 'Respuestas de formulario 1';
 
 function doPost(e) {
   try {
-    // Aceptar tanto JSON como form-encoded
     let data = {};
-    try { data = JSON.parse(e.postData.contents); } catch(ex) {
-      const params = e.parameter;
-      data = params;
-    }
+    try { data = JSON.parse(e.postData.contents); } catch(ex) { data = e.parameter || {}; }
+
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-    // Usar fecha enviada desde la app o generar una nueva
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+    function col(nombre) {
+      const idx = headers.findIndex(h =>
+        String(h).toLowerCase().includes(nombre.toLowerCase())
+      );
+      return idx >= 0 ? idx + 1 : -1;
+    }
+
     const fecha = data.fecha ||
       Utilities.formatDate(new Date(), 'America/Mexico_City', 'dd/MM/yyyy HH:mm:ss');
-    sheet.appendRow([
-      fecha,               // A: Marca temporal
-      data.corte    || '', // B: # DE CORTE
-      data.programa || '', // C: PROGRAMA
-      data.modelo   || '', // D: MODELO
-      data.prec     || '', // E: CANTIDAD DE PRENDAS RECIBIDAS
-      data.prev     || '', // F: CANTIDAD DE PRENDAS REVISADAS
-      data.auditor  || '', // G: AUDITOR
-      data.maquilero|| '', // H: MAQUILERO
-      data.tipo     || '', // I: PRODUCTO RECIBIDO
-      '',                  // J: (vacío)
-      data.puntos   || '', // K: PUNTOS IMPORTANTES DE REVISIÓN
-      '', '', '',          // L, M, N: (vacías)
-      data.cal      || '', // O: ¿Cómo evalúas la calidad?
-      data.obs      || '', // P: OBSERVACIONES GENERALES
-    ]);
+
+    const newRow = sheet.getLastRow() + 1;
+    sheet.insertRowAfter(sheet.getLastRow());
+
+    function set(colName, value) {
+      const c = col(colName);
+      if (c > 0 && value !== undefined && value !== '') {
+        sheet.getRange(newRow, c).setValue(value);
+      }
+    }
+
+    sheet.getRange(newRow, 1).setValue(fecha);
+    set('de corte',          data.corte);
+    set('programa',          data.programa);
+    set('modelo',            data.modelo);
+    set('recibidas',         data.prec);
+    set('revisadas',         data.prev);
+    set('auditor',           data.auditor);
+    set('maquilero',         data.maquilero);
+    set('producto recibido', data.tipo);
+
+    // Calificacion columna O (15) y observaciones columna P (16)
+    if (data.cal) sheet.getRange(newRow, 15).setValue(data.cal);
+    if (data.obs) sheet.getRange(newRow, 16).setValue(data.obs);
+
+    // Puntos: primera columna que diga "puntos"
+    const colPuntos = headers.findIndex(h =>
+      String(h).toLowerCase().includes('puntos')
+    );
+    if (colPuntos >= 0 && data.puntos) {
+      sheet.getRange(newRow, colPuntos + 1).setValue(data.puntos);
+    }
+
     return ContentService
-      .createTextOutput(JSON.stringify({ok:true}))
+      .createTextOutput(JSON.stringify({ok: true, row: newRow}))
       .setMimeType(ContentService.MimeType.JSON);
+
   } catch(err) {
     return ContentService
-      .createTextOutput(JSON.stringify({ok:false,error:err.message}))
+      .createTextOutput(JSON.stringify({ok: false, error: err.message}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput('OK — Apps Script activo');
+  return ContentService.createTextOutput('OK - Apps Script activo');
 }</div>
             <button class="btn btn-sm" style="margin-top:8px;" onclick="copiarScript()">📋 Copiar código</button>
           </div>
